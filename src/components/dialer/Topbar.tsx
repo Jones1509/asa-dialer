@@ -31,14 +31,17 @@ export const Topbar: React.FC<TopbarProps> = ({
 
   const dialNumber = (number: string) => {
     if (!number) return;
+    const cleanNumber = number.replace(/\s/g, '');
+    console.log('Dialing number:', cleanNumber, 'Twilio ready:', isTwilioReady);
     if (isTwilioReady && onTwilioCall) {
-      onTwilioCall(number.replace(/\s/g, ''));
-      onStartCall();
+      onTwilioCall(cleanNumber);
     } else {
-      // Fallback to tel: link
-      window.open(`tel:${number.replace(/\s/g, '')}`, '_self');
-      onStartCall();
+      // Fallback to tel: link - use location.href to avoid page replacement issues
+      const telLink = document.createElement('a');
+      telLink.href = `tel:${cleanNumber}`;
+      telLink.click();
     }
+    onStartCall();
   };
 
   const handleEndCall = () => {
