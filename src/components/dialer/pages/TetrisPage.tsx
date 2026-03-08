@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Gamepad2, Pause, Play, Trophy, Zap, Star, Crown } from 'lucide-react';
+import { Gamepad2, Pause, Play, Trophy, Zap, Star, Crown, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 const COLS = 10, ROWS = 20;
