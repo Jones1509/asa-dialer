@@ -138,16 +138,7 @@ const Index = () => {
           {renderPage()}
         </div>
       </div>
-      {state.currentLead && (
-        <TetrisOverlay
-          visible={state.showTetris}
-          currentLead={state.currentLead}
-          callSeconds={state.callSeconds}
-          formatTime={state.formatTime}
-          onEndCall={state.endCall}
-          activeDialNumber={activeDialNumber}
-        />
-      )}
+      {/* Tetris is now inline in StamdataPanel — no overlay needed */}
       {/* Incoming call overlay */}
       {incomingCall && !state.callActive && (
         <IncomingCallOverlay
