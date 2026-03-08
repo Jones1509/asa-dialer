@@ -96,7 +96,7 @@ const InlineTetris: React.FC = () => {
 
   const drawBlock = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string, glow: string, bs: number, ghost = false) => {
     const bx = x * bs, by = y * bs;
-    if (ghost) { ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; }
+    if (ghost) { ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4; ctx.setLineDash([3, 2]); ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = color; ctx.globalAlpha = 0.08; ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.fill(); ctx.globalAlpha = 1; return; }
     ctx.shadowColor = glow; ctx.shadowBlur = 14;
     const grad = ctx.createLinearGradient(bx, by, bx + bs, by + bs); grad.addColorStop(0, color); grad.addColorStop(1, shadeColor(color, -30));
     ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(bx + 1, by + 1, bs - 2, bs - 2, 4); ctx.fill(); ctx.shadowBlur = 0;
