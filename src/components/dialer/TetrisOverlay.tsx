@@ -20,7 +20,7 @@ const PIECES = [
 ];
 
 export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
-  visible, currentLead, callSeconds, formatTime, onEndCall,
+  visible, currentLead, callSeconds, formatTime, onEndCall, activeDialNumber,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<any>({});
