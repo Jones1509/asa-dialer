@@ -26,18 +26,21 @@ export const Topbar: React.FC<TopbarProps> = ({
 }) => {
   const [showManualDial, setShowManualDial] = useState(false);
   const [manualNumber, setManualNumber] = useState('');
+  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
   const isTwilioReady = twilioStatus === 'ready';
+
+  // The number currently being displayed — manual number takes priority when active
+  const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
   const dialNumber = (number: string) => {
     if (!number) return;
     const cleanNumber = number.replace(/\s/g, '');
     console.log('=== DIALING ===', cleanNumber);
+    setActiveDialNumber(cleanNumber);
     if (isTwilioReady && onTwilioCall) {
-      console.log('Using Twilio VoIP for:', cleanNumber);
       onTwilioCall(cleanNumber);
     } else {
-      console.log('Using tel: link for:', cleanNumber);
       const telLink = document.createElement('a');
       telLink.href = `tel:${cleanNumber}`;
       telLink.click();
@@ -50,6 +53,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       onTwilioHangUp();
     }
     onEndCall();
+    setActiveDialNumber(null);
   };
 
   const handleCallLead = () => {
@@ -102,16 +106,19 @@ export const Topbar: React.FC<TopbarProps> = ({
         </span>
       </div>
 
-      {/* Call status indicator */}
+      {/* Call status indicator — shows active dial number or lead phone */}
       <div className="flex items-center gap-2.5 bg-background border border-border/50 rounded-lg px-3.5 py-2 font-body text-[13px] font-medium min-w-[180px]">
         <div className={`w-2 h-2 rounded-full transition-all duration-500 ${
           callActive ? 'bg-success shadow-[0_0_8px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/25'
         }`} />
-        <span className="text-foreground/80 tabular-nums">{currentLead?.phone || '—'}</span>
-        {currentLead?.company && (
+        <span className="text-foreground/80 tabular-nums">{displayNumber}</span>
+        {!activeDialNumber && currentLead?.company && (
           <span className="text-muted-foreground/50 text-[12px] truncate max-w-[120px]">
             {currentLead.company}
           </span>
+        )}
+        {activeDialNumber && (
+          <span className="text-muted-foreground/50 text-[12px]">Manuel</span>
         )}
       </div>
 
