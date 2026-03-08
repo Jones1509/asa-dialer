@@ -186,7 +186,7 @@ export const TetrisPage: React.FC = () => {
       shakeRef.current.intensity *= 0.9; if (shakeRef.current.intensity < 0.5) shakeRef.current.intensity = 0;
     }
     const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w);
-    bg.addColorStop(0, '#0a0e1a'); bg.addColorStop(0.5, '#070b14'); bg.addColorStop(1, '#030508');
+    bg.addColorStop(0, '#1a2035'); bg.addColorStop(0.5, '#141a2a'); bg.addColorStop(1, '#0e1320');
     ctx.fillStyle = bg; ctx.fillRect(-5, -5, w + 10, h + 10);
     starsRef.current.forEach(star => {
       star.y += star.speed; if (star.y > h) { star.y = 0; star.x = Math.random() * w; }
