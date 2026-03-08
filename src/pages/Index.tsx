@@ -101,6 +101,7 @@ const Index = () => {
             onTwilioCall={twilio.makeCall}
             onTwilioHangUp={twilio.hangUp}
             canMakeVoipCall={twilio.canMakeVoipCall}
+            onActiveDialNumberChange={setActiveDialNumber}
           />
         )}
         <div className="flex-1 flex overflow-hidden">
