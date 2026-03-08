@@ -119,7 +119,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       <div className="flex items-center gap-1.5" title={twilioError || `VoIP: ${twilioStatus}`}>
         {statusIcon()}
         <span className="text-[11px] text-muted-foreground/60">
-          {twilioStatus === 'ready' ? 'VoIP' : twilioStatus === 'loading' ? 'Forbinder...' : 'Offline'}
+          {twilioStatus === 'ready' ? 'VoIP' : 'Forbinder...'}
         </span>
       </div>
 
