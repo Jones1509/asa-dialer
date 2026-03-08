@@ -83,9 +83,13 @@ const Index = () => {
         onEndCall={state.endCall}
       />
       {/* Notification */}
-      <div className={`fixed bottom-6 right-6 card-surface border-primary/30 rounded-lg px-5 py-3.5 text-sm flex items-center gap-2.5 z-[200] transition-all duration-300 ${
-        state.notification ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0'
-      }`}>
+      <div className={`fixed bottom-6 right-6 glass-surface border-primary/20 rounded-2xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
+        transition-all duration-500 ease-out
+        ${state.notification
+          ? 'translate-y-0 opacity-100 scale-100'
+          : 'translate-y-8 opacity-0 scale-95 pointer-events-none'
+        }`}
+        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
         {state.notification}
       </div>
     </div>

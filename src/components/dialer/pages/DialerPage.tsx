@@ -23,8 +23,8 @@ export const DialerPage: React.FC<DialerPageProps> = ({
 }) => {
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="px-6 pt-4 text-sm text-muted-foreground flex items-center gap-1.5">
-        🏠 Hjem › <span className="text-foreground">Dialer</span> › Elektriker firmaer Jonas
+      <div className="px-7 pt-5 pb-2 text-[13px] text-muted-foreground flex items-center gap-1.5 font-medium">
+        🏠 Hjem <span className="text-muted-foreground/40">›</span> <span className="text-foreground">Dialer</span> <span className="text-muted-foreground/40">›</span> Elektriker firmaer Jonas
       </div>
       <div className="flex-1 flex overflow-hidden">
         <LeadsPanel
