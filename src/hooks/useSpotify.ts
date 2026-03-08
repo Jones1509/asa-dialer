@@ -64,6 +64,7 @@ export function useSpotify() {
       });
       if (!error && data?.connected) {
         setIsConnected(true);
+        setSpotifyDisplayName(data.spotify_display_name || null);
         await refreshToken();
       }
     } catch (e) {
