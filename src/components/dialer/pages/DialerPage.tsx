@@ -17,6 +17,8 @@ interface DialerPageProps {
   onSaveLead: (status: string, note?: string) => void;
   onNextLead: () => void;
   loadingLeads: boolean;
+  callActive?: boolean;
+  tetrisEnabled?: boolean;
 }
 
 export const DialerPage: React.FC<DialerPageProps> = ({
