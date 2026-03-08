@@ -2,7 +2,7 @@ import React from 'react';
 import { Lead } from '@/types/leads';
 
 interface TopbarProps {
-  currentLead: Lead;
+  currentLead: Lead | null;
   callActive: boolean;
   callSeconds: number;
   formatTime: (s: number) => string;
