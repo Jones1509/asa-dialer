@@ -32,11 +32,12 @@ export const Topbar: React.FC<TopbarProps> = ({
   const dialNumber = (number: string) => {
     if (!number) return;
     const cleanNumber = number.replace(/\s/g, '');
-    console.log('Dialing number:', cleanNumber, 'Twilio ready:', isTwilioReady);
+    console.log('=== DIALING ===', cleanNumber);
     if (isTwilioReady && onTwilioCall) {
+      console.log('Using Twilio VoIP for:', cleanNumber);
       onTwilioCall(cleanNumber);
     } else {
-      // Fallback to tel: link - use location.href to avoid page replacement issues
+      console.log('Using tel: link for:', cleanNumber);
       const telLink = document.createElement('a');
       telLink.href = `tel:${cleanNumber}`;
       telLink.click();
@@ -57,12 +58,19 @@ export const Topbar: React.FC<TopbarProps> = ({
     }
   };
 
-  const handleManualDial = () => {
-    if (manualNumber.trim()) {
-      dialNumber(manualNumber.trim());
-      setManualNumber('');
-      setShowManualDial(false);
+  const handleManualDial = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
     }
+    const numberToDial = manualNumber.trim();
+    if (!numberToDial) return;
+    console.log('MANUAL DIAL:', numberToDial);
+    // Close manual dial UI AFTER capturing the number
+    setShowManualDial(false);
+    setManualNumber('');
+    // Dial the captured number
+    dialNumber(numberToDial);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
