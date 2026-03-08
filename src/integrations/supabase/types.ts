@@ -233,6 +233,36 @@ export type Database = {
         }
         Relationships: []
       }
+      tetris_scores: {
+        Row: {
+          created_at: string
+          id: string
+          level: number
+          lines_cleared: number
+          player_name: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          level?: number
+          lines_cleared?: number
+          player_name?: string
+          score?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          level?: number
+          lines_cleared?: number
+          player_name?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       twilio_config: {
         Row: {
           created_at: string | null
