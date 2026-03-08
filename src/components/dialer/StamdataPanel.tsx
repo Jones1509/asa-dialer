@@ -11,21 +11,42 @@ interface StamdataPanelProps {
 }
 
 // ─── Inline Mini Tetris ─────────────────────────────────────────────
-const COLS = 10, ROWS = 20, BLOCK = 12;
+const COLS = 10, ROWS = 20;
 const COLORS = ['', '#00d4ff', '#00ff87', '#bf5af2', '#ff9f0a', '#0a84ff', '#ff375f', '#ffd60a'];
 const GLOW = ['', 'rgba(0,212,255,0.3)', 'rgba(0,255,135,0.3)', 'rgba(191,90,242,0.3)', 'rgba(255,159,10,0.3)', 'rgba(10,132,255,0.3)', 'rgba(255,55,95,0.3)', 'rgba(255,214,10,0.3)'];
 const PIECES = [[[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]], [[4,0],[4,0],[4,4]], [[0,5],[0,5],[5,5]], [[6,6,0],[0,6,6]], [[0,7,7],[7,7,0]]];
 
 const InlineTetris: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<any>({});
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [lines, setLines] = useState(0);
   const [paused, setPaused] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [blockSize, setBlockSize] = useState(12);
   const animRef = useRef<number>(0);
   const lastDropRef = useRef<number>(0);
+
+  // Auto-scale to fit container
+  useEffect(() => {
+    const resize = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const h = container.clientHeight - 40; // leave room for header
+      const w = container.clientWidth - 24;
+      const bs = Math.floor(Math.min(h / ROWS, w / COLS));
+      setBlockSize(Math.max(8, Math.min(bs, 18)));
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    const obs = new ResizeObserver(resize);
+    if (containerRef.current) obs.observe(containerRef.current);
+    return () => { window.removeEventListener('resize', resize); obs.disconnect(); };
+  }, []);
+
+  const BLOCK = blockSize;
 
   const randomPiece = () => PIECES[Math.floor(Math.random() * PIECES.length)].map(r => [...r]);
 
@@ -161,27 +182,27 @@ const InlineTetris: React.FC = () => {
   const togglePause = () => { gameRef.current.paused = !gameRef.current.paused; setPaused(gameRef.current.paused); };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-3 w-full">
+    <div ref={containerRef} className="flex flex-col items-center gap-2 w-full h-full">
+      <div className="flex items-center gap-3 w-full px-1">
         <div className="flex items-center gap-1.5">
-          <Gamepad2 size={12} className="text-primary/60" />
-          <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-wider">Tetris</span>
+          <Gamepad2 size={12} className="text-primary-foreground/80" />
+          <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Tetris</span>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/50">
-            <Trophy size={8} className="text-yellow-500/60" />
-            <span className="text-[9px] font-bold text-foreground/60 tabular-nums">{score.toLocaleString()}</span>
+          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <Trophy size={8} className="text-yellow-400/60" />
+            <span className="text-[9px] font-bold text-white/50 tabular-nums">{score.toLocaleString()}</span>
           </div>
-          <div className="px-1.5 py-0.5 rounded bg-muted/50 text-[9px] font-medium text-foreground/50">Lvl {level}</div>
-          <button onClick={togglePause} className="p-1 rounded hover:bg-muted/80 transition-colors cursor-pointer text-muted-foreground/50 hover:text-foreground/70">
+          <div className="px-1.5 py-0.5 rounded text-[9px] font-medium text-white/35" style={{ background: 'rgba(255,255,255,0.04)' }}>Lvl {level}</div>
+          <button onClick={togglePause} className="p-1 rounded transition-colors cursor-pointer text-white/30 hover:text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
             {paused ? <Play size={10} /> : <Pause size={10} />}
           </button>
-          <button onClick={initGame} className="px-1.5 py-0.5 rounded hover:bg-muted/80 transition-colors cursor-pointer text-[9px] text-muted-foreground/50 hover:text-foreground/70">
+          <button onClick={initGame} className="px-1.5 py-0.5 rounded transition-colors cursor-pointer text-[9px] text-white/30 hover:text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
             🔄
           </button>
         </div>
       </div>
-      <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid hsl(var(--border) / 0.3)' }}>
+      <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid rgba(100,140,255,0.06)' }}>
         <canvas ref={canvasRef} width={COLS * BLOCK} height={ROWS * BLOCK} />
         {paused && !gameOver && (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg" style={{ background: 'rgba(5,8,15,0.8)' }}>
@@ -236,44 +257,73 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
   const showTetris = callActive && tetrisEnabled;
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto p-5 gap-4 animate-fade-in bg-background">
-      {/* Campaign badge */}
-      <div className="flex items-center gap-3">
-        <span className="bg-accent text-accent-foreground rounded-md px-2.5 py-1 text-[11px] font-semibold">{campaignName}</span>
-        <span className="text-[11px] text-muted-foreground/50 tabular-nums">ID: {lead.id.slice(0, 8)}</span>
-        {saving && <span className="text-[11px] text-primary/60 ml-auto">Gemmer...</span>}
-      </div>
-
-      {/* Stamdata – compact when Tetris is shown */}
-      <div>
-        <h2 className="font-heading font-bold text-base tracking-tight mb-3">Stamdata</h2>
-        <div className={showTetris ? "grid grid-cols-2 gap-x-4 gap-y-2" : "grid grid-cols-2 gap-4"}>
-          <div className="flex flex-col gap-1">
-            <label className="label-clean flex items-center gap-1.5"><Building2 size={11} /> Virksomhed</label>
-            <input className="input-clean" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="label-clean flex items-center gap-1.5"><PhoneIcon size={11} /> Telefon</label>
-            <input className="input-clean" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="label-clean flex items-center gap-1.5"><Mail size={11} /> Email</label>
-            <input className="input-clean" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="label-clean flex items-center gap-1.5"><Globe size={11} /> Hjemmeside</label>
-            <input className="input-clean" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
-          </div>
-          <div className={showTetris ? "col-span-2 flex flex-col gap-1" : "col-span-2 flex flex-col gap-1.5 mt-1"}>
-            <label className="label-clean flex items-center gap-1.5"><User size={11} /> Kontaktperson</label>
-            <input className="input-clean" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
-          </div>
+    <div className="flex-1 flex flex-col overflow-hidden animate-fade-in bg-background">
+      {/* Top section: Campaign + Stamdata */}
+      <div className="p-5 pb-3 shrink-0">
+        {/* Campaign badge */}
+        <div className="flex items-center gap-3 mb-3">
+          <span className="bg-accent text-accent-foreground rounded-md px-2.5 py-1 text-[11px] font-semibold">{campaignName}</span>
+          <span className="text-[11px] text-muted-foreground/50 tabular-nums">ID: {lead.id.slice(0, 8)}</span>
+          {saving && <span className="text-[11px] text-primary/60 ml-auto">Gemmer...</span>}
         </div>
+
+        <h2 className="font-heading font-bold text-base tracking-tight mb-3">Stamdata</h2>
+
+        {showTetris ? (
+          /* Compact horizontal layout during calls */
+          <div className="grid grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="label-clean flex items-center gap-1"><Building2 size={10} /> Virksomhed</label>
+              <input className="input-clean text-[12px]" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="label-clean flex items-center gap-1"><PhoneIcon size={10} /> Telefon</label>
+              <input className="input-clean text-[12px]" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="label-clean flex items-center gap-1"><User size={10} /> Kontaktperson</label>
+              <input className="input-clean text-[12px]" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="label-clean flex items-center gap-1"><Mail size={10} /> Email</label>
+              <input className="input-clean text-[12px]" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="label-clean flex items-center gap-1"><Globe size={10} /> Hjemmeside</label>
+              <input className="input-clean text-[12px]" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
+            </div>
+          </div>
+        ) : (
+          /* Normal spacious layout */
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className="label-clean flex items-center gap-1.5"><Building2 size={11} /> Virksomhed</label>
+              <input className="input-clean" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="label-clean flex items-center gap-1.5"><PhoneIcon size={11} /> Telefon</label>
+              <input className="input-clean" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="label-clean flex items-center gap-1.5"><Mail size={11} /> Email</label>
+              <input className="input-clean" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label className="label-clean flex items-center gap-1.5"><Globe size={11} /> Hjemmeside</label>
+              <input className="input-clean" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
+            </div>
+            <div className="col-span-2 flex flex-col gap-1.5">
+              <label className="label-clean flex items-center gap-1.5"><User size={11} /> Kontaktperson</label>
+              <input className="input-clean" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Inline Tetris during active call */}
+      {/* Tetris area — fills remaining space */}
       {showTetris && (
-        <div className="mt-1 pt-3" style={{ borderTop: '1px solid hsl(var(--border) / 0.4)' }}>
+        <div className="flex-1 min-h-0 mx-5 mb-4 rounded-xl overflow-hidden flex items-center justify-center"
+          style={{ background: 'radial-gradient(ellipse at center, #0c1020, #060810)', border: '1px solid hsl(var(--border) / 0.2)' }}>
           <InlineTetris />
         </div>
       )}
