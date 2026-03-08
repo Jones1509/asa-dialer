@@ -1,5 +1,6 @@
 import React from 'react';
 import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield } from 'lucide-react';
+import asaIcon from '@/assets/asa-icon.png';
 
 interface SidebarProps {
   activePage: string;
