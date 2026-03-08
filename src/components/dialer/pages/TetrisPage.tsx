@@ -150,7 +150,7 @@ export const TetrisPage: React.FC = () => {
 
   const drawBlock = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string, glow: string, bs: number, ghost = false) => {
     const bx = x * bs, by = y * bs;
-    if (ghost) { ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; }
+    if (ghost) { ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4; ctx.setLineDash([3, 2]); ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = color; ctx.globalAlpha = 0.08; ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.fill(); ctx.globalAlpha = 1; return; }
     ctx.shadowColor = glow; ctx.shadowBlur = 14;
     const grad = ctx.createLinearGradient(bx, by, bx + bs, by + bs); grad.addColorStop(0, color); grad.addColorStop(1, shadeColor(color, -30));
     ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(bx + 1, by + 1, bs - 2, bs - 2, 4); ctx.fill(); ctx.shadowBlur = 0;
@@ -186,14 +186,14 @@ export const TetrisPage: React.FC = () => {
       shakeRef.current.intensity *= 0.9; if (shakeRef.current.intensity < 0.5) shakeRef.current.intensity = 0;
     }
     const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w);
-    bg.addColorStop(0, '#0a0e1a'); bg.addColorStop(0.5, '#070b14'); bg.addColorStop(1, '#030508');
+    bg.addColorStop(0, '#1a2035'); bg.addColorStop(0.5, '#141a2a'); bg.addColorStop(1, '#0e1320');
     ctx.fillStyle = bg; ctx.fillRect(-5, -5, w + 10, h + 10);
     starsRef.current.forEach(star => {
       star.y += star.speed; if (star.y > h) { star.y = 0; star.x = Math.random() * w; }
       ctx.fillStyle = `rgba(255,255,255,${star.opacity * (Math.sin(time * 0.003 + star.x) * 0.3 + 0.7)})`;
       ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill();
     });
-    ctx.strokeStyle = 'rgba(100,140,255,0.03)'; ctx.lineWidth = 0.5;
+    ctx.strokeStyle = 'rgba(100,140,255,0.1)'; ctx.lineWidth = 0.5;
     for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r * BLOCK); ctx.lineTo(w, r * BLOCK); ctx.stroke(); }
     for (let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c * BLOCK, 0); ctx.lineTo(c * BLOCK, h); ctx.stroke(); }
     if (!g.board) { ctx.restore(); return; }

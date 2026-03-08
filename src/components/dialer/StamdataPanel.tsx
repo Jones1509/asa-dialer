@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Lead } from '@/types/leads';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Phone as PhoneIcon, Mail, Globe, User, Gamepad2, Pause, Play, Trophy, Zap, Star, Volume2, VolumeX } from 'lucide-react';
+import { Building2, Phone as PhoneIcon, Mail, Globe, User, Gamepad2, Pause, Play, Trophy, Zap, Star } from 'lucide-react';
 
 interface StamdataPanelProps {
   lead: Lead | null;
@@ -31,9 +31,6 @@ const InlineTetris: React.FC = () => {
   const [holdPiece, setHoldPiece] = useState<number[][] | null>(null);
   const [combo, setCombo] = useState(0);
   const [lastClear, setLastClear] = useState<string | null>(null);
-  const [musicMuted, setMusicMuted] = useState(false);
-  const [musicReady, setMusicReady] = useState(false);
-  const ytPlayerRef = useRef<any>(null);
   const animRef = useRef<number>(0);
   const lastDropRef = useRef<number>(0);
   const particlesRef = useRef<{ x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; size: number }[]>([]);
@@ -57,31 +54,7 @@ const InlineTetris: React.FC = () => {
     return () => { window.removeEventListener('resize', resize); obs.disconnect(); };
   }, []);
 
-  // YouTube music
-  useEffect(() => {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
-    if (!existing) document.head.appendChild(tag);
-    const initPlayer = () => {
-      ytPlayerRef.current = new (window as any).YT.Player('yt-inline-music', {
-        height: '0', width: '0', videoId: 'vtNJMAyeP0s',
-        playerVars: { autoplay: 1, loop: 1, playlist: 'vtNJMAyeP0s', controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
-        events: {
-          onReady: (e: any) => { e.target.setVolume(30); setMusicReady(true); },
-          onStateChange: (e: any) => { if (e.data === (window as any).YT.PlayerState.ENDED) e.target.playVideo(); },
-        },
-      });
-    };
-    if ((window as any).YT && (window as any).YT.Player) initPlayer();
-    else (window as any).onYouTubeIframeAPIReady = initPlayer;
-    return () => { if (ytPlayerRef.current?.destroy) ytPlayerRef.current.destroy(); };
-  }, []);
-
-  useEffect(() => {
-    const p = ytPlayerRef.current; if (!p || !musicReady) return;
-    try { if (paused || gameOver || musicMuted) p.pauseVideo(); else p.playVideo(); } catch {}
-  }, [paused, gameOver, musicMuted, musicReady]);
+  // No music in inline tetris
 
   const BLOCK = blockSize;
   const PREVIEW_BLOCK = Math.max(8, Math.floor(blockSize * 0.55));
@@ -120,7 +93,7 @@ const InlineTetris: React.FC = () => {
 
   const drawBlock = (ctx: CanvasRenderingContext2D, x: number, y: number, color: string, glow: string, bs: number, ghost = false) => {
     const bx = x * bs, by = y * bs;
-    if (ghost) { ctx.strokeStyle = color; ctx.lineWidth = 1; ctx.globalAlpha = 0.2; ctx.setLineDash([2, 2]); ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1; return; }
+    if (ghost) { ctx.strokeStyle = color; ctx.lineWidth = 1.5; ctx.globalAlpha = 0.4; ctx.setLineDash([3, 2]); ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.stroke(); ctx.setLineDash([]); ctx.fillStyle = color; ctx.globalAlpha = 0.08; ctx.beginPath(); ctx.roundRect(bx + 2, by + 2, bs - 4, bs - 4, 3); ctx.fill(); ctx.globalAlpha = 1; return; }
     ctx.shadowColor = glow; ctx.shadowBlur = 14;
     const grad = ctx.createLinearGradient(bx, by, bx + bs, by + bs); grad.addColorStop(0, color); grad.addColorStop(1, shadeColor(color, -30));
     ctx.fillStyle = grad; ctx.beginPath(); ctx.roundRect(bx + 1, by + 1, bs - 2, bs - 2, 4); ctx.fill(); ctx.shadowBlur = 0;
@@ -161,7 +134,7 @@ const InlineTetris: React.FC = () => {
       shakeRef.current.intensity *= 0.9; if (shakeRef.current.intensity < 0.5) shakeRef.current.intensity = 0;
     }
     const bg = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w);
-    bg.addColorStop(0, '#0a0e1a'); bg.addColorStop(0.5, '#070b14'); bg.addColorStop(1, '#030508');
+    bg.addColorStop(0, '#1a2035'); bg.addColorStop(0.5, '#141a2a'); bg.addColorStop(1, '#0e1320');
     ctx.fillStyle = bg; ctx.fillRect(-5, -5, w + 10, h + 10);
     // Stars
     starsRef.current.forEach(star => {
@@ -170,7 +143,7 @@ const InlineTetris: React.FC = () => {
       ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill();
     });
     // Grid
-    ctx.strokeStyle = 'rgba(100,140,255,0.04)'; ctx.lineWidth = 0.5;
+    ctx.strokeStyle = 'rgba(100,140,255,0.1)'; ctx.lineWidth = 0.5;
     for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r * BLOCK); ctx.lineTo(w, r * BLOCK); ctx.stroke(); }
     for (let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c * BLOCK, 0); ctx.lineTo(c * BLOCK, h); ctx.stroke(); }
     if (!g.board) { ctx.restore(); return; }
@@ -266,8 +239,6 @@ const InlineTetris: React.FC = () => {
 
   return (
     <div ref={containerRef} className="flex w-full h-full items-center justify-center relative">
-      {/* Hidden YouTube player */}
-      <div id="yt-inline-music" className="hidden" />
 
       {/* Ambient glows */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -343,9 +314,6 @@ const InlineTetris: React.FC = () => {
           </button>
           <button onClick={() => initGame()} className={btnStyle} style={btnBg}>
             🔄 Genstart
-          </button>
-          <button onClick={() => setMusicMuted(m => !m)} className={btnStyle} style={btnBg}>
-            {musicMuted ? <><VolumeX size={8} /> Musik fra</> : <><Volume2 size={8} /> Musik til</>}
           </button>
         </div>
       </div>
