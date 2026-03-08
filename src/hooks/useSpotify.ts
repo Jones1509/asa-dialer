@@ -212,13 +212,24 @@ export function useSpotify() {
   }, [isPlaying, duration]);
 
   const play = async (uri?: string) => {
-    if (!accessToken || !deviceId) return;
+    let token = accessToken;
+    if (!token || !deviceId) return;
     if (uri) {
-      await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+      let resp = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: [uri] }),
       });
+      if (resp.status === 403 || resp.status === 401) {
+        const newToken = await refreshToken();
+        if (newToken) {
+          await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${newToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ uris: [uri] }),
+          });
+        }
+      }
     } else {
       player?.resume();
     }
@@ -283,7 +294,7 @@ export function useSpotify() {
           id: p.id,
           name: p.name,
           image: p.images?.[0]?.url || '',
-          trackCount: p.tracks?.total || 0,
+          trackCount: p.tracks?.total ?? p.items?.total ?? 0,
         }))
       );
     } catch (e) {
@@ -301,12 +312,35 @@ export function useSpotify() {
   };
 
   const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
-    if (!accessToken) return [];
-    try {
+    let token = accessToken;
+    if (!token) return [];
+    
+    const doFetch = async (t: string) => {
       const resp = await fetch(
         `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
+      return resp;
+    };
+
+    try {
+      let resp = await doFetch(token);
+      
+      // If 403/401, try refreshing the token and retry
+      if (resp.status === 403 || resp.status === 401) {
+        console.log('Spotify token expired/forbidden, refreshing...');
+        const newToken = await refreshToken();
+        if (newToken) {
+          token = newToken;
+          resp = await doFetch(newToken);
+        }
+      }
+      
+      if (!resp.ok) {
+        console.error('Fetch playlist tracks failed:', resp.status, await resp.text());
+        return [];
+      }
+      
       const data = await resp.json();
       return (data.items || [])
         .filter((item: any) => item.track)
