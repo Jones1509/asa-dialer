@@ -23,7 +23,7 @@ interface DialerPageProps {
 
 export const DialerPage: React.FC<DialerPageProps> = ({
   leads, filteredLeads, currentLeadIdx, currentLead, searchQuery, campaignName,
-  onSearch, onSelectLead, onSaveLead, onNextLead, loadingLeads,
+  onSearch, onSelectLead, onSaveLead, onNextLead, loadingLeads, callActive, tetrisEnabled,
 }) => {
   if (loadingLeads) {
     return (
