@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
-import { useTwilioDevice } from '@/hooks/useTwilioDevice';
+import { useTwilioDevice, IncomingCallInfo } from '@/hooks/useTwilioDevice';
 import { AppSidebar } from '@/components/dialer/AppSidebar';
 import { Topbar } from '@/components/dialer/Topbar';
 import { TetrisOverlay } from '@/components/dialer/TetrisOverlay';
+import { IncomingCallOverlay } from '@/components/dialer/IncomingCallOverlay';
 import { DialerPage } from '@/components/dialer/pages/DialerPage';
 import { IncomingPage } from '@/components/dialer/pages/IncomingPage';
 import { CampaignsPage } from '@/components/dialer/pages/CampaignsPage';
@@ -15,16 +16,36 @@ import { SettingsPage } from '@/components/dialer/pages/SettingsPage';
 
 const Index = () => {
   const state = useDialerState();
+  const [incomingCall, setIncomingCall] = useState<IncomingCallInfo | null>(null);
+  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
+
+  const handleIncomingCall = useCallback((info: IncomingCallInfo) => {
+    setIncomingCall(info);
+  }, []);
+
   const twilio = useTwilioDevice({
     onCallDisconnected: () => {
       if (state.callActive) {
         state.endCall();
       }
+      setIncomingCall(null);
     },
+    onIncomingCall: handleIncomingCall,
   });
   const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
+
+  const handleAcceptIncoming = () => {
+    twilio.acceptCall();
+    setActiveDialNumber(incomingCall?.from || null);
+    state.startCall();
+    setIncomingCall(null);
+  };
+
+  const handleRejectIncoming = () => {
+    twilio.rejectCall();
+    setIncomingCall(null);
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -80,7 +101,6 @@ const Index = () => {
     }
   };
 
-  // Only show topbar on dialer page
   const showTopbar = state.activePage === 'dialer' && state.leads.length > 0;
 
   return (
@@ -122,6 +142,14 @@ const Index = () => {
           formatTime={state.formatTime}
           onEndCall={state.endCall}
           activeDialNumber={activeDialNumber}
+        />
+      )}
+      {/* Incoming call overlay */}
+      {incomingCall && !state.callActive && (
+        <IncomingCallOverlay
+          from={incomingCall.from}
+          onAccept={handleAcceptIncoming}
+          onReject={handleRejectIncoming}
         />
       )}
       <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]

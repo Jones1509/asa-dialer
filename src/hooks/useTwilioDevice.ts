@@ -4,8 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 type TwilioStatus = 'loading' | 'ready' | 'error' | 'offline';
 
+export interface IncomingCallInfo {
+  from: string;
+  callObject: Call;
+}
+
 interface UseTwilioDeviceOptions {
   onCallDisconnected?: () => void;
+  onIncomingCall?: (info: IncomingCallInfo) => void;
 }
 
 export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
@@ -95,12 +101,33 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
       device.on('unregistered', () => {
         console.log('[Twilio] Device unregistered, attempting re-register...');
         setStatus('offline');
-        // Auto-reconnect when unregistered
         setTimeout(() => {
           if (deviceRef.current === device) {
             device.register().catch(e => console.error('[Twilio] Re-register failed:', e));
           }
         }, 3000);
+      });
+
+      // Handle incoming calls
+      device.on('incoming', (call: Call) => {
+        console.log('[Twilio] Incoming call from:', call.parameters?.From);
+        activeCallRef.current = call;
+
+        call.on('disconnect', () => {
+          console.log('[Twilio] Incoming call disconnected');
+          activeCallRef.current = null;
+          options?.onCallDisconnected?.();
+        });
+        call.on('cancel', () => {
+          console.log('[Twilio] Incoming call cancelled');
+          activeCallRef.current = null;
+          options?.onCallDisconnected?.();
+        });
+
+        options?.onIncomingCall?.({
+          from: call.parameters?.From || 'Ukendt',
+          callObject: call,
+        });
       });
 
       device.on('tokenWillExpire', async () => {
@@ -199,7 +226,21 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
     }
   }, []);
 
-  // canMakeVoipCall is true only when device is ready AND mic is allowed
+  const acceptCall = useCallback(() => {
+    if (activeCallRef.current) {
+      activeCallRef.current.accept();
+      console.log('[Twilio] Incoming call accepted');
+    }
+  }, []);
+
+  const rejectCall = useCallback(() => {
+    if (activeCallRef.current) {
+      activeCallRef.current.reject();
+      activeCallRef.current = null;
+      console.log('[Twilio] Incoming call rejected');
+    }
+  }, []);
+
   const canMakeVoipCall = status === 'ready' && micAllowed === true;
 
   return {
@@ -207,6 +248,8 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
     error,
     makeCall,
     hangUp,
+    acceptCall,
+    rejectCall,
     reinitialize: initDevice,
     micAllowed,
     canMakeVoipCall,
