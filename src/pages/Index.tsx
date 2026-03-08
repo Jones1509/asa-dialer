@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
 import { AppSidebar } from '@/components/dialer/AppSidebar';
 import { Topbar } from '@/components/dialer/Topbar';
@@ -12,6 +14,14 @@ import { SettingsPage } from '@/components/dialer/pages/SettingsPage';
 
 const Index = () => {
   const state = useDialerState();
+  const { signOut, isAdmin } = useAuth();
+  const navigate = useNavigate();
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const renderPage = () => {
     switch (state.activePage) {
@@ -30,7 +40,14 @@ const Index = () => {
           />
         );
       case 'incoming': return <IncomingPage />;
-      case 'campaigns': return <CampaignsPage onNavigate={state.setActivePage} showNotif={state.showNotif} />;
+      case 'campaigns':
+        return (
+          <CampaignsPage
+            onNavigate={state.setActivePage}
+            showNotif={state.showNotif}
+            onSelectCampaign={setSelectedCampaignId}
+          />
+        );
       case 'shop': return <ShopPage />;
       case 'reports':
         return (
@@ -59,7 +76,9 @@ const Index = () => {
       <AppSidebar
         activePage={state.activePage}
         onNavigate={state.setActivePage}
-        onLogout={() => state.showNotif('👋 Logger ud...')}
+        onLogout={handleLogout}
+        isAdmin={isAdmin}
+        onAdminNav={() => navigate('/admin')}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar
@@ -82,7 +101,6 @@ const Index = () => {
         formatTime={state.formatTime}
         onEndCall={state.endCall}
       />
-      {/* Notification */}
       <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-2xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
         transition-all duration-500 ease-out
         ${state.notification
