@@ -220,7 +220,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       {callActive && (
         <div className="flex items-center gap-2 bg-success/10 border border-success/20 rounded-lg px-3 py-1.5 text-[12px] font-medium text-success">
           <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-          Opkald i gang {isTwilioReady ? '(VoIP)' : ''}
+          Opkald i gang {canMakeVoipCall ? '(VoIP)' : ''}
         </div>
       )}
 
