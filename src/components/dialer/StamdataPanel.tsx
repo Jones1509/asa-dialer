@@ -57,31 +57,7 @@ const InlineTetris: React.FC = () => {
     return () => { window.removeEventListener('resize', resize); obs.disconnect(); };
   }, []);
 
-  // YouTube music
-  useEffect(() => {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
-    if (!existing) document.head.appendChild(tag);
-    const initPlayer = () => {
-      ytPlayerRef.current = new (window as any).YT.Player('yt-inline-music', {
-        height: '0', width: '0', videoId: 'vtNJMAyeP0s',
-        playerVars: { autoplay: 1, loop: 1, playlist: 'vtNJMAyeP0s', controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
-        events: {
-          onReady: (e: any) => { e.target.setVolume(30); setMusicReady(true); },
-          onStateChange: (e: any) => { if (e.data === (window as any).YT.PlayerState.ENDED) e.target.playVideo(); },
-        },
-      });
-    };
-    if ((window as any).YT && (window as any).YT.Player) initPlayer();
-    else (window as any).onYouTubeIframeAPIReady = initPlayer;
-    return () => { if (ytPlayerRef.current?.destroy) ytPlayerRef.current.destroy(); };
-  }, []);
-
-  useEffect(() => {
-    const p = ytPlayerRef.current; if (!p || !musicReady) return;
-    try { if (paused || gameOver || musicMuted) p.pauseVideo(); else p.playVideo(); } catch {}
-  }, [paused, gameOver, musicMuted, musicReady]);
+  // No music in inline tetris
 
   const BLOCK = blockSize;
   const PREVIEW_BLOCK = Math.max(8, Math.floor(blockSize * 0.55));
