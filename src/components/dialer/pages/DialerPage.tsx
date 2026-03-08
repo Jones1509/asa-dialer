@@ -44,8 +44,8 @@ export const DialerPage: React.FC<DialerPageProps> = ({
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="px-6 pt-3 pb-2 text-[12px] text-muted-foreground/60 flex items-center gap-1 font-medium flex-wrap">
-        <Home size={12} className="shrink-0" /> <ChevronRight size={10} className="shrink-0" /> <span className="text-foreground/70 font-semibold shrink-0">Dialer</span> <ChevronRight size={10} className="shrink-0" /> <span className="break-words">{campaignName}</span>
+      <div className="px-6 pt-3 pb-2 text-[12px] text-muted-foreground/60 flex items-center gap-1 font-medium">
+        <Home size={12} /> <ChevronRight size={10} /> <span className="text-foreground/70 font-semibold">Dialer</span> <ChevronRight size={10} /> {campaignName}
       </div>
       <div className="flex-1 flex overflow-hidden">
         <LeadsPanel
