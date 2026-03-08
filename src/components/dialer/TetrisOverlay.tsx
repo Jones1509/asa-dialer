@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Lead } from '@/types/leads';
+import { Phone, PhoneOff, Gamepad2, Pause, Play } from 'lucide-react';
 
 interface TetrisOverlayProps {
   visible: boolean;
@@ -136,41 +137,45 @@ export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
   if (!visible) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-50 flex items-center justify-center flex-col gap-6 animate-fade-in">
-      <div className="text-center">
-        <h2 className="font-heading font-extrabold text-3xl text-primary">
-          🎮 Spil mens du venter!
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-50 flex items-center justify-center flex-col gap-5 animate-fade-in">
+      <div className="text-center flex flex-col items-center gap-2">
+        <Gamepad2 size={28} className="text-primary" strokeWidth={1.5} />
+        <h2 className="font-heading font-bold text-xl text-foreground tracking-tight">
+          Spil mens du venter
         </h2>
-        <p className="text-muted-foreground text-sm mt-2">Opkaldet er igang — slap af med Tetris</p>
+        <p className="text-muted-foreground/60 text-[13px]">Opkaldet er i gang</p>
       </div>
-      <div className="glass-surface border-primary/20 rounded-2xl px-6 py-4 flex items-center gap-5 min-w-[340px]">
-        <span className="text-2xl" style={{ animation: 'ring-anim 1s infinite' }}>📞</span>
-        <div>
-          <div className="font-heading font-bold text-[15px] tracking-tight">{currentLead.company}</div>
-          <div className="text-sm text-muted-foreground tabular-nums">{currentLead.phone}</div>
+      <div className="glass-surface border-primary/15 rounded-xl px-5 py-3 flex items-center gap-4 min-w-[320px]">
+        <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
+          <Phone size={15} className="text-success" strokeWidth={2} />
         </div>
-        <div className="font-heading font-bold text-base text-primary ml-auto tabular-nums tracking-wider">{formatTime(callSeconds)}</div>
+        <div>
+          <div className="font-heading font-bold text-[14px] tracking-tight">{currentLead.company}</div>
+          <div className="text-[12px] text-muted-foreground/50 tabular-nums">{currentLead.phone}</div>
+        </div>
+        <div className="font-heading font-bold text-[14px] text-primary ml-auto tabular-nums tracking-wider">{formatTime(callSeconds)}</div>
         <button onClick={onEndCall}
-          className="bg-destructive text-destructive-foreground border-none rounded-xl px-5 py-2.5 font-body font-semibold text-sm cursor-pointer hover:shadow-[0_4px_16px_hsl(0_72%_51%/0.3)] transition-all duration-300 active:scale-95">
-          📵 Læg på
+          className="bg-destructive text-destructive-foreground border-none rounded-lg px-4 py-2 font-body font-semibold text-[12px] cursor-pointer hover:shadow-[0_3px_12px_hsl(0_72%_51%/0.25)] transition-all duration-200 active:scale-95 flex items-center gap-1.5">
+          <PhoneOff size={14} strokeWidth={2} />
+          Læg på
         </button>
       </div>
-      <div className="flex gap-5 items-start">
+      <div className="flex gap-4 items-start">
         <canvas ref={canvasRef} width={200} height={400}
-          className="border border-border/40 rounded-2xl bg-card"
-          style={{ boxShadow: '0 8px 32px hsl(217 91% 60% / 0.08)' }} />
-        <div className="flex flex-col gap-3 min-w-[130px]">
+          className="border border-border/30 rounded-xl bg-card"
+          style={{ boxShadow: '0 6px 24px hsl(217 91% 60% / 0.06)' }} />
+        <div className="flex flex-col gap-2.5 min-w-[120px]">
           {[{ label: 'Score', value: score }, { label: 'Linjer', value: lines }, { label: 'Level', value: level }].map(s => (
-            <div key={s.label} className="card-surface rounded-xl px-4 py-3">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-[0.1em] font-medium">{s.label}</div>
-              <div className="font-heading font-bold text-xl text-primary mt-0.5">{s.value}</div>
+            <div key={s.label} className="card-surface rounded-lg px-3.5 py-2.5">
+              <div className="text-[9px] text-muted-foreground/50 uppercase tracking-widest font-medium">{s.label}</div>
+              <div className="font-heading font-bold text-lg text-primary mt-0.5">{s.value}</div>
             </div>
           ))}
-          <div className="text-[11px] text-muted-foreground/60 px-2 py-2 leading-relaxed">
-            ← → Flyt<br/>↑ Rotér<br/>↓ Drop<br/>Space Hurtig drop
+          <div className="text-[10px] text-muted-foreground/40 px-2 py-1.5 leading-relaxed">
+            ← → Flyt<br/>↑ Rotér<br/>↓ Drop<br/>Space Hurtig
           </div>
-          <button onClick={togglePause} className="btn-ghost-smooth text-[13px]">
-            {paused ? '▶ Fortsæt' : '⏸ Pause'}
+          <button onClick={togglePause} className="btn-ghost-smooth text-[12px] flex items-center justify-center gap-1.5">
+            {paused ? <><Play size={13} /> Fortsæt</> : <><Pause size={13} /> Pause</>}
           </button>
         </div>
       </div>
