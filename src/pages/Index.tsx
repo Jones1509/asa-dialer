@@ -95,6 +95,10 @@ const Index = () => {
             onStartCall={state.startCall}
             onEndCall={state.endCall}
             onActivity={() => state.showNotif('Aktivitet gemt')}
+            twilioStatus={twilio.status}
+            twilioError={twilio.error}
+            onTwilioCall={twilio.makeCall}
+            onTwilioHangUp={twilio.hangUp}
           />
         )}
         <div className="flex-1 flex overflow-hidden">
