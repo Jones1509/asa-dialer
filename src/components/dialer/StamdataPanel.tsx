@@ -315,9 +315,6 @@ const InlineTetris: React.FC = () => {
           <button onClick={() => initGame()} className={btnStyle} style={btnBg}>
             🔄 Genstart
           </button>
-          <button onClick={() => setMusicMuted(m => !m)} className={btnStyle} style={btnBg}>
-            {musicMuted ? <><VolumeX size={8} /> Musik fra</> : <><Volume2 size={8} /> Musik til</>}
-          </button>
         </div>
       </div>
     </div>
