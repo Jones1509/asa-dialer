@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +11,20 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
   const navigate = useNavigate();
+  const { user, isAdmin, isApproved, loading: authLoading } = useAuth();
+
+  // Redirect already logged-in users (but not during active login)
+  useEffect(() => {
+    if (!authLoading && user && !loading) {
+      if (isAdmin) {
+        navigate('/admin', { replace: true });
+      } else if (isApproved) {
+        navigate('/', { replace: true });
+      } else {
+        navigate('/pending', { replace: true });
+      }
+    }
+  }, [authLoading, user, isAdmin, isApproved, loading]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
