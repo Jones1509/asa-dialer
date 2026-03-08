@@ -295,7 +295,8 @@ export const TetrisPage: React.FC = () => {
 
   return (
     <div className="flex-1 flex overflow-hidden bg-background">
-      {/* Main content area */}
+      {/* Hidden YouTube player */}
+      <div id="yt-music-player" className="hidden" />
       <div className="flex-1 flex flex-col overflow-hidden p-5">
         {/* Page header */}
         <div className="flex items-center gap-3 mb-4">
