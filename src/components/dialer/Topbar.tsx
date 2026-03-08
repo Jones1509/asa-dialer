@@ -37,11 +37,10 @@ export const Topbar: React.FC<TopbarProps> = ({
     if (!number) return;
     const cleanNumber = number.replace(/\s/g, '');
     console.log('=== DIALING ===', cleanNumber);
+    setActiveDialNumber(cleanNumber);
     if (isTwilioReady && onTwilioCall) {
-      console.log('Using Twilio VoIP for:', cleanNumber);
       onTwilioCall(cleanNumber);
     } else {
-      console.log('Using tel: link for:', cleanNumber);
       const telLink = document.createElement('a');
       telLink.href = `tel:${cleanNumber}`;
       telLink.click();
