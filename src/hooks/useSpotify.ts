@@ -11,6 +11,8 @@ const SPOTIFY_SCOPES = [
   'user-read-currently-playing',
   'playlist-read-private',
   'playlist-read-collaborative',
+  'playlist-modify-public',
+  'playlist-modify-private',
   'user-library-read',
 ].join(' ');
 
