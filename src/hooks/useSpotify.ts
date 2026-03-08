@@ -361,6 +361,7 @@ export function useSpotify() {
   return {
     isConnected,
     loading,
+    spotifyDisplayName,
     login,
     exchangeCode,
     disconnect,
