@@ -15,6 +15,7 @@ const navItems = [
   { id: 'campaigns', icon: LayoutGrid, label: 'Kampagner' },
   { id: 'shop', icon: ShoppingBag, label: 'Produktshop' },
   { id: 'reports', icon: BarChart3, label: 'Rapporter' },
+  { id: 'tetris', icon: Gamepad2, label: 'Tetris' },
 ];
 
 export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isAdmin, onAdminNav }) => {
