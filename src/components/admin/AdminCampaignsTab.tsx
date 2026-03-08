@@ -86,6 +86,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
       phone: l.phone,
       email: l.email,
       website: l.website,
+      contact_person: l.contact_person,
     }));
     const { error } = await supabase.from('leads').insert(rows);
     if (error) { showNotif('Fejl ved import'); return; }

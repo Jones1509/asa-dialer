@@ -75,7 +75,7 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
     });
 
     const leads = allRows.map(row => {
-      const lead = { company: '', phone: '', email: '', website: '' };
+      const lead = { company: '', phone: '', email: '', website: '', contact_person: '' };
       Object.entries(mapping).forEach(([idx, field]) => {
         (lead as any)[field] = row[parseInt(idx)] || '';
       });
