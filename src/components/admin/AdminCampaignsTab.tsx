@@ -80,14 +80,37 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     fetchAll();
   };
 
-  const openCSV = (campaignId: string) => {
+  const startEdit = (c: Campaign) => {
+    setEditingCampaign(c.id);
+    setEditName(c.name);
+    setEditDesc(c.description || '');
+  };
+
+  const saveEdit = async () => {
+    if (!editingCampaign || !editName.trim()) return;
+    const { error } = await supabase.from('campaigns').update({ name: editName.trim(), description: editDesc.trim() || null }).eq('id', editingCampaign);
+    if (error) { showNotif('Kunne ikke gemme ændringer'); return; }
+    showNotif('Kampagne opdateret');
+    setEditingCampaign(null);
+    fetchAll();
+  };
+
+  const openCSV = (campaignId: string, replace = false) => {
     setCsvCampaignId(campaignId);
+    setCsvReplaceMode(replace);
     setShowCSV(true);
   };
 
   const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string; contact_person: string }>) => {
     const targetId = csvCampaignId;
     if (!targetId) return;
+
+    // If replace mode, delete all existing leads first
+    if (csvReplaceMode) {
+      const { error: delError } = await supabase.from('leads').delete().eq('campaign_id', targetId);
+      if (delError) { showNotif('Fejl ved sletning af gamle emner'); return; }
+    }
+
     const rows = leads.map(l => ({
       campaign_id: targetId,
       company: l.company,
@@ -98,8 +121,9 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     }));
     const { error } = await supabase.from('leads').insert(rows);
     if (error) { showNotif('Fejl ved import'); return; }
-    showNotif(`${leads.length} emner importeret`);
+    showNotif(csvReplaceMode ? `${leads.length} emner importeret (gamle slettet)` : `${leads.length} emner importeret`);
     setShowCSV(false);
+    setCsvReplaceMode(false);
     // If part of create flow, finish and reset
     if (createStep === 'csv') {
       setCreateStep(null);
