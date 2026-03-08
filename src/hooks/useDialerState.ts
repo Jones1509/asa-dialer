@@ -133,11 +133,11 @@ export function useDialerState() {
     setTotalClosed(prev => prev + 1);
 
     const statusLabels: Record<string, string> = {
-      sale: 'Salg ✅', callback: 'Genopkald 🔄', not_interested: 'Ikke interesseret',
+      sale: 'Salg', callback: 'Genopkald', not_interested: 'Ikke interesseret',
       wrong_number: 'Forkert nummer', no_answer: 'Ingen svar', voicemail: 'Telefonsvarer',
       interested: 'Interesseret',
     };
-    showNotif(`💾 Gemt som "${statusLabels[status] || status}"`);
+    showNotif(`Gemt som "${statusLabels[status] || status}"`);
 
     // Update local state
     setLeads(prev => prev.map(l => l.id === currentLead.id ? { ...l, status, note: note ?? l.note } : l));
