@@ -89,7 +89,7 @@ const AdminPage: React.FC = () => {
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="h-[56px] bg-card border-b border-border/40 flex items-center px-6 gap-3.5 shrink-0"
           style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-          <div className="bg-destructive/10 text-destructive text-[10px] font-bold rounded-md px-2.5 py-1 uppercase tracking-wider">
+          <div className="bg-primary/10 text-primary text-[10px] font-bold rounded-md px-2.5 py-1 uppercase tracking-wider">
             Admin
           </div>
           <h1 className="font-heading font-bold text-[15px] tracking-tight flex items-center gap-2">

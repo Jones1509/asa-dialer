@@ -103,13 +103,16 @@ const Index = () => {
           onEndCall={state.endCall}
         />
       )}
-      <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-2xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
+      <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
         transition-all duration-500 ease-out
         ${state.notification
           ? 'translate-y-0 opacity-100 scale-100'
           : 'translate-y-8 opacity-0 scale-95 pointer-events-none'
         }`}
         style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
+        <div className="w-5 h-5 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5.5L3.5 7.5L8.5 2.5" stroke="hsl(152 69% 41%)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+        </div>
         {state.notification}
       </div>
     </div>

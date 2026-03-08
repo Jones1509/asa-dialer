@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CSVUploadModal } from '@/components/dialer/CSVUploadModal';
-import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, ChevronUp, Users } from 'lucide-react';
+import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, ChevronUp, Users, Hash, Calendar } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -34,6 +34,9 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   const [csvCampaignId, setCsvCampaignId] = useState<string | null>(null);
   const [assignModal, setAssignModal] = useState<string | null>(null);
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
+  // New: combined create flow
+  const [createStep, setCreateStep] = useState<'info' | 'csv' | null>(null);
+  const [newCampaignId, setNewCampaignId] = useState<string | null>(null);
 
   const fetchAll = async () => {
     const [{ data: campaignsData }, { data: profilesData }] = await Promise.all([
@@ -60,11 +63,12 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
 
   const createCampaign = async () => {
     if (!newName.trim()) return;
-    const { error } = await supabase.from('campaigns').insert({ name: newName, description: newDesc });
-    if (error) { showNotif('Kunne ikke oprette kampagne'); return; }
-    showNotif('Kampagne oprettet');
-    setNewName(''); setNewDesc(''); setShowCreate(false);
-    fetchAll();
+    const { data, error } = await supabase.from('campaigns').insert({ name: newName, description: newDesc }).select().single();
+    if (error || !data) { showNotif('Kunne ikke oprette kampagne'); return; }
+    showNotif('Kampagne oprettet — tilføj nu leads via CSV');
+    setNewCampaignId(data.id);
+    setCsvCampaignId(data.id);
+    setCreateStep('csv');
   };
 
   const archiveCampaign = async (id: string) => {
@@ -79,9 +83,10 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   };
 
   const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string; contact_person: string }>) => {
-    if (!csvCampaignId) return;
+    const targetId = csvCampaignId;
+    if (!targetId) return;
     const rows = leads.map(l => ({
-      campaign_id: csvCampaignId,
+      campaign_id: targetId,
       company: l.company,
       phone: l.phone,
       email: l.email,
@@ -92,6 +97,14 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     if (error) { showNotif('Fejl ved import'); return; }
     showNotif(`${leads.length} emner importeret`);
     setShowCSV(false);
+    // If part of create flow, finish and reset
+    if (createStep === 'csv') {
+      setCreateStep(null);
+      setShowCreate(false);
+      setNewName('');
+      setNewDesc('');
+      setNewCampaignId(null);
+    }
     fetchAll();
   };
 
@@ -119,25 +132,62 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h3 className="font-heading font-bold text-[14px]">Kampagner ({campaigns.length})</h3>
-        <button onClick={() => setShowCreate(!showCreate)} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
+        <button onClick={() => { setShowCreate(!showCreate); setCreateStep('info'); }} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
           <Plus size={14} strokeWidth={2} />
           Ny kampagne
         </button>
       </div>
 
+      {/* Combined create flow */}
       {showCreate && (
-        <div className="card-surface rounded-xl p-5 flex flex-col gap-3.5">
-          <div className="flex flex-col gap-1.5">
-            <label className="label-clean">Kampagnenavn</label>
-            <input className="input-clean" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Navn på kampagne" />
+        <div className="card-surface rounded-xl overflow-hidden">
+          {/* Step indicator */}
+          <div className="px-5 py-3 border-b border-border/30 flex items-center gap-4">
+            <div className={`flex items-center gap-1.5 text-[12px] font-medium ${createStep === 'info' ? 'text-primary' : 'text-muted-foreground/50'}`}>
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${createStep === 'info' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>1</div>
+              Opret
+            </div>
+            <div className="w-8 h-px bg-border/50" />
+            <div className={`flex items-center gap-1.5 text-[12px] font-medium ${createStep === 'csv' ? 'text-primary' : 'text-muted-foreground/50'}`}>
+              <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${createStep === 'csv' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>2</div>
+              Importer leads
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="label-clean">Beskrivelse</label>
-            <textarea className="input-clean resize-none h-16" value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Valgfri beskrivelse" />
-          </div>
-          <div className="flex gap-2.5">
-            <button onClick={createCampaign} className="btn-primary-smooth text-[12px]">Opret</button>
-            <button onClick={() => setShowCreate(false)} className="btn-ghost-smooth text-[12px]">Annuller</button>
+
+          <div className="p-5 flex flex-col gap-3.5">
+            {createStep === 'info' && (
+              <>
+                <div className="flex flex-col gap-1.5">
+                  <label className="label-clean">Kampagnenavn</label>
+                  <input className="input-clean" value={newName} onChange={e => setNewName(e.target.value)} placeholder="F.eks. 'Elkunder marts 2026'" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className="label-clean">Beskrivelse</label>
+                  <textarea className="input-clean resize-none h-16" value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Valgfri beskrivelse" />
+                </div>
+                <div className="flex gap-2.5">
+                  <button onClick={createCampaign} disabled={!newName.trim()} className={`btn-primary-smooth text-[12px] flex items-center gap-1.5 ${!newName.trim() ? 'opacity-40' : ''}`}>
+                    Opret & importer CSV
+                  </button>
+                  <button onClick={() => { setShowCreate(false); setCreateStep(null); }} className="btn-ghost-smooth text-[12px]">Annuller</button>
+                </div>
+              </>
+            )}
+
+            {createStep === 'csv' && (
+              <div className="text-center py-4">
+                <div className="text-[13px] text-muted-foreground/60 mb-3">Kampagne "{newName}" oprettet — upload nu dine leads</div>
+                <button onClick={() => setShowCSV(true)} className="btn-primary-smooth text-[12px] flex items-center gap-1.5 mx-auto">
+                  <FileUp size={14} strokeWidth={2} /> Upload CSV-fil
+                </button>
+                <button
+                  onClick={() => { setShowCreate(false); setCreateStep(null); setNewName(''); setNewDesc(''); fetchAll(); }}
+                  className="btn-ghost-smooth text-[11px] mt-3 mx-auto block"
+                >
+                  Spring over — gør det senere
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -163,9 +213,15 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
                   <div className="text-[11px] text-muted-foreground/50">{c.description || 'Ingen beskrivelse'}</div>
                 </div>
                 <div className="flex items-center gap-2 text-[11px] text-muted-foreground/50">
-                  <span className="bg-secondary rounded-md px-2 py-0.5 tabular-nums">{c.leadCount} emner</span>
-                  <span className="bg-secondary rounded-md px-2 py-0.5 tabular-nums">{c.assignedUsers?.length ?? 0} brugere</span>
-                  <span>{new Date(c.created_at).toLocaleDateString('da-DK')}</span>
+                  <span className="bg-secondary rounded-md px-2 py-0.5 tabular-nums flex items-center gap-1">
+                    <Hash size={9} /> {c.leadCount} emner
+                  </span>
+                  <span className="bg-secondary rounded-md px-2 py-0.5 tabular-nums flex items-center gap-1">
+                    <Users size={9} /> {c.assignedUsers?.length ?? 0}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar size={9} /> {new Date(c.created_at).toLocaleDateString('da-DK')}
+                  </span>
                 </div>
                 {expandedCampaign === c.id ? <ChevronUp size={14} className="text-muted-foreground/40" /> : <ChevronDown size={14} className="text-muted-foreground/40" />}
               </div>
@@ -208,6 +264,13 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
                     </div>
                   )}
 
+                  {(c.assignedUsers?.length ?? 0) === 0 && (
+                    <div className="bg-warning/5 border border-warning/15 rounded-lg px-3.5 py-2.5 text-[12px] text-warning flex items-center gap-2">
+                      <Users size={13} strokeWidth={2} />
+                      Ingen brugere tildelt — kampagnen er ikke synlig for medarbejdere endnu
+                    </div>
+                  )}
+
                   {assignModal === c.id && (
                     <div className="bg-secondary/20 rounded-lg p-3.5">
                       <div className="label-clean mb-2">Vælg bruger</div>
@@ -241,7 +304,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
         )}
       </div>
 
-      <CSVUploadModal open={showCSV} onClose={() => setShowCSV(false)} onImport={handleCSVImport} />
+      <CSVUploadModal open={showCSV} onClose={() => { setShowCSV(false); if (createStep === 'csv') { setCreateStep(null); setShowCreate(false); setNewName(''); setNewDesc(''); fetchAll(); } }} onImport={handleCSVImport} />
     </div>
   );
 };
