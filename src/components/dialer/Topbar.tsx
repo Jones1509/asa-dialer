@@ -26,8 +26,12 @@ export const Topbar: React.FC<TopbarProps> = ({
 }) => {
   const [showManualDial, setShowManualDial] = useState(false);
   const [manualNumber, setManualNumber] = useState('');
+  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
   const isTwilioReady = twilioStatus === 'ready';
+
+  // The number currently being displayed — manual number takes priority when active
+  const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
   const dialNumber = (number: string) => {
     if (!number) return;
