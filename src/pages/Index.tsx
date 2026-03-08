@@ -102,6 +102,7 @@ const Index = () => {
           />
         );
       case 'tetris': return <TetrisPage />;
+      case 'spotify': return <SpotifyPage />;
       default: return null;
     }
   };
