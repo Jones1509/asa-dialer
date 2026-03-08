@@ -22,8 +22,11 @@ serve(async (req) => {
 
     console.log(`[twilio-voice] Request - To: ${toNumber}, From: ${fromNumber}, Direction: ${direction}`);
 
+    // Determine if this is an incoming call (To = our Twilio number) or outgoing (To = some other number)
+    const isIncoming = toNumber === callerId || toNumber.startsWith('client:') === false && fromNumber !== callerId && toNumber === callerId;
+    
     // OUTGOING CALL: Browser client is calling a phone number
-    if (toNumber && !toNumber.startsWith('client:')) {
+    if (toNumber && toNumber !== callerId && !toNumber.startsWith('client:')) {
       console.log(`[twilio-voice] Outgoing call to ${toNumber}`);
       const twiml = `<?xml version="1.0" encoding="UTF-8"?>
 <Response>
