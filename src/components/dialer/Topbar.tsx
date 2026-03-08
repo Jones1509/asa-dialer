@@ -124,17 +124,17 @@ export const Topbar: React.FC<TopbarProps> = ({
       </div>
 
       {/* Call status indicator */}
-      <div className="flex items-center gap-2.5 bg-background border border-border/50 rounded-lg px-3.5 py-2 font-body text-[13px] font-medium min-w-[180px]">
-        <div className={`w-2 h-2 rounded-full transition-all duration-500 ${
+      <div className="flex items-center gap-2.5 bg-background border border-border/50 rounded-lg px-3.5 py-2 font-body text-[13px] font-medium min-w-[220px]">
+        <div className={`w-2 h-2 rounded-full shrink-0 transition-all duration-500 ${
           callActive ? 'bg-success shadow-[0_0_8px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/25'
         }`} />
         <span className="text-foreground/80 tabular-nums">{displayNumber}</span>
-        {!activeDialNumber && currentLead?.company && (
-          <span className="text-muted-foreground/50 text-[12px] truncate max-w-[120px]">
-            {currentLead.company}
+        {currentLead?.company && (
+          <span className="text-foreground/60 text-[12px] font-semibold truncate max-w-[160px]">
+            {activeDialNumber && activeDialNumber !== currentLead?.phone ? 'Manuel' : currentLead.company}
           </span>
         )}
-        {activeDialNumber && activeDialNumber !== currentLead?.phone && (
+        {activeDialNumber && activeDialNumber !== currentLead?.phone && !currentLead?.company && (
           <span className="text-muted-foreground/50 text-[12px]">Manuel</span>
         )}
       </div>
@@ -165,7 +165,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       {callActive && (
         <button
           onClick={handleEndCall}
-          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100 animate-pulse"
+          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100"
           title="Afslut opkald"
         >
           <PhoneOff size={15} strokeWidth={2.2} />
