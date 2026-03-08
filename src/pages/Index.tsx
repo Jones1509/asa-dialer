@@ -115,6 +115,7 @@ const Index = () => {
           callSeconds={state.callSeconds}
           formatTime={state.formatTime}
           onEndCall={state.endCall}
+          activeDialNumber={activeDialNumber}
         />
       )}
       <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
