@@ -8,6 +8,7 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isAdminMode, setIsAdminMode] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -25,8 +26,25 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    setLoading(false);
-    navigate('/');
+    if (isAdminMode) {
+      // Verify admin role
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+        const hasAdmin = roleData?.some(r => r.role === 'admin');
+        if (!hasAdmin) {
+          await supabase.auth.signOut();
+          setError('Denne konto har ikke admin-adgang');
+          setLoading(false);
+          return;
+        }
+      }
+      setLoading(false);
+      navigate('/admin');
+    } else {
+      setLoading(false);
+      navigate('/');
+    }
   };
 
   return (
@@ -57,22 +75,25 @@ const LoginPage: React.FC = () => {
         {/* Bruger / Admin toggle */}
         <div className="flex justify-center gap-3 mb-6">
           <button
+            onClick={() => { setIsAdminMode(false); setError(''); }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300"
             style={{
-              background: 'hsl(25 90% 55%)',
-              color: 'white',
-              boxShadow: '0 4px 14px hsl(25 90% 55% / 0.4)',
+              background: !isAdminMode ? 'hsl(25 90% 55%)' : 'transparent',
+              color: !isAdminMode ? 'white' : 'hsl(0 0% 80%)',
+              boxShadow: !isAdminMode ? '0 4px 14px hsl(25 90% 55% / 0.4)' : 'none',
+              border: !isAdminMode ? 'none' : '1px solid hsl(0 0% 30%)',
             }}
           >
             👤 Bruger
           </button>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => { setIsAdminMode(true); setError(''); }}
             className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300"
             style={{
-              background: 'transparent',
-              color: 'hsl(0 0% 80%)',
-              border: '1px solid hsl(0 0% 30%)',
+              background: isAdminMode ? 'hsl(25 90% 55%)' : 'transparent',
+              color: isAdminMode ? 'white' : 'hsl(0 0% 80%)',
+              boxShadow: isAdminMode ? '0 4px 14px hsl(25 90% 55% / 0.4)' : 'none',
+              border: isAdminMode ? 'none' : '1px solid hsl(0 0% 30%)',
             }}
           >
             🛡️ Admin
@@ -80,14 +101,21 @@ const LoginPage: React.FC = () => {
         </div>
 
         <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1" style={{ color: 'hsl(0 0% 95%)' }}>
-          Velkommen tilbage!
+          {isAdminMode ? 'Admin Login' : 'Velkommen tilbage!'}
         </h1>
-        <p className="text-center text-sm mb-8" style={{ color: 'hsl(0 0% 55%)' }}>
-          Har du ikke en konto endnu?{' '}
-          <button onClick={() => navigate('/register')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline" style={{ color: 'hsl(25 90% 55%)' }}>
-            Opret konto
-          </button>
-        </p>
+        {!isAdminMode && (
+          <p className="text-center text-sm mb-8" style={{ color: 'hsl(0 0% 55%)' }}>
+            Har du ikke en konto endnu?{' '}
+            <button onClick={() => navigate('/register')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline" style={{ color: 'hsl(25 90% 55%)' }}>
+              Opret konto
+            </button>
+          </p>
+        )}
+        {isAdminMode && (
+          <p className="text-center text-sm mb-8" style={{ color: 'hsl(0 0% 55%)' }}>
+            Log ind med din administrator-konto
+          </p>
+        )}
 
         {/* Form */}
         <form onSubmit={handleLogin} className="flex flex-col gap-5">
