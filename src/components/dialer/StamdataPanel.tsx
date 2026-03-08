@@ -31,9 +31,6 @@ const InlineTetris: React.FC = () => {
   const [holdPiece, setHoldPiece] = useState<number[][] | null>(null);
   const [combo, setCombo] = useState(0);
   const [lastClear, setLastClear] = useState<string | null>(null);
-  const [musicMuted, setMusicMuted] = useState(false);
-  const [musicReady, setMusicReady] = useState(false);
-  const ytPlayerRef = useRef<any>(null);
   const animRef = useRef<number>(0);
   const lastDropRef = useRef<number>(0);
   const particlesRef = useRef<{ x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; size: number }[]>([]);
