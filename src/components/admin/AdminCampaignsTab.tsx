@@ -255,10 +255,38 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
 
               {expandedCampaign === c.id && (
                 <div className="px-4 pb-4 pt-2 border-t border-border/20 flex flex-col gap-3.5">
+                  {/* Edit mode */}
+                  {editingCampaign === c.id ? (
+                    <div className="flex flex-col gap-2.5 bg-secondary/20 rounded-lg p-3.5">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="label-clean">Kampagnenavn</label>
+                        <input className="input-clean" value={editName} onChange={e => setEditName(e.target.value)} />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="label-clean">Beskrivelse</label>
+                        <input className="input-clean" value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Valgfri beskrivelse" />
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={saveEdit} disabled={!editName.trim()} className={`btn-primary-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5 ${!editName.trim() ? 'opacity-40' : ''}`}>
+                          <Check size={13} strokeWidth={2} /> Gem
+                        </button>
+                        <button onClick={() => setEditingCampaign(null)} className="btn-ghost-smooth text-[11px] py-1.5 px-3">Annuller</button>
+                      </div>
+                    </div>
+                  ) : null}
+
                   <div className="flex gap-2 flex-wrap">
                     <button onClick={() => openCSV(c.id)} className="btn-primary-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
                       <FileUp size={13} strokeWidth={2} /> Importer CSV
                     </button>
+                    <button onClick={() => openCSV(c.id, true)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5 hover:text-destructive">
+                      <RefreshCw size={13} strokeWidth={2} /> Erstat CSV
+                    </button>
+                    {editingCampaign !== c.id && (
+                      <button onClick={() => startEdit(c)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
+                        <Pencil size={13} strokeWidth={2} /> Rediger
+                      </button>
+                    )}
                     <button onClick={() => setAssignModal(c.id)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
                       <UserPlus size={13} strokeWidth={2} /> Tildel bruger
                     </button>
