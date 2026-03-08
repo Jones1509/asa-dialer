@@ -4,7 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 type TwilioStatus = 'loading' | 'ready' | 'error' | 'offline';
 
-export function useTwilioDevice() {
+interface UseTwilioDeviceOptions {
+  onCallDisconnected?: () => void;
+}
+
+export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
   const [status, setStatus] = useState<TwilioStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const [micAllowed, setMicAllowed] = useState<boolean | null>(null);
@@ -160,11 +164,19 @@ export function useTwilioDevice() {
       call.on('disconnect', () => {
         console.log('Call disconnected');
         activeCallRef.current = null;
+        options?.onCallDisconnected?.();
+      });
+
+      call.on('cancel', () => {
+        console.log('Call cancelled');
+        activeCallRef.current = null;
+        options?.onCallDisconnected?.();
       });
 
       call.on('error', (err) => {
         console.error('Call error:', err);
         activeCallRef.current = null;
+        options?.onCallDisconnected?.();
       });
 
       return true;
