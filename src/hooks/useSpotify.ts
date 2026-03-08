@@ -78,7 +78,9 @@ export function useSpotify() {
       redirect_uri: REDIRECT_URI,
       show_dialog: 'true',
     });
-    window.location.href = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    // Open in new window to avoid iframe restrictions
+    window.open(authUrl, '_blank', 'noopener,noreferrer');
   };
 
   const exchangeCode = async (code: string) => {
