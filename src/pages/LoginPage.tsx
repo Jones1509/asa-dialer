@@ -26,8 +26,25 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    setLoading(false);
-    navigate('/');
+    if (isAdminMode) {
+      // Verify admin role
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+        const hasAdmin = roleData?.some(r => r.role === 'admin');
+        if (!hasAdmin) {
+          await supabase.auth.signOut();
+          setError('Denne konto har ikke admin-adgang');
+          setLoading(false);
+          return;
+        }
+      }
+      setLoading(false);
+      navigate('/admin');
+    } else {
+      setLoading(false);
+      navigate('/');
+    }
   };
 
   return (
