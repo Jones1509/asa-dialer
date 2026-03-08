@@ -5,7 +5,7 @@ import { useDialerState } from '@/hooks/useDialerState';
 import { useTwilioDevice, IncomingCallInfo } from '@/hooks/useTwilioDevice';
 import { AppSidebar } from '@/components/dialer/AppSidebar';
 import { Topbar } from '@/components/dialer/Topbar';
-import { TetrisOverlay } from '@/components/dialer/TetrisOverlay';
+// TetrisOverlay removed — Tetris is now inline in StamdataPanel
 import { IncomingCallOverlay } from '@/components/dialer/IncomingCallOverlay';
 import { DialerPage } from '@/components/dialer/pages/DialerPage';
 import { IncomingPage } from '@/components/dialer/pages/IncomingPage';
