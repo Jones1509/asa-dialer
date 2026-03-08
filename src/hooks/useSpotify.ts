@@ -120,6 +120,7 @@ export function useSpotify() {
     setDeviceId(null);
     setCurrentTrack(null);
     setIsPlaying(false);
+    setSpotifyDisplayName(null);
     await supabase.functions.invoke('spotify-auth', {
       body: { action: 'disconnect' },
     });
