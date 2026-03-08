@@ -332,7 +332,16 @@ export function useSpotify() {
       }
       
       const data = await resp.json();
-      const items = data.tracks?.items || data.items?.items || [];
+      console.log('Playlist API response keys:', Object.keys(data));
+      console.log('data.tracks type:', typeof data.tracks, data.tracks ? Object.keys(data.tracks) : 'null');
+      if (data.tracks?.items) {
+        console.log('tracks.items count:', data.tracks.items.length);
+        if (data.tracks.items[0]) {
+          console.log('First item keys:', Object.keys(data.tracks.items[0]));
+          console.log('First item.track:', data.tracks.items[0]?.track ? 'exists' : 'null');
+        }
+      }
+      const items = data.tracks?.items || [];
       return items
         .filter((item: any) => item?.track)
         .map((item: any) => ({
