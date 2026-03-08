@@ -303,57 +303,51 @@ export function useSpotify() {
   const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
     let token = accessToken;
     if (!token) return [];
-    
-    // Use /playlists/{id} endpoint (returns full playlist with embedded tracks)
-    // This avoids 403 issues that can occur with /playlists/{id}/tracks
-    const doFetch = async (t: string) => {
-      const resp = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}`,
-        { headers: { Authorization: `Bearer ${t}` } }
-      );
-      return resp;
+
+    // If token is expired, refresh first
+    const tryRefresh = async () => {
+      const newToken = await refreshToken();
+      if (newToken) token = newToken;
+      return token;
+    };
+
+    const fetchPage = async (url: string, t: string) => {
+      const resp = await fetch(url, { headers: { Authorization: `Bearer ${t}` } });
+      if (resp.status === 401 || resp.status === 403) {
+        const refreshed = await tryRefresh();
+        if (!refreshed) return null;
+        const retry = await fetch(url, { headers: { Authorization: `Bearer ${refreshed}` } });
+        if (!retry.ok) return null;
+        return retry.json();
+      }
+      if (!resp.ok) return null;
+      return resp.json();
     };
 
     try {
-      let resp = await doFetch(token);
-      
-      // If 403/401, try refreshing the token and retry
-      if (resp.status === 403 || resp.status === 401) {
-        console.log('Spotify token expired/forbidden, refreshing...');
-        const newToken = await refreshToken();
-        if (newToken) {
-          token = newToken;
-          resp = await doFetch(newToken);
-        }
+      const allTracks: SpotifyTrack[] = [];
+      let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&fields=next,items(track(id,name,uri,duration_ms,artists(name),album(name,images)))`;
+
+      while (url) {
+        const data = await fetchPage(url, token!);
+        if (!data) break;
+        const items = data.items || [];
+        const tracks = items
+          .filter((item: any) => item?.track?.id)
+          .map((item: any) => ({
+            id: item.track.id,
+            name: item.track.name,
+            artist: item.track.artists.map((a: any) => a.name).join(', '),
+            album: item.track.album?.name || '',
+            albumArt: item.track.album?.images?.[1]?.url || item.track.album?.images?.[0]?.url || '',
+            uri: item.track.uri,
+            duration_ms: item.track.duration_ms,
+          }));
+        allTracks.push(...tracks);
+        url = data.next || null;
       }
-      
-      if (!resp.ok) {
-        console.error('Fetch playlist failed:', resp.status, await resp.text());
-        return [];
-      }
-      
-      const data = await resp.json();
-      console.log('Playlist API response keys:', Object.keys(data));
-      console.log('data.tracks type:', typeof data.tracks, data.tracks ? Object.keys(data.tracks) : 'null');
-      if (data.tracks?.items) {
-        console.log('tracks.items count:', data.tracks.items.length);
-        if (data.tracks.items[0]) {
-          console.log('First item keys:', Object.keys(data.tracks.items[0]));
-          console.log('First item.track:', data.tracks.items[0]?.track ? 'exists' : 'null');
-        }
-      }
-      const items = data.tracks?.items || [];
-      return items
-        .filter((item: any) => item?.track)
-        .map((item: any) => ({
-          id: item.track.id,
-          name: item.track.name,
-          artist: item.track.artists.map((a: any) => a.name).join(', '),
-          album: item.track.album?.name || '',
-          albumArt: item.track.album?.images?.[2]?.url || item.track.album?.images?.[0]?.url || '',
-          uri: item.track.uri,
-          duration_ms: item.track.duration_ms,
-        }));
+
+      return allTracks;
     } catch (e) {
       console.error('Fetch playlist tracks error:', e);
       return [];
