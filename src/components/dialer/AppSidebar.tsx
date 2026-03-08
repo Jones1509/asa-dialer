@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield } from 'lucide-react';
+import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2 } from 'lucide-react';
 
 interface SidebarProps {
   activePage: string;
