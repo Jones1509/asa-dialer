@@ -38,6 +38,7 @@ interface SpotifyPlaylist {
 export function useSpotify() {
   const [isConnected, setIsConnected] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [spotifyDisplayName, setSpotifyDisplayName] = useState<string | null>(null);
   const [player, setPlayer] = useState<Spotify.Player | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
