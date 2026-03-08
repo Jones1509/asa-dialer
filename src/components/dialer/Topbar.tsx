@@ -107,8 +107,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   const statusIcon = () => {
     switch (twilioStatus) {
       case 'ready': return <Wifi size={12} className="text-success" />;
-      case 'loading': return <Loader2 size={12} className="text-muted-foreground animate-spin" />;
-      default: return <WifiOff size={12} className="text-destructive" />;
+      default: return <Loader2 size={12} className="text-muted-foreground animate-spin" />;
     }
   };
 
