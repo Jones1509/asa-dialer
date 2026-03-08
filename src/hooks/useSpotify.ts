@@ -98,7 +98,6 @@ export function useSpotify() {
       }
     }, 1500);
   };
-  };
 
   const exchangeCode = async (code: string) => {
     const { data, error } = await supabase.functions.invoke('spotify-auth', {
