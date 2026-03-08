@@ -1,5 +1,6 @@
 import React from 'react';
 import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield } from 'lucide-react';
+import asaIcon from '@/assets/asa-icon.png';
 
 interface SidebarProps {
   activePage: string;
@@ -20,10 +21,7 @@ const navItems = [
 export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isAdmin, onAdminNav }) => {
   return (
     <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center py-5 gap-1 shrink-0">
-      <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-heading font-extrabold text-[10px] text-primary-foreground mb-6 tracking-wider"
-        style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.3)' }}>
-        ASA
-      </div>
+      <img src={asaIcon} alt="ASA" className="w-9 h-9 rounded-xl mb-6 object-cover" style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.3)' }} />
       {navItems.map(item => {
         const Icon = item.icon;
         return (
