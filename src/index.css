@@ -78,7 +78,8 @@
 
 @layer components {
   .card-surface {
-    @apply bg-card rounded-2xl border border-border/50;
+    @apply bg-card rounded-2xl border;
+    border-color: hsl(var(--border) / 0.5);
     box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
