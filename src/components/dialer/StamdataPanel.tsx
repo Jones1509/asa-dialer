@@ -182,27 +182,27 @@ const InlineTetris: React.FC = () => {
   const togglePause = () => { gameRef.current.paused = !gameRef.current.paused; setPaused(gameRef.current.paused); };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="flex items-center gap-3 w-full">
+    <div ref={containerRef} className="flex flex-col items-center gap-2 w-full h-full">
+      <div className="flex items-center gap-3 w-full px-1">
         <div className="flex items-center gap-1.5">
-          <Gamepad2 size={12} className="text-primary/60" />
-          <span className="text-[10px] font-semibold text-foreground/70 uppercase tracking-wider">Tetris</span>
+          <Gamepad2 size={12} className="text-primary-foreground/80" />
+          <span className="text-[10px] font-semibold text-white/50 uppercase tracking-wider">Tetris</span>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/50">
-            <Trophy size={8} className="text-yellow-500/60" />
-            <span className="text-[9px] font-bold text-foreground/60 tabular-nums">{score.toLocaleString()}</span>
+          <div className="flex items-center gap-1 px-1.5 py-0.5 rounded" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <Trophy size={8} className="text-yellow-400/60" />
+            <span className="text-[9px] font-bold text-white/50 tabular-nums">{score.toLocaleString()}</span>
           </div>
-          <div className="px-1.5 py-0.5 rounded bg-muted/50 text-[9px] font-medium text-foreground/50">Lvl {level}</div>
-          <button onClick={togglePause} className="p-1 rounded hover:bg-muted/80 transition-colors cursor-pointer text-muted-foreground/50 hover:text-foreground/70">
+          <div className="px-1.5 py-0.5 rounded text-[9px] font-medium text-white/35" style={{ background: 'rgba(255,255,255,0.04)' }}>Lvl {level}</div>
+          <button onClick={togglePause} className="p-1 rounded transition-colors cursor-pointer text-white/30 hover:text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
             {paused ? <Play size={10} /> : <Pause size={10} />}
           </button>
-          <button onClick={initGame} className="px-1.5 py-0.5 rounded hover:bg-muted/80 transition-colors cursor-pointer text-[9px] text-muted-foreground/50 hover:text-foreground/70">
+          <button onClick={initGame} className="px-1.5 py-0.5 rounded transition-colors cursor-pointer text-[9px] text-white/30 hover:text-white/60" style={{ background: 'rgba(255,255,255,0.04)' }}>
             🔄
           </button>
         </div>
       </div>
-      <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid hsl(var(--border) / 0.3)' }}>
+      <div className="relative rounded-lg overflow-hidden" style={{ border: '1px solid rgba(100,140,255,0.06)' }}>
         <canvas ref={canvasRef} width={COLS * BLOCK} height={ROWS * BLOCK} />
         {paused && !gameOver && (
           <div className="absolute inset-0 flex items-center justify-center rounded-lg" style={{ background: 'rgba(5,8,15,0.8)' }}>
