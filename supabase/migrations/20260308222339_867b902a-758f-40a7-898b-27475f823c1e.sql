@@ -1,0 +1,1 @@
+DELETE FROM spotify_tokens WHERE user_id = '31c67e01-f4dc-4530-968b-70f2b4faaf3e';
