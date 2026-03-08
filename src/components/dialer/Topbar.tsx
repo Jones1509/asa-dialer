@@ -142,11 +142,11 @@ export const Topbar: React.FC<TopbarProps> = ({
             onClick={handleCallLead}
             disabled={twilioStatus === 'loading'}
             className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-100 ${
-              isTwilioReady
+              canMakeVoipCall
                 ? 'bg-success text-success-foreground hover:shadow-[0_0_16px_hsl(152_69%_41%/0.35)]'
                 : 'bg-success/60 text-success-foreground'
             }`}
-            title={isTwilioReady ? `Ring til ${currentLead.phone} via VoIP` : `Ring til ${currentLead.phone} via telefon`}
+            title={canMakeVoipCall ? `Ring til ${currentLead.phone} via VoIP` : `Ring til ${currentLead.phone} via telefon`}
           >
             <Phone size={15} strokeWidth={2.2} />
           </button>
