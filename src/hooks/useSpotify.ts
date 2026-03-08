@@ -11,6 +11,8 @@ const SPOTIFY_SCOPES = [
   'user-read-currently-playing',
   'playlist-read-private',
   'playlist-read-collaborative',
+  'playlist-modify-public',
+  'playlist-modify-private',
   'user-library-read',
 ].join(' ');
 
@@ -282,6 +284,72 @@ export function useSpotify() {
     });
   };
 
+  const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
+    if (!accessToken) return [];
+    try {
+      const resp = await fetch(
+        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      const data = await resp.json();
+      return (data.items || [])
+        .filter((item: any) => item.track)
+        .map((item: any) => ({
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists.map((a: any) => a.name).join(', '),
+          album: item.track.album.name,
+          albumArt: item.track.album.images?.[2]?.url || item.track.album.images?.[0]?.url || '',
+          uri: item.track.uri,
+          duration_ms: item.track.duration_ms,
+        }));
+    } catch (e) {
+      console.error('Fetch playlist tracks error:', e);
+      return [];
+    }
+  };
+
+  const createPlaylist = async (name: string): Promise<string | null> => {
+    if (!accessToken) return null;
+    try {
+      // Get user id first
+      const meResp = await fetch('https://api.spotify.com/v1/me', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const me = await meResp.json();
+      const resp = await fetch(`https://api.spotify.com/v1/users/${me.id}/playlists`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, public: false }),
+      });
+      const data = await resp.json();
+      await fetchPlaylists();
+      return data.id || null;
+    } catch (e) {
+      console.error('Create playlist error:', e);
+      return null;
+    }
+  };
+
+  const addTrackToPlaylist = async (playlistId: string, trackUri: string) => {
+    if (!accessToken) return false;
+    try {
+      const resp = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ uris: [trackUri] }),
+      });
+      if (resp.ok) {
+        await fetchPlaylists();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('Add track error:', e);
+      return false;
+    }
+  };
+
   useEffect(() => {
     if (accessToken) fetchPlaylists();
   }, [accessToken, fetchPlaylists]);
@@ -308,6 +376,10 @@ export function useSpotify() {
     searchResults,
     playlists,
     playPlaylist,
+    fetchPlaylistTracks,
+    createPlaylist,
+    addTrackToPlaylist,
+    fetchPlaylists,
     accessToken,
     deviceId,
   };
