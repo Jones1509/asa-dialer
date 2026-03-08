@@ -33,14 +33,20 @@ export const Topbar: React.FC<TopbarProps> = ({
   // The number currently being displayed — manual number takes priority when active
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
-  const dialNumber = (number: string) => {
+  const dialNumber = async (number: string) => {
     if (!number) return;
     const cleanNumber = number.replace(/\s/g, '');
     console.log('=== DIALING ===', cleanNumber);
     setActiveDialNumber(cleanNumber);
-    if (isTwilioReady && onTwilioCall) {
-      onTwilioCall(cleanNumber);
-    } else {
+
+    let usedVoip = false;
+    if (canMakeVoipCall && onTwilioCall) {
+      usedVoip = await onTwilioCall(cleanNumber);
+    }
+    
+    if (!usedVoip) {
+      // Always fall back to tel: link
+      console.log('Using tel: fallback for:', cleanNumber);
       const telLink = document.createElement('a');
       telLink.href = `tel:${cleanNumber}`;
       telLink.click();
