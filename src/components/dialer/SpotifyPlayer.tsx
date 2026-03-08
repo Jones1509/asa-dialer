@@ -109,9 +109,14 @@ export const SpotifyPlayer: React.FC = () => {
     <div className="fixed left-[68px] bottom-4 w-[320px] bg-card border border-border/50 rounded-2xl shadow-2xl z-[300] overflow-hidden flex flex-col max-h-[500px]">
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border/30">
-        <div className="flex items-center gap-2">
-          <Music size={14} className="text-[#1DB954]" />
-          <span className="text-xs font-semibold text-foreground">Spotify</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <Music size={14} className="text-[#1DB954] shrink-0" />
+          <div className="min-w-0">
+            <span className="text-xs font-semibold text-foreground">Spotify</span>
+            {spotify.spotifyDisplayName && (
+              <p className="text-[9px] text-muted-foreground truncate">Forbundet som: {spotify.spotifyDisplayName}</p>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1">
           <button onClick={spotify.disconnect} className="p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors cursor-pointer border-none bg-transparent" title="Afbryd Spotify">

@@ -38,6 +38,7 @@ interface SpotifyPlaylist {
 export function useSpotify() {
   const [isConnected, setIsConnected] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [spotifyDisplayName, setSpotifyDisplayName] = useState<string | null>(null);
   const [player, setPlayer] = useState<Spotify.Player | null>(null);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [currentTrack, setCurrentTrack] = useState<SpotifyTrack | null>(null);
@@ -63,6 +64,7 @@ export function useSpotify() {
       });
       if (!error && data?.connected) {
         setIsConnected(true);
+        setSpotifyDisplayName(data.spotify_display_name || null);
         await refreshToken();
       }
     } catch (e) {
@@ -91,6 +93,7 @@ export function useSpotify() {
     });
     if (error) throw error;
     setAccessToken(data.access_token);
+    setSpotifyDisplayName(data.spotify_display_name || null);
     setIsConnected(true);
     return data.access_token;
   };
@@ -117,6 +120,7 @@ export function useSpotify() {
     setDeviceId(null);
     setCurrentTrack(null);
     setIsPlaying(false);
+    setSpotifyDisplayName(null);
     await supabase.functions.invoke('spotify-auth', {
       body: { action: 'disconnect' },
     });
@@ -357,6 +361,7 @@ export function useSpotify() {
   return {
     isConnected,
     loading,
+    spotifyDisplayName,
     login,
     exchangeCode,
     disconnect,
