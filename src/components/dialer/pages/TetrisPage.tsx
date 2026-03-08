@@ -26,20 +26,20 @@ export const TetrisPage: React.FC = () => {
   const [lastClear, setLastClear] = useState<string | null>(null);
   const [highScores, setHighScores] = useState<HighScore[]>([]);
   const [scoreSaved, setScoreSaved] = useState(false);
-  const [blockSize, setBlockSize] = useState(24);
+  const [blockSize, setBlockSize] = useState(20);
   const animFrameRef = useRef<number>(0);
   const lastDropRef = useRef<number>(0);
   const particlesRef = useRef<Particle[]>([]);
   const starsRef = useRef<{ x: number; y: number; size: number; speed: number; opacity: number }[]>([]);
   const shakeRef = useRef({ x: 0, y: 0, intensity: 0 });
 
-  // Auto-scale block size
+  // Auto-scale: fit game inside available space (leave room for header, padding, side panels)
   useEffect(() => {
     const resize = () => {
-      const maxH = window.innerHeight - 200;
-      const maxW = (window.innerWidth - 68 - 400) * 0.55; // sidebar + side panels
-      const bs = Math.floor(Math.min(maxH / ROWS, maxW / COLS, 28));
-      setBlockSize(Math.max(16, bs));
+      const maxH = window.innerHeight - 240; // header + padding
+      const maxW = (window.innerWidth - 68 - 260 - 240) * 0.5; // sidebar + highscore panel + side game panels
+      const bs = Math.floor(Math.min(maxH / ROWS, maxW / COLS, 22));
+      setBlockSize(Math.max(14, bs));
     };
     resize();
     window.addEventListener('resize', resize);
