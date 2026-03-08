@@ -56,7 +56,7 @@ export const DialerPage: React.FC<DialerPageProps> = ({
           onSelect={onSelectLead}
           allLeads={leads}
         />
-        <StamdataPanel lead={currentLead} campaignName={campaignName} />
+        <StamdataPanel lead={currentLead} campaignName={campaignName} callActive={callActive} tetrisEnabled={tetrisEnabled} />
         <ResultPanel lead={currentLead} onSave={onSaveLead} onNext={onNextLead} />
       </div>
     </div>
