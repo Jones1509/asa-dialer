@@ -17,11 +17,13 @@ interface DialerPageProps {
   onSaveLead: (status: string, note?: string) => void;
   onNextLead: () => void;
   loadingLeads: boolean;
+  callActive?: boolean;
+  tetrisEnabled?: boolean;
 }
 
 export const DialerPage: React.FC<DialerPageProps> = ({
   leads, filteredLeads, currentLeadIdx, currentLead, searchQuery, campaignName,
-  onSearch, onSelectLead, onSaveLead, onNextLead, loadingLeads,
+  onSearch, onSelectLead, onSaveLead, onNextLead, loadingLeads, callActive, tetrisEnabled,
 }) => {
   if (loadingLeads) {
     return (
@@ -54,7 +56,7 @@ export const DialerPage: React.FC<DialerPageProps> = ({
           onSelect={onSelectLead}
           allLeads={leads}
         />
-        <StamdataPanel lead={currentLead} campaignName={campaignName} />
+        <StamdataPanel lead={currentLead} campaignName={campaignName} callActive={callActive} tetrisEnabled={tetrisEnabled} />
         <ResultPanel lead={currentLead} onSave={onSaveLead} onNext={onNextLead} />
       </div>
     </div>
