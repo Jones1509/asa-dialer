@@ -4,8 +4,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 type TwilioStatus = 'loading' | 'ready' | 'error' | 'offline';
 
+export interface IncomingCallInfo {
+  from: string;
+  callObject: Call;
+}
+
 interface UseTwilioDeviceOptions {
   onCallDisconnected?: () => void;
+  onIncomingCall?: (info: IncomingCallInfo) => void;
 }
 
 export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
