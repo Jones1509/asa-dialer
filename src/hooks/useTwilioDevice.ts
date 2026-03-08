@@ -4,7 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 type TwilioStatus = 'loading' | 'ready' | 'error' | 'offline';
 
-export function useTwilioDevice() {
+interface UseTwilioDeviceOptions {
+  onCallDisconnected?: () => void;
+}
+
+export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
   const [status, setStatus] = useState<TwilioStatus>('loading');
   const [error, setError] = useState<string | null>(null);
   const [micAllowed, setMicAllowed] = useState<boolean | null>(null);
