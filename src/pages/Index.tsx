@@ -15,6 +15,7 @@ import { SettingsPage } from '@/components/dialer/pages/SettingsPage';
 
 const Index = () => {
   const state = useDialerState();
+  const twilio = useTwilioDevice();
   const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
