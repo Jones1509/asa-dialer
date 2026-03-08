@@ -12,16 +12,23 @@ export function useTwilioDevice() {
   const activeCallRef = useRef<Call | null>(null);
   const initAttemptedRef = useRef(false);
 
-  // Check mic permission on mount
+  // Check mic permission on mount — don't block VoIP if check fails
   useEffect(() => {
-    navigator.mediaDevices?.getUserMedia({ audio: true })
+    if (!navigator.mediaDevices?.getUserMedia) {
+      console.log('getUserMedia not available, assuming mic allowed');
+      setMicAllowed(true);
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
       .then((stream) => {
-        // Got permission, stop the stream immediately
         stream.getTracks().forEach(t => t.stop());
+        console.log('Mic permission granted');
         setMicAllowed(true);
       })
-      .catch(() => {
-        setMicAllowed(false);
+      .catch((err) => {
+        console.warn('Mic permission check failed:', err.message, '- still allowing VoIP attempts');
+        // Still set true — Twilio SDK will handle the actual permission prompt
+        setMicAllowed(true);
       });
   }, []);
 
