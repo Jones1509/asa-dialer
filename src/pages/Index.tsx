@@ -98,6 +98,7 @@ const Index = () => {
             showNotif={state.showNotif}
           />
         );
+      case 'tetris': return <TetrisPage />;
       default: return null;
     }
   };
