@@ -18,14 +18,35 @@ const PIECES = [[[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]], [[4,0],[4,0],[4,4
 
 const InlineTetris: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<any>({});
   const [score, setScore] = useState(0);
   const [level, setLevel] = useState(1);
   const [lines, setLines] = useState(0);
   const [paused, setPaused] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [blockSize, setBlockSize] = useState(12);
   const animRef = useRef<number>(0);
   const lastDropRef = useRef<number>(0);
+
+  // Auto-scale to fit container
+  useEffect(() => {
+    const resize = () => {
+      const container = containerRef.current;
+      if (!container) return;
+      const h = container.clientHeight - 40; // leave room for header
+      const w = container.clientWidth - 24;
+      const bs = Math.floor(Math.min(h / ROWS, w / COLS));
+      setBlockSize(Math.max(8, Math.min(bs, 18)));
+    };
+    resize();
+    window.addEventListener('resize', resize);
+    const obs = new ResizeObserver(resize);
+    if (containerRef.current) obs.observe(containerRef.current);
+    return () => { window.removeEventListener('resize', resize); obs.disconnect(); };
+  }, []);
+
+  const BLOCK = blockSize;
 
   const randomPiece = () => PIECES[Math.floor(Math.random() * PIECES.length)].map(r => [...r]);
 
