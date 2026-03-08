@@ -12,16 +12,23 @@ export function useTwilioDevice() {
   const activeCallRef = useRef<Call | null>(null);
   const initAttemptedRef = useRef(false);
 
-  // Check mic permission on mount
+  // Check mic permission on mount — don't block VoIP if check fails
   useEffect(() => {
-    navigator.mediaDevices?.getUserMedia({ audio: true })
+    if (!navigator.mediaDevices?.getUserMedia) {
+      console.log('getUserMedia not available, assuming mic allowed');
+      setMicAllowed(true);
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true })
       .then((stream) => {
-        // Got permission, stop the stream immediately
         stream.getTracks().forEach(t => t.stop());
+        console.log('Mic permission granted');
         setMicAllowed(true);
       })
-      .catch(() => {
-        setMicAllowed(false);
+      .catch((err) => {
+        console.warn('Mic permission check failed:', err.message, '- still allowing VoIP attempts');
+        // Still set true — Twilio SDK will handle the actual permission prompt
+        setMicAllowed(true);
       });
   }, []);
 
@@ -124,21 +131,19 @@ export function useTwilioDevice() {
   }, [initDevice]);
 
   const makeCall = useCallback(async (phoneNumber: string): Promise<boolean> => {
-    // If mic is not allowed, don't even try Twilio — return false so caller uses tel: fallback
-    if (!micAllowed) {
-      console.log('Mic not allowed, skipping Twilio');
-      return false;
-    }
-
+    console.log(`[Twilio] makeCall called with number: "${phoneNumber}", status: ${status}, micAllowed: ${micAllowed}`);
+    
     if (!deviceRef.current || status !== 'ready') {
-      console.error('Device not ready, status:', status);
+      console.error(`[Twilio] Device not ready. status=${status}, device=${!!deviceRef.current}`);
       return false;
     }
 
     try {
+      console.log(`[Twilio] Connecting call to: ${phoneNumber}`);
       const call = await deviceRef.current.connect({
         params: { To: phoneNumber },
       });
+      console.log(`[Twilio] Call connected successfully to: ${phoneNumber}`);
 
       activeCallRef.current = call;
 

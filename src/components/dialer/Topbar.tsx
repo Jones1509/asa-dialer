@@ -32,21 +32,32 @@ export const Topbar: React.FC<TopbarProps> = ({
 
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
-  // ===== LEAD CALL (uses Twilio if available, otherwise tel:) =====
-  const handleCallLead = () => {
-    if (!currentLead?.phone) return;
-    const cleanNumber = currentLead.phone.replace(/\s/g, '');
+  // ===== Shared dial function — uses Twilio VoIP for ALL calls =====
+  const dialNumber = async (number: string) => {
+    const cleanNumber = number.replace(/\s/g, '');
+    if (!cleanNumber) return;
+    
     setActiveDialNumber(cleanNumber);
     
-    if (canMakeVoipCall && onTwilioCall) {
-      onTwilioCall(cleanNumber);
-    } else {
-      window.location.href = `tel:${cleanNumber}`;
+    if (onTwilioCall) {
+      const success = await onTwilioCall(cleanNumber);
+      if (success) {
+        onStartCall();
+        return;
+      }
     }
+    // Fallback to tel: only if Twilio is completely unavailable
+    window.location.href = `tel:${cleanNumber}`;
     onStartCall();
   };
 
-  // ===== MANUAL CALL (completely separate — always uses tel: link) =====
+  // ===== LEAD CALL =====
+  const handleCallLead = () => {
+    if (!currentLead?.phone) return;
+    dialNumber(currentLead.phone);
+  };
+
+  // ===== MANUAL CALL — uses same Twilio VoIP as lead calls =====
   const handleManualDial = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -54,14 +65,9 @@ export const Topbar: React.FC<TopbarProps> = ({
     const numberToDial = manualNumber.trim().replace(/\s/g, '');
     if (!numberToDial) return;
     
-    // Save number for display, clear input, close manual dial
-    setActiveDialNumber(numberToDial);
     setManualNumber('');
     setShowManualDial(false);
-    
-    // ALWAYS use direct tel: link for manual dial — never Twilio
-    window.location.href = `tel:${numberToDial}`;
-    onStartCall();
+    dialNumber(numberToDial);
   };
 
   const handleEndCall = () => {
@@ -74,11 +80,9 @@ export const Topbar: React.FC<TopbarProps> = ({
     if (e.key === 'Enter') {
       const numberToDial = manualNumber.trim().replace(/\s/g, '');
       if (!numberToDial) return;
-      setActiveDialNumber(numberToDial);
       setManualNumber('');
       setShowManualDial(false);
-      window.location.href = `tel:${numberToDial}`;
-      onStartCall();
+      dialNumber(numberToDial);
     }
     if (e.key === 'Escape') { setShowManualDial(false); setManualNumber(''); }
   };
