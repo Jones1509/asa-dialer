@@ -283,7 +283,7 @@ export function useSpotify() {
           id: p.id,
           name: p.name,
           image: p.images?.[0]?.url || '',
-          trackCount: p.tracks?.total || 0,
+          trackCount: p.tracks?.total ?? p.items?.total ?? 0,
         }))
       );
     } catch (e) {
