@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { Clock, ArrowLeft } from 'lucide-react';
 
 const PendingPage: React.FC = () => {
   const navigate = useNavigate();
@@ -22,8 +23,8 @@ const PendingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <div className="w-full max-w-[480px] text-center">
-        <div className="w-20 h-20 rounded-2xl bg-accent flex items-center justify-center text-4xl mx-auto mb-6">
-          ⏳
+        <div className="w-20 h-20 rounded-2xl bg-accent flex items-center justify-center mx-auto mb-6">
+          <Clock size={36} className="text-primary" strokeWidth={1.5} />
         </div>
         <h1 className="font-heading font-extrabold text-3xl tracking-tight mb-3">
           Afventer godkendelse
@@ -38,8 +39,9 @@ const PendingPage: React.FC = () => {
             <span className="text-muted-foreground">Konto under godkendelse</span>
           </div>
         </div>
-        <button onClick={handleLogout} className="btn-ghost-smooth">
-          ← Tilbage til login
+        <button onClick={handleLogout} className="btn-ghost-smooth flex items-center gap-2 mx-auto">
+          <ArrowLeft size={14} />
+          Tilbage til login
         </button>
       </div>
     </div>

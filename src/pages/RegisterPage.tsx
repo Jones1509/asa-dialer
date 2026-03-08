@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { User, Shield, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -50,9 +51,9 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden"
       style={{
-        background: 'radial-gradient(ellipse at 70% 20%, hsl(25 80% 25% / 0.6), transparent 60%), radial-gradient(ellipse at 20% 80%, hsl(25 70% 20% / 0.5), transparent 60%), radial-gradient(ellipse at 90% 90%, hsl(30 60% 15% / 0.4), transparent 50%), hsl(0 0% 5%)',
+        background: 'radial-gradient(ellipse at 70% 20%, hsl(217 80% 20% / 0.7), transparent 60%), radial-gradient(ellipse at 20% 80%, hsl(217 70% 15% / 0.6), transparent 60%), radial-gradient(ellipse at 90% 90%, hsl(220 60% 10% / 0.5), transparent 50%), hsl(220 20% 4%)',
       }}>
-      <div className="absolute inset-0 opacity-30 pointer-events-none"
+      <div className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`,
         }}
@@ -61,10 +62,10 @@ const RegisterPage: React.FC = () => {
       <div className="w-full max-w-[420px] relative z-10">
         <div className="text-center mb-8">
           <div className="inline-block mb-3">
-            <span className="font-heading font-extrabold text-5xl tracking-tight" style={{ color: 'hsl(25 90% 55%)' }}>
-              3SA
+            <span className="font-heading font-extrabold text-5xl tracking-tight text-primary">
+              ASA
             </span>
-            <div className="font-heading font-semibold text-sm tracking-[0.2em] uppercase" style={{ color: 'hsl(25 90% 55%)' }}>
+            <div className="font-heading font-semibold text-sm tracking-[0.2em] uppercase text-primary/70">
               Dialer
             </div>
           </div>
@@ -72,76 +73,51 @@ const RegisterPage: React.FC = () => {
 
         <div className="flex justify-center gap-3 mb-6">
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300"
-            style={{
-              background: 'hsl(25 90% 55%)',
-              color: 'white',
-              boxShadow: '0 4px 14px hsl(25 90% 55% / 0.4)',
-            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-primary-foreground border border-primary shadow-[0_4px_14px_hsl(217_91%_60%/0.4)]"
           >
-            👤 Bruger
+            <User size={15} strokeWidth={2} />
+            Bruger
           </button>
           <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300"
-            style={{
-              background: 'transparent',
-              color: 'hsl(0 0% 80%)',
-              border: '1px solid hsl(0 0% 30%)',
-            }}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-transparent text-white/60 border border-white/15 hover:border-white/30 transition-all duration-300"
           >
-            🛡️ Admin
+            <Shield size={15} strokeWidth={2} />
+            Admin
           </button>
         </div>
 
-        <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1" style={{ color: 'hsl(0 0% 95%)' }}>
+        <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1 text-white">
           Opret konto
         </h1>
-        <p className="text-center text-sm mb-8" style={{ color: 'hsl(0 0% 55%)' }}>
+        <p className="text-center text-sm mb-8 text-white/40">
           Har du allerede en konto?{' '}
-          <button onClick={() => navigate('/login')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline" style={{ color: 'hsl(25 90% 55%)' }}>
+          <button onClick={() => navigate('/login')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline text-primary">
             Log ind
           </button>
         </p>
 
-        <form onSubmit={handleRegister} className="flex flex-col gap-5">
-          <div className="relative">
-            <input
-              type="text"
-              value={firstName}
-              onChange={e => setFirstName(e.target.value)}
-              placeholder="Fornavn"
-              required
-              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-transparent"
-              style={{
-                color: 'hsl(0 0% 85%)',
-                borderBottom: '1px solid hsl(25 90% 55% / 0.5)',
-                borderTop: 'none',
-                borderLeft: 'none',
-                borderRight: 'none',
-                borderRadius: 0,
-              }}
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg opacity-40">👤</span>
-          </div>
-
-          <div className="relative">
-            <input
-              type="text"
-              value={lastName}
-              onChange={e => setLastName(e.target.value)}
-              placeholder="Efternavn"
-              required
-              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-transparent"
-              style={{
-                color: 'hsl(0 0% 85%)',
-                borderBottom: '1px solid hsl(25 90% 55% / 0.5)',
-                borderTop: 'none',
-                borderLeft: 'none',
-                borderRight: 'none',
-                borderRadius: 0,
-              }}
-            />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg opacity-40">👤</span>
+        <form onSubmit={handleRegister} className="flex flex-col gap-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="relative">
+              <input
+                type="text"
+                value={firstName}
+                onChange={e => setFirstName(e.target.value)}
+                placeholder="Fornavn"
+                required
+                className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
+              />
+            </div>
+            <div className="relative">
+              <input
+                type="text"
+                value={lastName}
+                onChange={e => setLastName(e.target.value)}
+                placeholder="Efternavn"
+                required
+                className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
+              />
+            </div>
           </div>
 
           <div className="relative">
@@ -151,16 +127,9 @@ const RegisterPage: React.FC = () => {
               onChange={e => setEmail(e.target.value)}
               placeholder="din@email.dk"
               required
-              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300"
-              style={{
-                background: 'hsl(220 20% 92%)',
-                color: 'hsl(220 20% 14%)',
-                border: '2px solid transparent',
-              }}
-              onFocus={e => e.target.style.borderColor = 'hsl(25 90% 55%)'}
-              onBlur={e => e.target.style.borderColor = 'transparent'}
+              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
             />
-            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg opacity-40">📧</span>
+            <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25" />
           </div>
 
           <div className="relative">
@@ -170,26 +139,19 @@ const RegisterPage: React.FC = () => {
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300"
-              style={{
-                background: 'hsl(220 20% 92%)',
-                color: 'hsl(220 20% 14%)',
-                border: '2px solid transparent',
-              }}
-              onFocus={e => e.target.style.borderColor = 'hsl(25 90% 55%)'}
-              onBlur={e => e.target.style.borderColor = 'transparent'}
+              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-lg opacity-40 bg-transparent border-none cursor-pointer hover:opacity-70 transition-opacity"
+              className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/25 hover:text-white/50 transition-colors"
             >
-              {showPassword ? '🙈' : '👁️'}
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           </div>
 
           {error && (
-            <div className="text-sm rounded-xl px-4 py-3" style={{ background: 'hsl(0 70% 50% / 0.15)', color: 'hsl(0 70% 65%)' }}>
+            <div className="text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">
               {error}
             </div>
           )}
@@ -197,17 +159,14 @@ const RegisterPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-4 rounded-full text-sm font-bold cursor-pointer transition-all duration-300 border-none"
-            style={{
-              background: 'hsl(25 90% 55%)',
-              color: 'white',
-              boxShadow: '0 4px 20px hsl(25 90% 55% / 0.4)',
-              opacity: loading ? 0.7 : 1,
-            }}
-            onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; }}
+            className="w-full py-4 rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 border-none bg-primary text-primary-foreground shadow-[0_4px_20px_hsl(217_91%_60%/0.4)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(217_91%_60%/0.5)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
           >
-            {loading ? 'Opretter...' : 'Opret konto'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                Opretter...
+              </span>
+            ) : 'Opret konto'}
           </button>
         </form>
       </div>

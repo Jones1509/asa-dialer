@@ -19,7 +19,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">⏳ Indlæser...</div>
+        <div className="text-muted-foreground text-sm">Indlæser...</div>
       </div>
     );
   }
@@ -36,7 +36,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">⏳ Indlæser...</div>
+        <div className="text-muted-foreground text-sm">Indlæser...</div>
       </div>
     );
   }
@@ -53,7 +53,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground">⏳ Indlæser...</div>
+        <div className="text-muted-foreground text-sm">Indlæser...</div>
       </div>
     );
   }

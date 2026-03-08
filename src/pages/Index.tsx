@@ -88,7 +88,7 @@ const Index = () => {
           formatTime={state.formatTime}
           onStartCall={state.startCall}
           onEndCall={state.endCall}
-          onActivity={() => state.showNotif('✅ Aktivitet gemt!')}
+          onActivity={() => state.showNotif('Aktivitet gemt')}
         />
         <div className="flex-1 flex overflow-hidden">
           {renderPage()}
