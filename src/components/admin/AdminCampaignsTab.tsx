@@ -34,9 +34,12 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   const [csvCampaignId, setCsvCampaignId] = useState<string | null>(null);
   const [assignModal, setAssignModal] = useState<string | null>(null);
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
-  // New: combined create flow
   const [createStep, setCreateStep] = useState<'info' | 'csv' | null>(null);
   const [newCampaignId, setNewCampaignId] = useState<string | null>(null);
+  const [editingCampaign, setEditingCampaign] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [csvReplaceMode, setCsvReplaceMode] = useState(false);
 
   const fetchAll = async () => {
     const [{ data: campaignsData }, { data: profilesData }] = await Promise.all([
