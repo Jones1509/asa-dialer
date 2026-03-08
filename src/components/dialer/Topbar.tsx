@@ -30,73 +30,64 @@ export const Topbar: React.FC<TopbarProps> = ({
   const [manualNumber, setManualNumber] = useState('');
   const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
-  // The number currently being displayed — manual number takes priority when active
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
-  const dialNumber = async (number: string) => {
-    if (!number) return;
-    const cleanNumber = number.replace(/\s/g, '');
-    console.log('=== DIALING ===', cleanNumber);
+  // ===== LEAD CALL (uses Twilio if available, otherwise tel:) =====
+  const handleCallLead = () => {
+    if (!currentLead?.phone) return;
+    const cleanNumber = currentLead.phone.replace(/\s/g, '');
     setActiveDialNumber(cleanNumber);
-
-    let usedVoip = false;
-    if (canMakeVoipCall && onTwilioCall) {
-      usedVoip = await onTwilioCall(cleanNumber);
-    }
     
-    if (!usedVoip) {
-      // Always fall back to tel: link
-      console.log('Using tel: fallback for:', cleanNumber);
-      const telLink = document.createElement('a');
-      telLink.href = `tel:${cleanNumber}`;
-      telLink.click();
+    if (canMakeVoipCall && onTwilioCall) {
+      onTwilioCall(cleanNumber);
+    } else {
+      window.location.href = `tel:${cleanNumber}`;
     }
     onStartCall();
   };
 
+  // ===== MANUAL CALL (completely separate — always uses tel: link) =====
+  const handleManualDial = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    
+    const numberToDial = manualNumber.trim().replace(/\s/g, '');
+    if (!numberToDial) return;
+    
+    // Save number for display, clear input, close manual dial
+    setActiveDialNumber(numberToDial);
+    setManualNumber('');
+    setShowManualDial(false);
+    
+    // ALWAYS use direct tel: link for manual dial — never Twilio
+    window.location.href = `tel:${numberToDial}`;
+    onStartCall();
+  };
+
   const handleEndCall = () => {
-    if (onTwilioHangUp) {
-      onTwilioHangUp();
-    }
+    if (onTwilioHangUp) onTwilioHangUp();
     onEndCall();
     setActiveDialNumber(null);
   };
 
-  const handleCallLead = () => {
-    if (currentLead?.phone) {
-      dialNumber(currentLead.phone);
-    }
-  };
-
-  const handleManualDial = (e?: React.MouseEvent) => {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-    const numberToDial = manualNumber.trim();
-    if (!numberToDial) return;
-    console.log('MANUAL DIAL:', numberToDial);
-    // Close manual dial UI AFTER capturing the number
-    setShowManualDial(false);
-    setManualNumber('');
-    // Dial the captured number
-    dialNumber(numberToDial);
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleManualDial();
+    if (e.key === 'Enter') {
+      const numberToDial = manualNumber.trim().replace(/\s/g, '');
+      if (!numberToDial) return;
+      setActiveDialNumber(numberToDial);
+      setManualNumber('');
+      setShowManualDial(false);
+      window.location.href = `tel:${numberToDial}`;
+      onStartCall();
+    }
     if (e.key === 'Escape') { setShowManualDial(false); setManualNumber(''); }
   };
 
   const statusIcon = () => {
     switch (twilioStatus) {
-      case 'ready':
-        return <Wifi size={12} className="text-success" />;
-      case 'loading':
-        return <Loader2 size={12} className="text-muted-foreground animate-spin" />;
-      case 'error':
-      case 'offline':
-        return <WifiOff size={12} className="text-destructive" />;
+      case 'ready': return <Wifi size={12} className="text-success" />;
+      case 'loading': return <Loader2 size={12} className="text-muted-foreground animate-spin" />;
+      default: return <WifiOff size={12} className="text-destructive" />;
     }
   };
 
@@ -112,7 +103,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         </span>
       </div>
 
-      {/* Call status indicator — shows active dial number or lead phone */}
+      {/* Call status indicator */}
       <div className="flex items-center gap-2.5 bg-background border border-border/50 rounded-lg px-3.5 py-2 font-body text-[13px] font-medium min-w-[180px]">
         <div className={`w-2 h-2 rounded-full transition-all duration-500 ${
           callActive ? 'bg-success shadow-[0_0_8px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/25'
@@ -123,7 +114,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             {currentLead.company}
           </span>
         )}
-        {activeDialNumber && (
+        {activeDialNumber && activeDialNumber !== currentLead?.phone && (
           <span className="text-muted-foreground/50 text-[12px]">Manuel</span>
         )}
       </div>
@@ -135,34 +126,23 @@ export const Topbar: React.FC<TopbarProps> = ({
         {formatTime(callSeconds)}
       </div>
 
-      {/* Call button for current lead — hidden when manual dial is open */}
-      {currentLead && !showManualDial && (
-        !callActive ? (
-          <button
-            onClick={handleCallLead}
-            disabled={twilioStatus === 'loading'}
-            className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-100 ${
-              canMakeVoipCall
-                ? 'bg-success text-success-foreground hover:shadow-[0_0_16px_hsl(152_69%_41%/0.35)]'
-                : 'bg-success/60 text-success-foreground'
-            }`}
-            title={canMakeVoipCall ? `Ring til ${currentLead.phone} via VoIP` : `Ring til ${currentLead.phone} via telefon`}
-          >
-            <Phone size={15} strokeWidth={2.2} />
-          </button>
-        ) : (
-          <button
-            onClick={handleEndCall}
-            className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100 animate-pulse"
-            title="Afslut opkald"
-          >
-            <PhoneOff size={15} strokeWidth={2.2} />
-          </button>
-        )
+      {/* === LEAD CALL BUTTON — only visible when manual dial is CLOSED === */}
+      {currentLead && !showManualDial && !callActive && (
+        <button
+          onClick={handleCallLead}
+          className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-100 ${
+            canMakeVoipCall
+              ? 'bg-success text-success-foreground hover:shadow-[0_0_16px_hsl(152_69%_41%/0.35)]'
+              : 'bg-success/60 text-success-foreground'
+          }`}
+          title={`Ring til ${currentLead.phone}`}
+        >
+          <Phone size={15} strokeWidth={2.2} />
+        </button>
       )}
 
-      {/* End call button when manual dial started a call */}
-      {!currentLead && callActive && (
+      {/* End call button */}
+      {callActive && (
         <button
           onClick={handleEndCall}
           className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100 animate-pulse"
@@ -172,7 +152,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         </button>
       )}
 
-      {/* Manual dial toggle */}
+      {/* === MANUAL DIAL TOGGLE — completely separate from lead call === */}
       {!callActive && (
         <button
           onClick={() => setShowManualDial(!showManualDial)}
@@ -187,7 +167,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         </button>
       )}
 
-      {/* Manual number input */}
+      {/* === MANUAL NUMBER INPUT — its own call button === */}
       {showManualDial && !callActive && (
         <div className="flex items-center gap-2 bg-background border border-border/50 rounded-lg px-3 py-1.5 animate-fade-in">
           <input
@@ -199,6 +179,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             className="bg-transparent border-none outline-none text-[13px] font-medium w-[160px] text-foreground placeholder:text-muted-foreground/40"
             autoFocus
           />
+          {/* This button ONLY calls handleManualDial — never handleCallLead */}
           <button
             onClick={handleManualDial}
             disabled={!manualNumber.trim()}
@@ -207,7 +188,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 ? 'bg-success text-success-foreground cursor-pointer hover:scale-105'
                 : 'bg-muted text-muted-foreground/40 cursor-not-allowed'
             }`}
-            title="Ring til nummer"
+            title={`Ring til ${manualNumber.trim() || '...'}`}
           >
             <Phone size={12} strokeWidth={2.5} />
           </button>
@@ -220,7 +201,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       {callActive && (
         <div className="flex items-center gap-2 bg-success/10 border border-success/20 rounded-lg px-3 py-1.5 text-[12px] font-medium text-success">
           <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-          Opkald i gang {canMakeVoipCall ? '(VoIP)' : ''}
+          Opkald i gang
         </div>
       )}
 
