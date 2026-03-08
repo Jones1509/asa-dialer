@@ -69,6 +69,8 @@ const Index = () => {
             onSaveLead={state.saveLead}
             onNextLead={state.nextLead}
             loadingLeads={state.loadingLeads}
+            callActive={state.callActive}
+            tetrisEnabled={state.tetrisEnabled}
           />
         );
       case 'incoming': return <IncomingPage />;
