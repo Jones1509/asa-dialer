@@ -53,6 +53,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       onTwilioHangUp();
     }
     onEndCall();
+    setActiveDialNumber(null);
   };
 
   const handleCallLead = () => {
