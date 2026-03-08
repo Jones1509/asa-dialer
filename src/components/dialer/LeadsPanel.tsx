@@ -10,11 +10,15 @@ interface LeadsPanelProps {
   allLeads: Lead[];
 }
 
-const statusDotClass: Record<string, string> = {
-  new: 'bg-primary',
-  done: 'bg-success',
-  recall: 'bg-info',
-  busy: 'bg-destructive',
+const statusConfig: Record<string, { dot: string; label: string }> = {
+  new: { dot: 'bg-primary', label: 'Ny' },
+  no_answer: { dot: 'bg-warning', label: 'Ingen svar' },
+  callback: { dot: 'bg-info', label: 'Genopkald' },
+  voicemail: { dot: 'bg-muted-foreground', label: 'Telefonsvarer' },
+  interested: { dot: 'bg-success', label: 'Interesseret' },
+  not_interested: { dot: 'bg-destructive', label: 'Ej int.' },
+  wrong_number: { dot: 'bg-destructive', label: 'Forkert nr.' },
+  sale: { dot: 'bg-success', label: 'Salg' },
 };
 
 export const LeadsPanel: React.FC<LeadsPanelProps> = ({
@@ -24,7 +28,7 @@ export const LeadsPanel: React.FC<LeadsPanelProps> = ({
     <div className="w-[340px] border-r border-border/50 flex flex-col shrink-0 bg-card">
       <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
         <span className="font-heading font-bold text-[15px] tracking-tight">Emner</span>
-        <span className="badge-clean">{leads.length}</span>
+        <span className="badge-clean">{allLeads.length}</span>
       </div>
       <div className="px-4 py-3 border-b border-border/50">
         <input
@@ -35,9 +39,13 @@ export const LeadsPanel: React.FC<LeadsPanelProps> = ({
         />
       </div>
       <div className="flex-1 overflow-y-auto">
+        {leads.length === 0 && (
+          <div className="px-5 py-8 text-center text-muted-foreground text-sm">Ingen emner fundet</div>
+        )}
         {leads.map((lead) => {
-          const realIdx = allLeads.indexOf(lead);
+          const realIdx = allLeads.findIndex(l => l.id === lead.id);
           const isActive = realIdx === currentLeadIdx;
+          const sc = statusConfig[lead.status] || { dot: 'bg-primary', label: lead.status };
           return (
             <div
               key={lead.id}
@@ -60,7 +68,10 @@ export const LeadsPanel: React.FC<LeadsPanelProps> = ({
                 </div>
                 <div className="text-[12px] text-muted-foreground mt-0.5 tabular-nums">{lead.phone}</div>
               </div>
-              <div className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${statusDotClass[lead.status] || 'bg-primary'}`} />
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-muted-foreground">{sc.label}</span>
+                <div className={`w-2 h-2 rounded-full shrink-0 transition-all duration-300 ${sc.dot}`} />
+              </div>
             </div>
           );
         })}

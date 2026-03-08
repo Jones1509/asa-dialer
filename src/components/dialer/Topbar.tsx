@@ -2,7 +2,7 @@ import React from 'react';
 import { Lead } from '@/types/leads';
 
 interface TopbarProps {
-  currentLead: Lead;
+  currentLead: Lead | null;
   callActive: boolean;
   callSeconds: number;
   formatTime: (s: number) => string;
@@ -22,7 +22,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
           callActive ? 'bg-success shadow-[0_0_10px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/30'
         }`} />
-        <span className="text-foreground/80 tabular-nums">{currentLead.phone}</span>
+        <span className="text-foreground/80 tabular-nums">{currentLead?.phone || '—'}</span>
       </div>
       <div className="font-heading text-xs text-primary font-bold tracking-[0.15em] tabular-nums">
         {formatTime(callSeconds)}
