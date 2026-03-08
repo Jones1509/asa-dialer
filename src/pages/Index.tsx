@@ -71,6 +71,9 @@ const Index = () => {
     }
   };
 
+  // Only show topbar on dialer page
+  const showTopbar = state.activePage === 'dialer' && state.leads.length > 0;
+
   return (
     <div className="flex min-h-screen h-screen overflow-hidden bg-background">
       <AppSidebar
@@ -81,15 +84,17 @@ const Index = () => {
         onAdminNav={() => navigate('/admin')}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Topbar
-          currentLead={state.currentLead}
-          callActive={state.callActive}
-          callSeconds={state.callSeconds}
-          formatTime={state.formatTime}
-          onStartCall={state.startCall}
-          onEndCall={state.endCall}
-          onActivity={() => state.showNotif('Aktivitet gemt')}
-        />
+        {showTopbar && (
+          <Topbar
+            currentLead={state.currentLead}
+            callActive={state.callActive}
+            callSeconds={state.callSeconds}
+            formatTime={state.formatTime}
+            onStartCall={state.startCall}
+            onEndCall={state.endCall}
+            onActivity={() => state.showNotif('Aktivitet gemt')}
+          />
+        )}
         <div className="flex-1 flex overflow-hidden">
           {renderPage()}
         </div>

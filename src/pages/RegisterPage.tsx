@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
-import { User, Shield, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Mail, Eye, EyeOff, Loader2, UserPlus } from 'lucide-react';
 
 const RegisterPage: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -71,21 +71,6 @@ const RegisterPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex justify-center gap-3 mb-6">
-          <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-primary-foreground border border-primary shadow-[0_4px_14px_hsl(217_91%_60%/0.4)]"
-          >
-            <User size={15} strokeWidth={2} />
-            Bruger
-          </button>
-          <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-transparent text-white/60 border border-white/15 hover:border-white/30 transition-all duration-300"
-          >
-            <Shield size={15} strokeWidth={2} />
-            Admin
-          </button>
-        </div>
-
         <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1 text-white">
           Opret konto
         </h1>
@@ -137,7 +122,7 @@ const RegisterPage: React.FC = () => {
               type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="Mindst 6 tegn"
               required
               className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
             />
@@ -166,7 +151,12 @@ const RegisterPage: React.FC = () => {
                 <Loader2 size={16} className="animate-spin" />
                 Opretter...
               </span>
-            ) : 'Opret konto'}
+            ) : (
+              <span className="flex items-center justify-center gap-2">
+                <UserPlus size={16} strokeWidth={2} />
+                Opret konto
+              </span>
+            )}
           </button>
         </form>
       </div>
