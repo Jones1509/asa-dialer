@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { CSVUploadModal } from '@/components/dialer/CSVUploadModal';
-import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, ChevronUp, Users, Hash, Calendar } from 'lucide-react';
+import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, ChevronUp, Users, Hash, Calendar, Pencil, RefreshCw, Check } from 'lucide-react';
 
 interface Campaign {
   id: string;
@@ -34,9 +34,12 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   const [csvCampaignId, setCsvCampaignId] = useState<string | null>(null);
   const [assignModal, setAssignModal] = useState<string | null>(null);
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
-  // New: combined create flow
   const [createStep, setCreateStep] = useState<'info' | 'csv' | null>(null);
   const [newCampaignId, setNewCampaignId] = useState<string | null>(null);
+  const [editingCampaign, setEditingCampaign] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [csvReplaceMode, setCsvReplaceMode] = useState(false);
 
   const fetchAll = async () => {
     const [{ data: campaignsData }, { data: profilesData }] = await Promise.all([
@@ -77,14 +80,37 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     fetchAll();
   };
 
-  const openCSV = (campaignId: string) => {
+  const startEdit = (c: Campaign) => {
+    setEditingCampaign(c.id);
+    setEditName(c.name);
+    setEditDesc(c.description || '');
+  };
+
+  const saveEdit = async () => {
+    if (!editingCampaign || !editName.trim()) return;
+    const { error } = await supabase.from('campaigns').update({ name: editName.trim(), description: editDesc.trim() || null }).eq('id', editingCampaign);
+    if (error) { showNotif('Kunne ikke gemme ændringer'); return; }
+    showNotif('Kampagne opdateret');
+    setEditingCampaign(null);
+    fetchAll();
+  };
+
+  const openCSV = (campaignId: string, replace = false) => {
     setCsvCampaignId(campaignId);
+    setCsvReplaceMode(replace);
     setShowCSV(true);
   };
 
   const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string; contact_person: string }>) => {
     const targetId = csvCampaignId;
     if (!targetId) return;
+
+    // If replace mode, delete all existing leads first
+    if (csvReplaceMode) {
+      const { error: delError } = await supabase.from('leads').delete().eq('campaign_id', targetId);
+      if (delError) { showNotif('Fejl ved sletning af gamle emner'); return; }
+    }
+
     const rows = leads.map(l => ({
       campaign_id: targetId,
       company: l.company,
@@ -95,8 +121,9 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     }));
     const { error } = await supabase.from('leads').insert(rows);
     if (error) { showNotif('Fejl ved import'); return; }
-    showNotif(`${leads.length} emner importeret`);
+    showNotif(csvReplaceMode ? `${leads.length} emner importeret (gamle slettet)` : `${leads.length} emner importeret`);
     setShowCSV(false);
+    setCsvReplaceMode(false);
     // If part of create flow, finish and reset
     if (createStep === 'csv') {
       setCreateStep(null);
@@ -228,10 +255,38 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
 
               {expandedCampaign === c.id && (
                 <div className="px-4 pb-4 pt-2 border-t border-border/20 flex flex-col gap-3.5">
+                  {/* Edit mode */}
+                  {editingCampaign === c.id ? (
+                    <div className="flex flex-col gap-2.5 bg-secondary/20 rounded-lg p-3.5">
+                      <div className="flex flex-col gap-1.5">
+                        <label className="label-clean">Kampagnenavn</label>
+                        <input className="input-clean" value={editName} onChange={e => setEditName(e.target.value)} />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="label-clean">Beskrivelse</label>
+                        <input className="input-clean" value={editDesc} onChange={e => setEditDesc(e.target.value)} placeholder="Valgfri beskrivelse" />
+                      </div>
+                      <div className="flex gap-2">
+                        <button onClick={saveEdit} disabled={!editName.trim()} className={`btn-primary-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5 ${!editName.trim() ? 'opacity-40' : ''}`}>
+                          <Check size={13} strokeWidth={2} /> Gem
+                        </button>
+                        <button onClick={() => setEditingCampaign(null)} className="btn-ghost-smooth text-[11px] py-1.5 px-3">Annuller</button>
+                      </div>
+                    </div>
+                  ) : null}
+
                   <div className="flex gap-2 flex-wrap">
                     <button onClick={() => openCSV(c.id)} className="btn-primary-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
                       <FileUp size={13} strokeWidth={2} /> Importer CSV
                     </button>
+                    <button onClick={() => openCSV(c.id, true)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5 hover:text-destructive">
+                      <RefreshCw size={13} strokeWidth={2} /> Erstat CSV
+                    </button>
+                    {editingCampaign !== c.id && (
+                      <button onClick={() => startEdit(c)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
+                        <Pencil size={13} strokeWidth={2} /> Rediger
+                      </button>
+                    )}
                     <button onClick={() => setAssignModal(c.id)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
                       <UserPlus size={13} strokeWidth={2} /> Tildel bruger
                     </button>
@@ -304,7 +359,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
         )}
       </div>
 
-      <CSVUploadModal open={showCSV} onClose={() => { setShowCSV(false); if (createStep === 'csv') { setCreateStep(null); setShowCreate(false); setNewName(''); setNewDesc(''); fetchAll(); } }} onImport={handleCSVImport} />
+      <CSVUploadModal open={showCSV} onClose={() => { setShowCSV(false); setCsvReplaceMode(false); if (createStep === 'csv') { setCreateStep(null); setShowCreate(false); setNewName(''); setNewDesc(''); fetchAll(); } }} onImport={handleCSVImport} />
     </div>
   );
 };
