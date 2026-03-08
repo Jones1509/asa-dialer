@@ -80,11 +80,9 @@ export const Topbar: React.FC<TopbarProps> = ({
     if (e.key === 'Enter') {
       const numberToDial = manualNumber.trim().replace(/\s/g, '');
       if (!numberToDial) return;
-      setActiveDialNumber(numberToDial);
       setManualNumber('');
       setShowManualDial(false);
-      window.location.href = `tel:${numberToDial}`;
-      onStartCall();
+      dialNumber(numberToDial);
     }
     if (e.key === 'Escape') { setShowManualDial(false); setManualNumber(''); }
   };
