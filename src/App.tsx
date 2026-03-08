@@ -10,6 +10,7 @@ import RegisterPage from "./pages/RegisterPage";
 import PendingPage from "./pages/PendingPage";
 import AdminPage from "./pages/AdminPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import SpotifyCallbackPage from "./pages/SpotifyCallbackPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -77,6 +78,7 @@ const App = () => (
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/pending" element={<PendingPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/callback" element={<SpotifyCallbackPage />} />
             <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
