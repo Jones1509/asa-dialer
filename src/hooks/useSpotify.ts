@@ -93,6 +93,7 @@ export function useSpotify() {
     });
     if (error) throw error;
     setAccessToken(data.access_token);
+    setSpotifyDisplayName(data.spotify_display_name || null);
     setIsConnected(true);
     return data.access_token;
   };
