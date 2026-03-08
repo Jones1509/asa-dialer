@@ -102,7 +102,7 @@ export function useDialerState() {
     setShowTetris(false);
     const m = String(Math.floor(callSecondsRef.current / 60)).padStart(2, '0');
     const s = String(callSecondsRef.current % 60).padStart(2, '0');
-    showNotif(`📵 Opkald afsluttet — ${m}:${s}`);
+    showNotif(`Opkald afsluttet — ${m}:${s}`);
     setCallSeconds(0);
   }, [callActive, showNotif]);
 

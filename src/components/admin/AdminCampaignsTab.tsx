@@ -78,7 +78,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     setShowCSV(true);
   };
 
-  const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string }>) => {
+  const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string; contact_person: string }>) => {
     if (!csvCampaignId) return;
     const rows = leads.map(l => ({
       campaign_id: csvCampaignId,
@@ -86,6 +86,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
       phone: l.phone,
       email: l.email,
       website: l.website,
+      contact_person: l.contact_person,
     }));
     const { error } = await supabase.from('leads').insert(rows);
     if (error) { showNotif('Fejl ved import'); return; }

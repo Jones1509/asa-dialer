@@ -4,7 +4,7 @@ import { Upload, FileText, X, Download } from 'lucide-react';
 interface CSVUploadModalProps {
   open: boolean;
   onClose: () => void;
-  onImport: (leads: Array<{ company: string; phone: string; email: string; website: string }>) => void;
+  onImport: (leads: Array<{ company: string; phone: string; email: string; website: string; contact_person: string }>) => void;
 }
 
 const COLUMN_MAPPINGS: Record<string, string> = {
@@ -12,6 +12,7 @@ const COLUMN_MAPPINGS: Record<string, string> = {
   telefon: 'phone', phone: 'phone', tlf: 'phone', tel: 'phone', telefonnummer: 'phone',
   email: 'email', 'e-mail': 'email', mail: 'email',
   hjemmeside: 'website', website: 'website', web: 'website', url: 'website', link: 'website',
+  kontaktperson: 'contact_person', kontakt: 'contact_person', contact: 'contact_person', 'contact person': 'contact_person', person: 'contact_person',
 };
 
 function parseCSV(text: string): string[][] {
@@ -74,7 +75,7 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
     });
 
     const leads = allRows.map(row => {
-      const lead = { company: '', phone: '', email: '', website: '' };
+      const lead = { company: '', phone: '', email: '', website: '', contact_person: '' };
       Object.entries(mapping).forEach(([idx, field]) => {
         (lead as any)[field] = row[parseInt(idx)] || '';
       });
