@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Shield, Mail, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { User, Shield, Mail, Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,6 +11,8 @@ const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isAdminMode, setIsAdminMode] = useState(false);
+  const [resetMode, setResetMode] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
   const { user, isAdmin, isApproved, loading: authLoading } = useAuth();
 
@@ -61,6 +63,25 @@ const LoginPage: React.FC = () => {
     }
   };
 
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      setError('Indtast din email-adresse');
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      setResetSent(true);
+      setError('');
+    }
+  };
+
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden"
       style={{
@@ -85,103 +106,176 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Bruger / Admin toggle */}
-        <div className="flex justify-center gap-3 mb-6">
-          <button
-            onClick={() => { setIsAdminMode(false); setError(''); }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${
-              !isAdminMode
-                ? 'bg-primary text-primary-foreground border-primary shadow-[0_4px_14px_hsl(217_91%_60%/0.4)]'
-                : 'bg-transparent text-white/60 border-white/15 hover:border-white/30'
-            }`}
-          >
-            <User size={15} strokeWidth={2} />
-            Bruger
-          </button>
-          <button
-            onClick={() => { setIsAdminMode(true); setError(''); }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${
-              isAdminMode
-                ? 'bg-primary text-primary-foreground border-primary shadow-[0_4px_14px_hsl(217_91%_60%/0.4)]'
-                : 'bg-transparent text-white/60 border-white/15 hover:border-white/30'
-            }`}
-          >
-            <Shield size={15} strokeWidth={2} />
-            Admin
-          </button>
-        </div>
-
-        <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1 text-white">
-          {isAdminMode ? 'Admin Login' : 'Velkommen tilbage!'}
-        </h1>
-        {!isAdminMode && (
-          <p className="text-center text-sm mb-8 text-white/40">
-            Har du ikke en konto endnu?{' '}
-            <button onClick={() => navigate('/register')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline text-primary">
-              Opret konto
-            </button>
-          </p>
-        )}
-        {isAdminMode && (
-          <p className="text-center text-sm mb-8 text-white/40">
-            Log ind med din administrator-konto
-          </p>
-        )}
-
-        <form onSubmit={handleLogin} className="flex flex-col gap-5">
-          <div className="relative">
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="din@email.dk"
-              required
-              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
-            />
-            <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25" />
+        {resetMode ? (
+          /* Password reset view */
+          <div className="flex flex-col gap-5">
+            <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1 text-white">
+              Nulstil adgangskode
+            </h1>
+            {resetSent ? (
+              <div className="text-center flex flex-col items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-success/15 flex items-center justify-center">
+                  <Mail size={24} className="text-success" />
+                </div>
+                <p className="text-white/50 text-sm leading-relaxed">
+                  Vi har sendt et link til <strong className="text-white/70">{email}</strong>.<br/>
+                  Tjek din indbakke og klik på linket for at nulstille din adgangskode.
+                </p>
+                <button onClick={() => { setResetMode(false); setResetSent(false); }} className="text-primary text-sm font-semibold bg-transparent border-none cursor-pointer hover:underline">
+                  Tilbage til login
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleResetPassword} className="flex flex-col gap-5">
+                <p className="text-center text-sm text-white/40">
+                  Indtast din email-adresse og vi sender dig et link til at nulstille din adgangskode.
+                </p>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    placeholder="din@email.dk"
+                    required
+                    className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
+                  />
+                  <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25" />
+                </div>
+                {error && (
+                  <div className="text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">
+                    {error}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-4 rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 border-none bg-primary text-primary-foreground shadow-[0_4px_20px_hsl(217_91%_60%/0.4)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(217_91%_60%/0.5)] disabled:opacity-60"
+                >
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 size={16} className="animate-spin" />
+                      Sender...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <KeyRound size={16} />
+                      Send nulstillingslink
+                    </span>
+                  )}
+                </button>
+                <button type="button" onClick={() => { setResetMode(false); setError(''); }} className="text-center text-sm text-white/40 bg-transparent border-none cursor-pointer hover:text-white/60 transition-colors">
+                  Tilbage til login
+                </button>
+              </form>
+            )}
           </div>
-
-          <div className="relative">
-            <input
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/25 hover:text-white/50 transition-colors"
-            >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-            </button>
-          </div>
-
-          {error && (
-            <div className="text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">
-              {error}
+        ) : (
+          /* Login view */
+          <>
+            {/* Bruger / Admin toggle */}
+            <div className="flex justify-center gap-3 mb-6">
+              <button
+                onClick={() => { setIsAdminMode(false); setError(''); }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${
+                  !isAdminMode
+                    ? 'bg-primary text-primary-foreground border-primary shadow-[0_4px_14px_hsl(217_91%_60%/0.4)]'
+                    : 'bg-transparent text-white/60 border-white/15 hover:border-white/30'
+                }`}
+              >
+                <User size={15} strokeWidth={2} />
+                Bruger
+              </button>
+              <button
+                onClick={() => { setIsAdminMode(true); setError(''); }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 border ${
+                  isAdminMode
+                    ? 'bg-primary text-primary-foreground border-primary shadow-[0_4px_14px_hsl(217_91%_60%/0.4)]'
+                    : 'bg-transparent text-white/60 border-white/15 hover:border-white/30'
+                }`}
+              >
+                <Shield size={15} strokeWidth={2} />
+                Admin
+              </button>
             </div>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 border-none bg-primary text-primary-foreground shadow-[0_4px_20px_hsl(217_91%_60%/0.4)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(217_91%_60%/0.5)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                Logger ind...
-              </span>
-            ) : 'Log ind'}
-          </button>
-        </form>
+            <h1 className="font-heading font-extrabold text-3xl tracking-tight text-center mb-1 text-white">
+              {isAdminMode ? 'Admin Login' : 'Velkommen tilbage!'}
+            </h1>
+            {!isAdminMode && (
+              <p className="text-center text-sm mb-8 text-white/40">
+                Har du ikke en konto endnu?{' '}
+                <button onClick={() => navigate('/register')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline text-primary">
+                  Opret konto
+                </button>
+              </p>
+            )}
+            {isAdminMode && (
+              <p className="text-center text-sm mb-8 text-white/40">
+                Log ind med din administrator-konto
+              </p>
+            )}
 
-        <p className="text-center text-sm mt-6 text-white/30">
-          Glemt din adgangskode?
-        </p>
+            <form onSubmit={handleLogin} className="flex flex-col gap-5">
+              <div className="relative">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="din@email.dk"
+                  required
+                  className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
+                />
+                <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25" />
+              </div>
+
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full px-5 py-4 rounded-xl text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-primary/50 focus:bg-white/[0.12]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/25 hover:text-white/50 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+
+              {error && (
+                <div className="text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 rounded-xl text-sm font-bold cursor-pointer transition-all duration-300 border-none bg-primary text-primary-foreground shadow-[0_4px_20px_hsl(217_91%_60%/0.4)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(217_91%_60%/0.5)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    Logger ind...
+                  </span>
+                ) : 'Log ind'}
+              </button>
+            </form>
+
+            <p className="text-center text-sm mt-6">
+              <button
+                onClick={() => { setResetMode(true); setError(''); }}
+                className="text-white/30 bg-transparent border-none cursor-pointer hover:text-white/50 transition-colors text-sm"
+              >
+                Glemt din adgangskode?
+              </button>
+            </p>
+          </>
+        )}
       </div>
     </div>
   );
