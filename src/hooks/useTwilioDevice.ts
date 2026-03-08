@@ -164,11 +164,19 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
       call.on('disconnect', () => {
         console.log('Call disconnected');
         activeCallRef.current = null;
+        options?.onCallDisconnected?.();
+      });
+
+      call.on('cancel', () => {
+        console.log('Call cancelled');
+        activeCallRef.current = null;
+        options?.onCallDisconnected?.();
       });
 
       call.on('error', (err) => {
         console.error('Call error:', err);
         activeCallRef.current = null;
+        options?.onCallDisconnected?.();
       });
 
       return true;
