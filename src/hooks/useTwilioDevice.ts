@@ -130,10 +130,8 @@ export function useTwilioDevice() {
   }, []);
 
   useEffect(() => {
-    if (!initAttemptedRef.current) {
-      initAttemptedRef.current = true;
-      initDevice();
-    }
+    // Always init on mount (handles HMR and page reloads)
+    initDevice();
     return () => {
       if (deviceRef.current) {
         deviceRef.current.destroy();
