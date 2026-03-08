@@ -47,8 +47,8 @@ export const TetrisPage: React.FC = () => {
       ytPlayerRef.current = new (window as any).YT.Player('yt-music-player', {
         height: '0',
         width: '0',
-        videoId: 'CLIkAdMqshY',
-        playerVars: { autoplay: 1, loop: 1, playlist: 'CLIkAdMqshY', controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
+        videoId: 'vtNJMAyeP0s',
+        playerVars: { autoplay: 1, loop: 1, playlist: 'vtNJMAyeP0s', controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
         events: {
           onReady: (e: any) => { e.target.setVolume(35); setMusicReady(true); },
           onStateChange: (e: any) => {
