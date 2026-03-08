@@ -18,6 +18,7 @@ const Index = () => {
   const twilio = useTwilioDevice();
   const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
   const handleLogout = async () => {
     await signOut();
