@@ -80,10 +80,22 @@ export function useTwilioDevice() {
       device.on('error', (err) => {
         console.error('Twilio Device error:', err);
         setError(err.message);
+        // Auto-reconnect on error
+        setTimeout(() => {
+          console.log('[Twilio] Auto-reconnecting after error...');
+          device.register().catch(e => console.error('[Twilio] Re-register failed:', e));
+        }, 3000);
       });
 
       device.on('unregistered', () => {
+        console.log('[Twilio] Device unregistered, attempting re-register...');
         setStatus('offline');
+        // Auto-reconnect when unregistered
+        setTimeout(() => {
+          if (deviceRef.current === device) {
+            device.register().catch(e => console.error('[Twilio] Re-register failed:', e));
+          }
+        }, 3000);
       });
 
       device.on('tokenWillExpire', async () => {

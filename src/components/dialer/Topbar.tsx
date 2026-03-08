@@ -39,15 +39,25 @@ export const Topbar: React.FC<TopbarProps> = ({
 
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
+  // Format number to E.164 (add +45 for Danish numbers without country code)
+  const formatE164 = (num: string): string => {
+    if (num.startsWith('+')) return num;
+    if (num.startsWith('00')) return '+' + num.slice(2);
+    // Danish numbers: 8 digits without country code
+    if (/^\d{8}$/.test(num)) return '+45' + num;
+    return '+' + num;
+  };
+
   // ===== Shared dial function — uses Twilio VoIP for ALL calls =====
   const dialNumber = async (number: string) => {
     const cleanNumber = number.replace(/\s/g, '');
     if (!cleanNumber) return;
     
-    setActiveDialNumber(cleanNumber);
+    const e164Number = formatE164(cleanNumber);
+    setActiveDialNumber(e164Number);
     
     if (onTwilioCall) {
-      const success = await onTwilioCall(cleanNumber);
+      const success = await onTwilioCall(e164Number);
       if (success) {
         onStartCall();
         return;
