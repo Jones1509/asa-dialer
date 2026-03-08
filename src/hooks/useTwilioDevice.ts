@@ -131,21 +131,19 @@ export function useTwilioDevice() {
   }, [initDevice]);
 
   const makeCall = useCallback(async (phoneNumber: string): Promise<boolean> => {
-    // If mic is not allowed, don't even try Twilio — return false so caller uses tel: fallback
-    if (!micAllowed) {
-      console.log('Mic not allowed, skipping Twilio');
-      return false;
-    }
-
+    console.log(`[Twilio] makeCall called with number: "${phoneNumber}", status: ${status}, micAllowed: ${micAllowed}`);
+    
     if (!deviceRef.current || status !== 'ready') {
-      console.error('Device not ready, status:', status);
+      console.error(`[Twilio] Device not ready. status=${status}, device=${!!deviceRef.current}`);
       return false;
     }
 
     try {
+      console.log(`[Twilio] Connecting call to: ${phoneNumber}`);
       const call = await deviceRef.current.connect({
         params: { To: phoneNumber },
       });
+      console.log(`[Twilio] Call connected successfully to: ${phoneNumber}`);
 
       activeCallRef.current = call;
 
