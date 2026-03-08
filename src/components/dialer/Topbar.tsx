@@ -16,39 +16,37 @@ export const Topbar: React.FC<TopbarProps> = ({
   onStartCall, onEndCall, onActivity,
 }) => {
   return (
-    <div className="h-14 bg-popover border-b border-border flex items-center px-6 gap-4 shrink-0">
-      <div className="flex items-center gap-3 bg-muted border border-border rounded-lg px-3.5 py-1.5 font-heading text-sm font-semibold min-w-[200px]">
-        <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
-          callActive ? 'bg-success shadow-[0_0_8px_hsl(var(--success))]' : 'bg-muted-foreground/40'
+    <div className="h-[60px] bg-card border-b border-border/60 flex items-center px-6 gap-4 shrink-0"
+      style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+      <div className="flex items-center gap-3 bg-secondary/50 border border-border/50 rounded-xl px-4 py-2 font-heading text-[13px] font-semibold min-w-[200px] tracking-wide">
+        <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
+          callActive ? 'bg-success shadow-[0_0_10px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/30'
         }`} />
-        <span>{currentLead.phone}</span>
+        <span className="text-foreground/80">{currentLead.phone}</span>
       </div>
-      <div className="font-heading text-xs text-primary font-bold tracking-wider">
+      <div className="font-heading text-xs text-primary font-bold tracking-[0.15em] tabular-nums">
         {formatTime(callSeconds)}
       </div>
       {!callActive ? (
         <button
           onClick={onStartCall}
-          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center text-base bg-success text-success-foreground hover:scale-110 hover:shadow-[0_0_16px_rgba(34,197,94,.5)] transition-all duration-200"
+          className="w-10 h-10 rounded-full border-none cursor-pointer flex items-center justify-center text-base bg-success text-success-foreground transition-all duration-300 ease-out hover:scale-110 hover:shadow-[0_0_20px_hsl(152_69%_41%/0.4)] active:scale-100"
         >
           📞
         </button>
       ) : (
         <button
           onClick={onEndCall}
-          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center text-base bg-destructive text-destructive-foreground hover:scale-110 hover:shadow-[0_0_16px_rgba(239,68,68,.5)] transition-all duration-200"
+          className="w-10 h-10 rounded-full border-none cursor-pointer flex items-center justify-center text-base bg-destructive text-destructive-foreground transition-all duration-300 ease-out hover:scale-110 hover:shadow-[0_0_20px_hsl(0_72%_51%/0.4)] active:scale-100"
         >
           📵
         </button>
       )}
       <div className="flex-1" />
-      <button
-        onClick={onActivity}
-        className="bg-primary text-primary-foreground border-none rounded-lg px-4 py-2 font-body font-semibold text-sm cursor-pointer hover:opacity-90 transition-all duration-200"
-      >
+      <button onClick={onActivity} className="btn-primary-smooth">
         Aktivitet
       </button>
-      <span className="text-muted-foreground text-sm ml-2">Mere ▾</span>
+      <span className="text-muted-foreground/60 text-sm ml-1 cursor-pointer hover:text-foreground transition-colors duration-200">Mere ▾</span>
     </div>
   );
 };

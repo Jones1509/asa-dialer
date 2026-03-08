@@ -16,13 +16,15 @@ export const ShopPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('engang');
 
   return (
-    <div className="flex flex-col p-7 gap-6 overflow-y-auto flex-1 animate-fade-in">
-      <h1 className="font-heading font-extrabold text-2xl">🛍️ Produktshop</h1>
-      <p className="text-sm text-muted-foreground">Vælg en eller flere løsninger der passer bedst til dine kunders behov</p>
-      <div className="card-surface border-primary/30 rounded-xl px-5 py-3.5 flex items-center gap-4">
+    <div className="flex flex-col p-8 gap-7 overflow-y-auto flex-1 animate-fade-in">
+      <div>
+        <h1 className="font-heading font-extrabold text-[26px] tracking-tight">🛍️ Produktshop</h1>
+        <p className="text-sm text-muted-foreground mt-1">Vælg en eller flere løsninger der passer bedst til dine kunders behov</p>
+      </div>
+      <div className="card-surface border-primary/15 rounded-2xl px-5 py-4 flex items-center gap-4">
         <span className="text-sm text-muted-foreground">📄 Salgsscripts:</span>
         {['Hjemmeside', 'Prisberegner', 'Chatbot'].map(s => (
-          <button key={s} className="bg-transparent border border-border rounded-lg px-3.5 py-1.5 text-sm text-muted-foreground cursor-pointer hover:border-primary/40 hover:text-primary transition-all duration-200">
+          <button key={s} className="btn-ghost-smooth text-[13px] py-1.5 px-3.5">
             ⬇ {s}
           </button>
         ))}
@@ -32,23 +34,26 @@ export const ShopPage: React.FC = () => {
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`px-4 py-2 rounded-full border text-sm cursor-pointer transition-all duration-200 font-body
-              ${activeTab === t.id ? 'bg-primary border-primary text-primary-foreground' : 'border-border text-muted-foreground bg-transparent hover:border-primary/40'}`}
+            className={`px-5 py-2 rounded-full text-sm cursor-pointer font-body font-medium
+              transition-all duration-300 ease-out
+              ${activeTab === t.id
+                ? 'bg-primary text-primary-foreground shadow-[0_2px_8px_hsl(25_95%_53%/0.25)]'
+                : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
           >
             {t.label}
           </button>
         ))}
       </div>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
-        {products.map(p => (
-          <div key={p.name} className="card-surface hover-lift rounded-xl p-5">
-            <div className="text-3xl mb-3">{p.icon}</div>
-            <div className="font-heading font-bold text-base">{p.name}</div>
-            <div className="text-sm text-muted-foreground mt-1.5 mb-4">{p.desc}</div>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+        {products.map((p, i) => (
+          <div key={p.name} className="card-surface hover-lift rounded-2xl p-6" style={{ animationDelay: `${i * 80}ms` }}>
+            <div className="text-3xl mb-4">{p.icon}</div>
+            <div className="font-heading font-bold text-base tracking-tight">{p.name}</div>
+            <div className="text-sm text-muted-foreground mt-1.5 mb-5 leading-relaxed">{p.desc}</div>
             <div className="font-heading font-extrabold text-xl text-primary">
               {p.price} <span className="text-sm text-muted-foreground font-body font-normal">{p.type}</span>
             </div>
-            <div className="text-xs text-success mt-1">{p.provision}</div>
+            <div className="text-xs text-success font-medium mt-1.5">{p.provision}</div>
           </div>
         ))}
       </div>
