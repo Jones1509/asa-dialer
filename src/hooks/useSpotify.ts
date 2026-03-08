@@ -315,9 +315,11 @@ export function useSpotify() {
     let token = accessToken;
     if (!token) return [];
     
+    // Use /playlists/{id} endpoint (returns full playlist with embedded tracks)
+    // This avoids 403 issues that can occur with /playlists/{id}/tracks
     const doFetch = async (t: string) => {
       const resp = await fetch(
-        `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
+        `https://api.spotify.com/v1/playlists/${playlistId}`,
         { headers: { Authorization: `Bearer ${t}` } }
       );
       return resp;
@@ -337,19 +339,20 @@ export function useSpotify() {
       }
       
       if (!resp.ok) {
-        console.error('Fetch playlist tracks failed:', resp.status, await resp.text());
+        console.error('Fetch playlist failed:', resp.status, await resp.text());
         return [];
       }
       
       const data = await resp.json();
-      return (data.items || [])
-        .filter((item: any) => item.track)
+      const items = data.tracks?.items || data.items?.items || [];
+      return items
+        .filter((item: any) => item?.track)
         .map((item: any) => ({
           id: item.track.id,
           name: item.track.name,
           artist: item.track.artists.map((a: any) => a.name).join(', '),
-          album: item.track.album.name,
-          albumArt: item.track.album.images?.[2]?.url || item.track.album.images?.[0]?.url || '',
+          album: item.track.album?.name || '',
+          albumArt: item.track.album?.images?.[2]?.url || item.track.album?.images?.[0]?.url || '',
           uri: item.track.uri,
           duration_ms: item.track.duration_ms,
         }));

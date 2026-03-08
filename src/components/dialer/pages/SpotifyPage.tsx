@@ -321,7 +321,7 @@ export const SpotifyPage: React.FC = () => {
                 )}
                 <div className="flex-1 min-w-0">
                   <h2 className="font-heading font-bold text-lg truncate">{openPlaylist?.name}</h2>
-                  <p className="text-[12px] text-muted-foreground mt-0.5">{playlistTracks.length} sange</p>
+                  <p className="text-[12px] text-muted-foreground mt-0.5">{openPlaylist?.trackCount || playlistTracks.length} sange</p>
                   <button
                     onClick={() => spotify.playPlaylist(openPlaylistId)}
                     className="mt-3 px-5 py-2 rounded-full bg-[#1DB954] text-white text-[12px] font-semibold cursor-pointer border-none hover:bg-[#1DB954]/90 transition-colors flex items-center gap-2 shadow-md shadow-[#1DB954]/20"
