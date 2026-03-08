@@ -10,7 +10,7 @@ export function useTwilioDevice() {
   const [micAllowed, setMicAllowed] = useState<boolean | null>(null);
   const deviceRef = useRef<Device | null>(null);
   const activeCallRef = useRef<Call | null>(null);
-  const initAttemptedRef = useRef(false);
+  
 
   // Check mic permission on mount — don't block VoIP if check fails
   useEffect(() => {
@@ -130,10 +130,8 @@ export function useTwilioDevice() {
   }, []);
 
   useEffect(() => {
-    if (!initAttemptedRef.current) {
-      initAttemptedRef.current = true;
-      initDevice();
-    }
+    // Always init on mount (handles HMR and page reloads)
+    initDevice();
     return () => {
       if (deviceRef.current) {
         deviceRef.current.destroy();
