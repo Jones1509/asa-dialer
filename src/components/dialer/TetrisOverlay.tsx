@@ -8,6 +8,7 @@ interface TetrisOverlayProps {
   callSeconds: number;
   formatTime: (s: number) => string;
   onEndCall: () => void;
+  activeDialNumber?: string | null;
 }
 
 const COLS = 10, ROWS = 20, BLOCK = 20;
