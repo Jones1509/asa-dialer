@@ -10,7 +10,7 @@ interface TetrisOverlayProps {
 }
 
 const COLS = 10, ROWS = 20, BLOCK = 20;
-const COLORS = ['', '#f97316', '#22c55e', '#3b82f6', '#a855f7', '#ec4899', '#f59e0b', '#06b6d4'];
+const COLORS = ['', '#3b82f6', '#22c55e', '#06b6d4', '#a855f7', '#ec4899', '#f59e0b', '#6366f1'];
 const PIECES = [
   [[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]],
   [[4,0],[4,0],[4,4]], [[0,5],[0,5],[5,5]],
@@ -101,7 +101,7 @@ export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext('2d')!;
-        ctx.fillStyle = '#fafbfc'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.strokeStyle = 'rgba(0,0,0,0.04)';
         for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) ctx.strokeRect(c * BLOCK, r * BLOCK, BLOCK, BLOCK);
         for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (gg.board[r][c]) drawBlock(ctx, c, r, COLORS[gg.board[r][c]]);
@@ -138,7 +138,7 @@ export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
   return (
     <div className="fixed inset-0 bg-background/80 backdrop-blur-2xl z-50 flex items-center justify-center flex-col gap-6 animate-fade-in">
       <div className="text-center">
-        <h2 className="font-heading font-extrabold text-3xl bg-gradient-to-r from-primary to-orange-400 bg-clip-text text-transparent">
+        <h2 className="font-heading font-extrabold text-3xl text-primary">
           🎮 Spil mens du venter!
         </h2>
         <p className="text-muted-foreground text-sm mt-2">Opkaldet er igang — slap af med Tetris</p>
@@ -158,7 +158,7 @@ export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
       <div className="flex gap-5 items-start">
         <canvas ref={canvasRef} width={200} height={400}
           className="border border-border/40 rounded-2xl bg-card"
-          style={{ boxShadow: '0 8px 32px rgba(249,115,22,0.08)' }} />
+          style={{ boxShadow: '0 8px 32px hsl(217 91% 60% / 0.08)' }} />
         <div className="flex flex-col gap-3 min-w-[130px]">
           {[{ label: 'Score', value: score }, { label: 'Linjer', value: lines }, { label: 'Level', value: level }].map(s => (
             <div key={s.label} className="card-surface rounded-xl px-4 py-3">

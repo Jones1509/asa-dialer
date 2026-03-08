@@ -34,11 +34,11 @@ export const ShopPage: React.FC = () => {
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`px-5 py-2 rounded-full text-sm cursor-pointer font-body font-medium
+            className={`px-5 py-2 rounded-full text-sm cursor-pointer font-body font-medium border-none
               transition-all duration-300 ease-out
               ${activeTab === t.id
-                ? 'bg-primary text-primary-foreground shadow-[0_2px_8px_hsl(25_95%_53%/0.25)]'
-                : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
+                ? 'bg-primary text-primary-foreground shadow-[0_2px_8px_hsl(217_91%_60%/0.25)]'
+                : 'bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground'}`}
           >
             {t.label}
           </button>

@@ -16,13 +16,13 @@ export const Topbar: React.FC<TopbarProps> = ({
   onStartCall, onEndCall, onActivity,
 }) => {
   return (
-    <div className="h-[60px] bg-card border-b border-border/60 flex items-center px-6 gap-4 shrink-0"
+    <div className="h-[60px] bg-card border-b border-border/50 flex items-center px-6 gap-4 shrink-0"
       style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-      <div className="flex items-center gap-3 bg-secondary/50 border border-border/50 rounded-xl px-4 py-2 font-heading text-[13px] font-semibold min-w-[200px] tracking-wide">
+      <div className="flex items-center gap-3 bg-background border border-border/50 rounded-xl px-4 py-2 font-body text-[13px] font-medium min-w-[200px]">
         <div className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
           callActive ? 'bg-success shadow-[0_0_10px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/30'
         }`} />
-        <span className="text-foreground/80">{currentLead.phone}</span>
+        <span className="text-foreground/80 tabular-nums">{currentLead.phone}</span>
       </div>
       <div className="font-heading text-xs text-primary font-bold tracking-[0.15em] tabular-nums">
         {formatTime(callSeconds)}

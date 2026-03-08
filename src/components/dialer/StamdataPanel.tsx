@@ -21,14 +21,14 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead }) => {
   }, [lead]);
 
   return (
-    <div className="flex-1 flex flex-col overflow-y-auto p-7 gap-6 animate-fade-in">
+    <div className="flex-1 flex flex-col overflow-y-auto p-7 gap-6 animate-fade-in bg-background">
       <div>
         <div className="label-clean mb-2">Kampagne</div>
         <div className="badge-clean w-fit">Elektriker firmaer Jonas</div>
       </div>
-      <div className="font-heading font-extrabold text-[22px] flex items-center gap-3 tracking-tight">
-        Stamdata
-        <span className="text-[13px] text-muted-foreground font-body font-normal tracking-normal">Lead ID: {lead.id}</span>
+      <div>
+        <h2 className="font-heading font-extrabold text-[22px] tracking-tight">Stamdata</h2>
+        <span className="text-[13px] text-muted-foreground font-body">Lead ID: {lead.id}</span>
       </div>
       <div className="grid grid-cols-2 gap-5">
         <div className="flex flex-col gap-2">

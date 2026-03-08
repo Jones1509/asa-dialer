@@ -11,10 +11,10 @@ interface ReportsPageProps {
 const statConfigs = [
   { key: 'calls', icon: '📞', label: 'Opkald', color: 'bg-success' },
   { key: 'sales', icon: '🛒', label: 'Salg', color: 'bg-primary' },
-  { key: 'recalls', icon: '🔄', label: 'Genopkald', color: 'bg-pink-500' },
-  { key: 'long', icon: '📈', label: '5+ min opkald', color: 'bg-info' },
-  { key: 'time', icon: '⏱', label: 'Total taletid', color: 'bg-warning' },
-  { key: 'closed', icon: '✅', label: 'Afsluttede', color: 'bg-purple-500' },
+  { key: 'recalls', icon: '🔄', label: 'Genopkald', color: 'bg-info' },
+  { key: 'long', icon: '📈', label: '5+ min opkald', color: 'bg-warning' },
+  { key: 'time', icon: '⏱', label: 'Total taletid', color: 'bg-primary' },
+  { key: 'closed', icon: '✅', label: 'Afsluttede', color: 'bg-success' },
 ];
 
 export const ReportsPage: React.FC<ReportsPageProps> = ({

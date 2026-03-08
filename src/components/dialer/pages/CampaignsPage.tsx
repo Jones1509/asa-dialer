@@ -25,7 +25,7 @@ export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onNavigate, showNo
               { label: 'Ubehandlet', value: '481' },
               { label: 'Behandlet', value: '1' },
             ].map(s => (
-              <div key={s.label} className="bg-secondary/60 rounded-xl px-3.5 py-3">
+              <div key={s.label} className="bg-background rounded-xl px-3.5 py-3">
                 <div className="text-[11px] text-muted-foreground font-medium">{s.label}</div>
                 <div className="font-heading font-bold text-lg text-primary mt-0.5">{s.value}</div>
               </div>

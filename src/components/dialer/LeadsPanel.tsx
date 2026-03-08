@@ -21,7 +21,7 @@ export const LeadsPanel: React.FC<LeadsPanelProps> = ({
   leads, currentLeadIdx, searchQuery, onSearch, onSelect, allLeads,
 }) => {
   return (
-    <div className="w-[340px] border-r border-border/50 flex flex-col shrink-0 bg-card/50">
+    <div className="w-[340px] border-r border-border/50 flex flex-col shrink-0 bg-card">
       <div className="px-5 py-4 border-b border-border/50 flex items-center justify-between">
         <span className="font-heading font-bold text-[15px] tracking-tight">Emner</span>
         <span className="badge-clean">{leads.length}</span>
