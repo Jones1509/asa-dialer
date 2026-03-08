@@ -359,7 +359,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
         )}
       </div>
 
-      <CSVUploadModal open={showCSV} onClose={() => { setShowCSV(false); if (createStep === 'csv') { setCreateStep(null); setShowCreate(false); setNewName(''); setNewDesc(''); fetchAll(); } }} onImport={handleCSVImport} />
+      <CSVUploadModal open={showCSV} onClose={() => { setShowCSV(false); setCsvReplaceMode(false); if (createStep === 'csv') { setCreateStep(null); setShowCreate(false); setNewName(''); setNewDesc(''); fetchAll(); } }} onImport={handleCSVImport} />
     </div>
   );
 };
