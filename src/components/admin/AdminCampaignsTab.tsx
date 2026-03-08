@@ -78,7 +78,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     setShowCSV(true);
   };
 
-  const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string }>) => {
+  const handleCSVImport = async (leads: Array<{ company: string; phone: string; email: string; website: string; contact_person: string }>) => {
     if (!csvCampaignId) return;
     const rows = leads.map(l => ({
       campaign_id: csvCampaignId,
