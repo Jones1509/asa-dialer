@@ -1,7 +1,7 @@
 import React from 'react';
-import { LeadsPanel } from '../LeadsPanel';
-import { StamdataPanel } from '../StamdataPanel';
-import { ResultPanel } from '../ResultPanel';
+import { LeadsPanel } from '@/components/dialer/LeadsPanel';
+import { StamdataPanel } from '@/components/dialer/StamdataPanel';
+import { ResultPanel } from '@/components/dialer/ResultPanel';
 import { Lead } from '@/types/leads';
 import { leadsData } from '@/types/leads';
 
