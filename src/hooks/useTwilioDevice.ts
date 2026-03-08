@@ -226,7 +226,21 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
     }
   }, []);
 
-  // canMakeVoipCall is true only when device is ready AND mic is allowed
+  const acceptCall = useCallback(() => {
+    if (activeCallRef.current) {
+      activeCallRef.current.accept();
+      console.log('[Twilio] Incoming call accepted');
+    }
+  }, []);
+
+  const rejectCall = useCallback(() => {
+    if (activeCallRef.current) {
+      activeCallRef.current.reject();
+      activeCallRef.current = null;
+      console.log('[Twilio] Incoming call rejected');
+    }
+  }, []);
+
   const canMakeVoipCall = status === 'ready' && micAllowed === true;
 
   return {
@@ -234,6 +248,8 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
     error,
     makeCall,
     hangUp,
+    acceptCall,
+    rejectCall,
     reinitialize: initDevice,
     micAllowed,
     canMakeVoipCall,
