@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
+import { Upload, FileText, X, Download } from 'lucide-react';
 
 interface CSVUploadModalProps {
   open: boolean;
@@ -87,7 +88,7 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
       setPreview(null);
       setHeaders([]);
       setAllRows([]);
-    }, 800);
+    }, 600);
   };
 
   const reset = () => {
@@ -101,26 +102,33 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-fade-in" onClick={reset}>
-      <div className="card-surface rounded-2xl w-full max-w-[640px] max-h-[80vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between">
-          <h2 className="font-heading font-bold text-lg tracking-tight">📂 Importer CSV</h2>
-          <button onClick={reset} className="text-muted-foreground hover:text-foreground text-xl cursor-pointer bg-transparent border-none">✕</button>
+    <div className="fixed inset-0 bg-background/70 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-fade-in" onClick={reset}>
+      <div className="card-surface rounded-xl w-full max-w-[600px] max-h-[78vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
+          <h2 className="font-heading font-bold text-[15px] tracking-tight flex items-center gap-2">
+            <Upload size={16} className="text-muted-foreground" strokeWidth={1.8} />
+            Importer CSV
+          </h2>
+          <button onClick={reset} className="text-muted-foreground/40 hover:text-foreground cursor-pointer bg-transparent border-none transition-colors duration-150">
+            <X size={18} />
+          </button>
         </div>
 
-        <div className="p-6 flex-1 overflow-y-auto flex flex-col gap-5">
+        <div className="p-5 flex-1 overflow-y-auto flex flex-col gap-4">
           {!file ? (
             <div
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300
-                ${dragOver ? 'border-primary bg-accent/50 scale-[1.01]' : 'border-border/60 hover:border-primary/40 hover:bg-accent/20'}`}
+              className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 flex flex-col items-center gap-3
+                ${dragOver ? 'border-primary bg-accent/40' : 'border-border/50 hover:border-primary/30 hover:bg-accent/15'}`}
             >
-              <div className="text-4xl mb-3">📄</div>
-              <div className="font-medium text-sm">Træk og slip din CSV-fil her</div>
-              <div className="text-xs text-muted-foreground mt-2">eller klik for at vælge en fil</div>
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+                <FileText size={22} className="text-muted-foreground/50" strokeWidth={1.5} />
+              </div>
+              <div className="font-medium text-[13px]">Træk og slip din CSV-fil her</div>
+              <div className="text-[12px] text-muted-foreground/50">eller klik for at vælge</div>
               <input
                 ref={inputRef}
                 type="file"
@@ -131,32 +139,34 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
             </div>
           ) : (
             <>
-              <div className="flex items-center gap-3 bg-accent/30 rounded-xl px-4 py-3">
-                <span className="text-xl">📄</span>
+              <div className="flex items-center gap-3 bg-accent/20 rounded-lg px-3.5 py-2.5">
+                <FileText size={18} className="text-primary shrink-0" strokeWidth={1.8} />
                 <div className="flex-1">
-                  <div className="font-medium text-sm">{file.name}</div>
-                  <div className="text-xs text-muted-foreground">{allRows.length} rækker fundet</div>
+                  <div className="font-medium text-[13px]">{file.name}</div>
+                  <div className="text-[11px] text-muted-foreground/50">{allRows.length} rækker fundet</div>
                 </div>
-                <button onClick={() => { setFile(null); setPreview(null); }} className="text-xs text-muted-foreground hover:text-destructive cursor-pointer bg-transparent border-none">✕ Fjern</button>
+                <button onClick={() => { setFile(null); setPreview(null); }} className="text-muted-foreground/40 hover:text-destructive cursor-pointer bg-transparent border-none">
+                  <X size={14} />
+                </button>
               </div>
 
               {preview && (
                 <div>
-                  <div className="label-clean mb-2">Forhåndsvisning (første {preview.length} rækker)</div>
-                  <div className="overflow-x-auto rounded-xl border border-border/50">
-                    <table className="w-full text-xs">
+                  <div className="label-clean mb-1.5">Forhåndsvisning ({preview.length} rækker)</div>
+                  <div className="overflow-x-auto rounded-lg border border-border/40">
+                    <table className="w-full text-[11px]">
                       <thead>
-                        <tr className="bg-secondary/60">
+                        <tr className="bg-secondary/40">
                           {headers.map((h, i) => (
-                            <th key={i} className="px-3 py-2 text-left font-medium text-muted-foreground">{h}</th>
+                            <th key={i} className="px-2.5 py-1.5 text-left font-medium text-muted-foreground/60">{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {preview.map((row, ri) => (
-                          <tr key={ri} className="border-t border-border/30">
+                          <tr key={ri} className="border-t border-border/20">
                             {row.map((cell, ci) => (
-                              <td key={ci} className="px-3 py-2 text-foreground/80">{cell}</td>
+                              <td key={ci} className="px-2.5 py-1.5 text-foreground/70">{cell}</td>
                             ))}
                           </tr>
                         ))}
@@ -170,15 +180,15 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
         </div>
 
         {file && (
-          <div className="px-6 py-4 border-t border-border/50 flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">{allRows.length} emner klar til import</span>
-            <div className="flex gap-3">
-              <button onClick={reset} className="btn-ghost-smooth text-sm">Annuller</button>
-              <button onClick={handleImport} disabled={importing} className="btn-primary-smooth text-sm flex items-center gap-2">
+          <div className="px-5 py-3.5 border-t border-border/40 flex items-center justify-between">
+            <span className="text-[12px] text-muted-foreground/50">{allRows.length} emner klar</span>
+            <div className="flex gap-2.5">
+              <button onClick={reset} className="btn-ghost-smooth text-[12px]">Annuller</button>
+              <button onClick={handleImport} disabled={importing} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
                 {importing ? (
-                  <>⏳ Importerer...</>
+                  <>Importerer...</>
                 ) : (
-                  <>📥 Importer {allRows.length} emner</>
+                  <><Download size={13} strokeWidth={2} /> Importer {allRows.length} emner</>
                 )}
               </button>
             </div>

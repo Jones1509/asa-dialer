@@ -1,4 +1,5 @@
 import React from 'react';
+import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield } from 'lucide-react';
 
 interface SidebarProps {
   activePage: string;
@@ -9,47 +10,50 @@ interface SidebarProps {
 }
 
 const navItems = [
-  { id: 'dialer', icon: '📞', label: 'Dialer' },
-  { id: 'incoming', icon: '📲', label: 'Indgående' },
-  { id: 'campaigns', icon: '📋', label: 'Kampagner' },
-  { id: 'shop', icon: '🛍️', label: 'Produktshop' },
-  { id: 'reports', icon: '📊', label: 'Rapporter' },
+  { id: 'dialer', icon: Phone, label: 'Dialer' },
+  { id: 'incoming', icon: PhoneIncoming, label: 'Indgående' },
+  { id: 'campaigns', icon: LayoutGrid, label: 'Kampagner' },
+  { id: 'shop', icon: ShoppingBag, label: 'Produktshop' },
+  { id: 'reports', icon: BarChart3, label: 'Rapporter' },
 ];
 
 export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isAdmin, onAdminNav }) => {
   return (
-    <div className="w-[72px] bg-card border-r border-border/50 flex flex-col items-center py-5 gap-1.5 shrink-0">
-      <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-heading font-extrabold text-[11px] text-primary-foreground mb-5 tracking-wide"
-        style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.35)' }}>
+    <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center py-5 gap-1 shrink-0">
+      <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-heading font-extrabold text-[10px] text-primary-foreground mb-6 tracking-wider"
+        style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.3)' }}>
         ASA
       </div>
-      {navItems.map(item => (
-        <button
-          key={item.id}
-          onClick={() => onNavigate(item.id)}
-          title={item.label}
-          className={`w-11 h-11 rounded-xl border-none cursor-pointer flex items-center justify-center text-[17px] relative group
-            transition-all duration-300 ease-out
-            ${activePage === item.id
-              ? 'bg-primary text-primary-foreground shadow-[0_3px_12px_hsl(217_91%_60%/0.3)]'
-              : 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
-            }`}
-        >
-          {item.icon}
-          <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-foreground text-background text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50">
-            {item.label}
-          </span>
-        </button>
-      ))}
+      {navItems.map(item => {
+        const Icon = item.icon;
+        return (
+          <button
+            key={item.id}
+            onClick={() => onNavigate(item.id)}
+            title={item.label}
+            className={`w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center relative group
+              transition-all duration-200 ease-out
+              ${activePage === item.id
+                ? 'bg-primary text-primary-foreground shadow-[0_2px_10px_hsl(217_91%_60%/0.25)]'
+                : 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
+              }`}
+          >
+            <Icon size={18} strokeWidth={activePage === item.id ? 2.2 : 1.8} />
+            <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
+              {item.label}
+            </span>
+          </button>
+        );
+      })}
       <div className="flex-1" />
       {isAdmin && onAdminNav && (
         <button
           onClick={onAdminNav}
           title="Admin panel"
-          className="w-11 h-11 rounded-xl border-none cursor-pointer flex items-center justify-center text-[17px] bg-transparent text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 ease-out group relative"
+          className="w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center bg-transparent text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 ease-out group relative"
         >
-          🛡️
-          <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-foreground text-background text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50">
+          <Shield size={18} strokeWidth={1.8} />
+          <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
             Admin panel
           </span>
         </button>
@@ -57,25 +61,25 @@ export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onL
       <button
         onClick={() => onNavigate('settings')}
         title="Indstillinger"
-        className={`w-11 h-11 rounded-xl border-none cursor-pointer flex items-center justify-center text-[17px] group relative
-          transition-all duration-300 ease-out
+        className={`w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center group relative
+          transition-all duration-200 ease-out
           ${activePage === 'settings'
-            ? 'bg-primary text-primary-foreground shadow-[0_3px_12px_hsl(217_91%_60%/0.3)]'
+            ? 'bg-primary text-primary-foreground shadow-[0_2px_10px_hsl(217_91%_60%/0.25)]'
             : 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
           }`}
       >
-        ⚙️
-        <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-foreground text-background text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50">
+        <Settings size={18} strokeWidth={1.8} />
+        <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
           Indstillinger
         </span>
       </button>
       <button
         onClick={onLogout}
         title="Log ud"
-        className="w-11 h-11 rounded-xl border-none cursor-pointer flex items-center justify-center text-[17px] bg-transparent text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-300 ease-out group relative"
+        className="w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center bg-transparent text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 ease-out group relative"
       >
-        🚪
-        <span className="absolute left-full ml-3 px-2.5 py-1 rounded-lg bg-foreground text-background text-xs font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-200 z-50">
+        <LogOut size={18} strokeWidth={1.8} />
+        <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
           Log ud
         </span>
       </button>

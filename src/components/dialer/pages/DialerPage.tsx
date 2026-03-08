@@ -3,6 +3,7 @@ import { LeadsPanel } from '@/components/dialer/LeadsPanel';
 import { StamdataPanel } from '@/components/dialer/StamdataPanel';
 import { ResultPanel } from '@/components/dialer/ResultPanel';
 import { Lead } from '@/types/leads';
+import { LayoutGrid, ChevronRight, Home } from 'lucide-react';
 
 interface DialerPageProps {
   leads: Lead[];
@@ -25,7 +26,7 @@ export const DialerPage: React.FC<DialerPageProps> = ({
   if (loadingLeads) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="text-muted-foreground">⏳ Indlæser emner...</div>
+        <div className="text-muted-foreground text-[13px]">Indlæser emner...</div>
       </div>
     );
   }
@@ -33,16 +34,16 @@ export const DialerPage: React.FC<DialerPageProps> = ({
   if (!leads.length) {
     return (
       <div className="flex-1 flex items-center justify-center flex-col gap-3">
-        <div className="text-4xl">📋</div>
-        <div className="text-muted-foreground text-sm">Vælg en kampagne fra kampagne-siden for at begynde</div>
+        <LayoutGrid size={40} className="text-muted-foreground/30" strokeWidth={1.2} />
+        <div className="text-muted-foreground text-[13px]">Vælg en kampagne for at begynde</div>
       </div>
     );
   }
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="px-7 pt-4 pb-2 text-[13px] text-muted-foreground flex items-center gap-1.5 font-medium">
-        🏠 Hjem <span className="text-border">›</span> <span className="text-foreground font-semibold">Dialer</span> <span className="text-border">›</span> {campaignName}
+      <div className="px-6 pt-3 pb-2 text-[12px] text-muted-foreground/60 flex items-center gap-1 font-medium">
+        <Home size={12} /> <ChevronRight size={10} /> <span className="text-foreground/70 font-semibold">Dialer</span> <ChevronRight size={10} /> {campaignName}
       </div>
       <div className="flex-1 flex overflow-hidden">
         <LeadsPanel

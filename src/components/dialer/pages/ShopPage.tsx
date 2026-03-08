@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ShoppingBag, Package } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -39,42 +40,44 @@ export const ShopPage: React.FC = () => {
   const filtered = activeTab === 'alle' ? products : products.filter(p => p.category === activeTab);
 
   return (
-    <div className="flex flex-col p-8 gap-7 overflow-y-auto flex-1 animate-fade-in">
+    <div className="flex flex-col p-8 gap-6 overflow-y-auto flex-1 animate-fade-in">
       <div>
-        <h1 className="font-heading font-extrabold text-[26px] tracking-tight">🛍️ Produktshop</h1>
-        <p className="text-sm text-muted-foreground mt-1">Vælg en eller flere løsninger der passer bedst til dine kunders behov</p>
+        <h1 className="font-heading font-bold text-xl tracking-tight">Produktshop</h1>
+        <p className="text-[13px] text-muted-foreground/60 mt-1">Vælg løsninger der passer til dine kunders behov</p>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         {tabs.map(t => {
           const count = t.id === 'alle' ? products.length : products.filter(p => p.category === t.id).length;
           return (
             <button
               key={t.id}
               onClick={() => setActiveTab(t.id)}
-              className={`px-5 py-2 rounded-full text-sm cursor-pointer font-body font-medium border-none
-                transition-all duration-300 ease-out
+              className={`px-4 py-1.5 rounded-lg text-[13px] cursor-pointer font-body font-medium border-none
+                transition-all duration-200 ease-out
                 ${activeTab === t.id
-                  ? 'bg-primary text-primary-foreground shadow-[0_2px_8px_hsl(217_91%_60%/0.25)]'
-                  : 'bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground'}`}
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-secondary/60 text-muted-foreground hover:bg-secondary hover:text-foreground'}`}
             >
-              {t.label} {count}
+              {t.label} ({count})
             </button>
           );
         })}
       </div>
       {loading ? (
-        <div className="text-muted-foreground text-sm">Indlæser produkter...</div>
+        <div className="text-muted-foreground text-[13px]">Indlæser produkter...</div>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-5">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
           {filtered.map((p, i) => (
-            <div key={p.id} className="card-surface hover-lift rounded-2xl p-6" style={{ animationDelay: `${i * 80}ms` }}>
-              <div className="text-3xl mb-4">{p.icon}</div>
-              <div className="font-heading font-bold text-base tracking-tight">{p.name}</div>
-              <div className="text-sm text-muted-foreground mt-1.5 mb-5 leading-relaxed">{p.description}</div>
-              <div className="font-heading font-extrabold text-xl text-primary">
-                {p.price} <span className="text-sm text-muted-foreground font-body font-normal">{p.price_type}</span>
+            <div key={p.id} className="card-surface hover-lift rounded-xl p-5" style={{ animationDelay: `${i * 60}ms` }}>
+              <div className="w-10 h-10 rounded-xl bg-secondary flex items-center justify-center mb-3">
+                <Package size={18} className="text-muted-foreground" strokeWidth={1.8} />
               </div>
-              <div className="text-xs text-success font-medium mt-1.5">{p.provision}</div>
+              <div className="font-heading font-bold text-[14px] tracking-tight">{p.name}</div>
+              <div className="text-[13px] text-muted-foreground/60 mt-1 mb-4 leading-relaxed line-clamp-2">{p.description}</div>
+              <div className="font-heading font-bold text-lg text-primary">
+                {p.price} <span className="text-[12px] text-muted-foreground/50 font-body font-normal">{p.price_type}</span>
+              </div>
+              {p.provision && <div className="text-[11px] text-success font-medium mt-1">{p.provision}</div>}
             </div>
           ))}
         </div>

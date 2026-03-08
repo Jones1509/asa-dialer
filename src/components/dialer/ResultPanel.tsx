@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lead } from '@/types/leads';
+import { Save, SkipForward, DollarSign, ThumbsUp, RefreshCw, ThumbsDown, PhoneOff, Voicemail, XCircle } from 'lucide-react';
 
 interface ResultPanelProps {
   lead: Lead | null;
@@ -8,13 +9,13 @@ interface ResultPanelProps {
 }
 
 const outcomes = [
-  { id: 'sale', icon: '💰', label: 'Salg', color: 'bg-success/10 text-success border-success/30' },
-  { id: 'interested', icon: '👍', label: 'Interesseret', color: 'bg-primary/10 text-primary border-primary/30' },
-  { id: 'callback', icon: '🔄', label: 'Genopkald', color: 'bg-info/10 text-info border-info/30' },
-  { id: 'not_interested', icon: '👎', label: 'Ikke interesseret', color: 'bg-destructive/10 text-destructive border-destructive/30' },
-  { id: 'no_answer', icon: '📵', label: 'Ingen svar', color: 'bg-warning/10 text-warning border-warning/30' },
-  { id: 'voicemail', icon: '📞', label: 'Telefonsvarer', color: 'bg-muted text-muted-foreground border-border' },
-  { id: 'wrong_number', icon: '❌', label: 'Forkert nummer', color: 'bg-destructive/10 text-destructive border-destructive/30' },
+  { id: 'sale', icon: DollarSign, label: 'Salg', color: 'bg-success/10 text-success border-success/20' },
+  { id: 'interested', icon: ThumbsUp, label: 'Interesseret', color: 'bg-primary/10 text-primary border-primary/20' },
+  { id: 'callback', icon: RefreshCw, label: 'Genopkald', color: 'bg-info/10 text-info border-info/20' },
+  { id: 'not_interested', icon: ThumbsDown, label: 'Ikke interesseret', color: 'bg-destructive/8 text-destructive/80 border-destructive/15' },
+  { id: 'no_answer', icon: PhoneOff, label: 'Ingen svar', color: 'bg-warning/10 text-warning border-warning/20' },
+  { id: 'voicemail', icon: Voicemail, label: 'Telefonsvarer', color: 'bg-muted text-muted-foreground border-border/50' },
+  { id: 'wrong_number', icon: XCircle, label: 'Forkert nummer', color: 'bg-destructive/8 text-destructive/80 border-destructive/15' },
 ];
 
 export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }) => {
@@ -28,8 +29,8 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }
 
   if (!lead) {
     return (
-      <div className="w-[300px] border-l border-border/50 p-6 flex items-center justify-center shrink-0 bg-card">
-        <div className="text-muted-foreground text-sm">Ingen emne valgt</div>
+      <div className="w-[280px] border-l border-border/40 p-5 flex items-center justify-center shrink-0 bg-card">
+        <div className="text-muted-foreground text-[13px]">Ingen emne valgt</div>
       </div>
     );
   }
@@ -42,54 +43,56 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }
   };
 
   return (
-    <div className="w-[300px] border-l border-border/50 p-6 flex flex-col gap-5 shrink-0 overflow-y-auto bg-card">
-      <div className="font-heading font-bold text-[15px] pb-3 border-b border-border/50 tracking-tight flex items-center gap-2">
-        📋 Resultat
+    <div className="w-[280px] border-l border-border/40 p-5 flex flex-col gap-4 shrink-0 overflow-y-auto bg-card">
+      <div className="font-heading font-bold text-[14px] pb-3 border-b border-border/40 tracking-tight">
+        Resultat
       </div>
 
-      {/* Notes */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         <label className="label-clean">Noter</label>
         <textarea
-          className="input-clean resize-none h-28"
+          className="input-clean resize-none h-24 text-[13px]"
           value={note}
           onChange={e => setNote(e.target.value)}
           placeholder="Skriv noter om samtalen..."
         />
       </div>
 
-      {/* Outcome selection */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1.5">
         <label className="label-clean">Udfald</label>
-        <div className="grid grid-cols-1 gap-1.5">
-          {outcomes.map(o => (
-            <button
-              key={o.id}
-              onClick={() => setSelectedOutcome(o.id)}
-              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-sm font-medium cursor-pointer transition-all duration-200
-                ${selectedOutcome === o.id
-                  ? `${o.color} border-2 scale-[1.02]`
-                  : 'bg-transparent border-border/50 text-foreground/70 hover:bg-secondary/50'
-                }`}
-            >
-              <span>{o.icon}</span>
-              <span>{o.label}</span>
-            </button>
-          ))}
+        <div className="grid grid-cols-1 gap-1">
+          {outcomes.map(o => {
+            const Icon = o.icon;
+            return (
+              <button
+                key={o.id}
+                onClick={() => setSelectedOutcome(o.id)}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-[13px] font-medium cursor-pointer transition-all duration-150
+                  ${selectedOutcome === o.id
+                    ? `${o.color} border-2 shadow-sm`
+                    : 'bg-transparent border-border/30 text-foreground/65 hover:bg-secondary/40 hover:text-foreground/80'
+                  }`}
+              >
+                <Icon size={14} strokeWidth={2} />
+                <span>{o.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Save */}
       <button
         onClick={handleSave}
         disabled={!selectedOutcome}
-        className={`btn-primary-smooth flex items-center justify-center gap-2 transition-opacity ${!selectedOutcome ? 'opacity-50 cursor-not-allowed' : ''}`}
+        className={`btn-primary-smooth flex items-center justify-center gap-2 text-[13px] ${!selectedOutcome ? 'opacity-40 cursor-not-allowed' : ''}`}
       >
-        💾 Gem & næste
+        <Save size={14} strokeWidth={2} />
+        Gem & næste
       </button>
 
-      <button className="btn-ghost-smooth flex items-center justify-center gap-2" onClick={onNext}>
-        ⏭ Spring over
+      <button className="btn-ghost-smooth flex items-center justify-center gap-1.5 text-[13px]" onClick={onNext}>
+        <SkipForward size={14} strokeWidth={2} />
+        Spring over
       </button>
     </div>
   );
