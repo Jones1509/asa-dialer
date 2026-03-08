@@ -26,20 +26,20 @@ export const TetrisPage: React.FC = () => {
   const [lastClear, setLastClear] = useState<string | null>(null);
   const [highScores, setHighScores] = useState<HighScore[]>([]);
   const [scoreSaved, setScoreSaved] = useState(false);
-  const [blockSize, setBlockSize] = useState(24);
+  const [blockSize, setBlockSize] = useState(20);
   const animFrameRef = useRef<number>(0);
   const lastDropRef = useRef<number>(0);
   const particlesRef = useRef<Particle[]>([]);
   const starsRef = useRef<{ x: number; y: number; size: number; speed: number; opacity: number }[]>([]);
   const shakeRef = useRef({ x: 0, y: 0, intensity: 0 });
 
-  // Auto-scale block size
+  // Auto-scale: fit game inside available space (leave room for header, padding, side panels)
   useEffect(() => {
     const resize = () => {
-      const maxH = window.innerHeight - 200;
-      const maxW = (window.innerWidth - 68 - 400) * 0.55; // sidebar + side panels
-      const bs = Math.floor(Math.min(maxH / ROWS, maxW / COLS, 28));
-      setBlockSize(Math.max(16, bs));
+      const maxH = window.innerHeight - 240; // header + padding
+      const maxW = (window.innerWidth - 68 - 260 - 240) * 0.5; // sidebar + highscore panel + side game panels
+      const bs = Math.floor(Math.min(maxH / ROWS, maxW / COLS, 22));
+      setBlockSize(Math.max(14, bs));
     };
     resize();
     window.addEventListener('resize', resize);
@@ -243,121 +243,136 @@ export const TetrisPage: React.FC = () => {
   const medalColors = ['#ffd60a', '#c0c0c0', '#cd7f32'];
 
   return (
-    <div className="flex-1 flex overflow-hidden" style={{ background: 'radial-gradient(ellipse at center, #0a0e1a, #030508)' }}>
-      {/* Ambient */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/3 w-72 h-72 rounded-full opacity-[0.025] animate-pulse" style={{ background: 'radial-gradient(circle, #00d4ff, transparent 70%)' }} />
-        <div className="absolute bottom-1/3 right-1/4 w-72 h-72 rounded-full opacity-[0.025] animate-pulse" style={{ background: 'radial-gradient(circle, #bf5af2, transparent 70%)', animationDelay: '1s' }} />
-      </div>
+    <div className="flex-1 flex overflow-hidden bg-background">
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col overflow-hidden p-5">
+        {/* Page header */}
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(263 70% 50%))', boxShadow: '0 4px 14px hsl(var(--primary) / 0.3)' }}>
+            <Gamepad2 size={18} className="text-primary-foreground" strokeWidth={1.5} />
+          </div>
+          <div>
+            <h1 className="font-heading font-bold text-base text-foreground tracking-tight">Tetris Lounge</h1>
+            <p className="text-[11px] text-muted-foreground">Slå dine kollegaers highscores</p>
+          </div>
+        </div>
 
-      {/* Game section */}
-      <div className="flex-1 flex items-center justify-center relative z-10" ref={containerRef}>
-        <div className="flex gap-3 items-start">
-          {/* Left — Hold + Controls */}
-          <div className="flex flex-col gap-2" style={{ width: 100 }}>
-            {renderPiecePreview(holdPiece, 'Hold (C)')}
-            <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
-              <div className="text-[8px] text-white/20 uppercase tracking-[0.15em] font-medium mb-1.5">Kontroller</div>
-              <div className="space-y-1 text-[9px] text-white/25">
-                {[['←→', 'Flyt'], ['↑', 'Rotér'], ['↓', 'Drop'], ['⎵', 'Hard'], ['C', 'Hold'], ['P', 'Pause']].map(([k, l]) => (
-                  <div key={k} className="flex items-center gap-1.5">
-                    <kbd className="px-1 py-0.5 rounded text-[7px] bg-white/5 text-white/35 font-mono min-w-[18px] text-center">{k}</kbd>
-                    <span>{l}</span>
+        {/* Game card */}
+        <div className="flex-1 rounded-2xl overflow-hidden flex items-center justify-center relative"
+          style={{ background: 'radial-gradient(ellipse at center, #0c1020, #060810)', border: '1px solid hsl(var(--border) / 0.3)' }}>
+          
+          {/* Ambient glows */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/3 w-52 h-52 rounded-full opacity-[0.03] animate-pulse" style={{ background: 'radial-gradient(circle, #00d4ff, transparent 70%)' }} />
+            <div className="absolute bottom-1/3 right-1/4 w-52 h-52 rounded-full opacity-[0.03] animate-pulse" style={{ background: 'radial-gradient(circle, #bf5af2, transparent 70%)', animationDelay: '1s' }} />
+          </div>
+
+          <div className="flex gap-3 items-start relative z-10" ref={containerRef}>
+            {/* Left — Hold + Controls */}
+            <div className="flex flex-col gap-2" style={{ width: 90 }}>
+              {renderPiecePreview(holdPiece, 'Hold (C)')}
+              <div className="rounded-lg px-2 py-2" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }}>
+                <div className="text-[7px] text-white/20 uppercase tracking-[0.15em] font-medium mb-1">Kontroller</div>
+                <div className="space-y-0.5 text-[8px] text-white/25">
+                  {[['←→', 'Flyt'], ['↑', 'Rotér'], ['↓', 'Drop'], ['⎵', 'Hard'], ['C', 'Hold'], ['P', 'Pause']].map(([k, l]) => (
+                    <div key={k} className="flex items-center gap-1">
+                      <kbd className="px-1 py-0.5 rounded text-[6px] bg-white/5 text-white/30 font-mono min-w-[14px] text-center">{k}</kbd>
+                      <span>{l}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Canvas */}
+            <div className="relative">
+              <canvas ref={canvasRef} width={COLS * BLOCK} height={ROWS * BLOCK} className="rounded-xl"
+                style={{ border: '1px solid rgba(100,140,255,0.08)', boxShadow: '0 0 40px rgba(0,212,255,0.03), inset 0 0 20px rgba(0,0,0,0.4)' }} />
+              {lastClear && (
+                <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none animate-scale-in">
+                  <div className="font-heading font-black text-xl text-white px-4 py-2 rounded-xl text-center whitespace-nowrap"
+                    style={{ background: lastClear.includes('TETRIS') ? 'linear-gradient(135deg, rgba(255,214,10,0.9), rgba(255,159,10,0.9))' : 'linear-gradient(135deg, rgba(0,212,255,0.85), rgba(191,90,242,0.85))', textShadow: '0 2px 6px rgba(0,0,0,0.4)' }}>
+                    {lastClear}
                   </div>
-                ))}
-              </div>
+                </div>
+              )}
+              {paused && !gameOver && (
+                <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl" style={{ background: 'rgba(5,8,15,0.85)', backdropFilter: 'blur(6px)' }}>
+                  <div className="text-center">
+                    <Pause size={20} className="text-cyan-400 mx-auto mb-1.5" />
+                    <div className="font-heading font-bold text-sm" style={{ background: 'linear-gradient(135deg, #00d4ff, #bf5af2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAUSE</div>
+                    <div className="text-white/25 text-[9px] mt-1">Tryk P</div>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
 
-          {/* Canvas */}
-          <div className="relative">
-            <canvas ref={canvasRef} width={COLS * BLOCK} height={ROWS * BLOCK} className="rounded-xl"
-              style={{ border: '1px solid rgba(100,140,255,0.08)', boxShadow: '0 0 60px rgba(0,212,255,0.04), inset 0 0 30px rgba(0,0,0,0.4)' }} />
-            {lastClear && (
-              <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 pointer-events-none animate-scale-in">
-                <div className="font-heading font-black text-2xl text-white px-5 py-2.5 rounded-xl text-center whitespace-nowrap"
-                  style={{ background: lastClear.includes('TETRIS') ? 'linear-gradient(135deg, rgba(255,214,10,0.9), rgba(255,159,10,0.9))' : 'linear-gradient(135deg, rgba(0,212,255,0.85), rgba(191,90,242,0.85))', textShadow: '0 2px 8px rgba(0,0,0,0.4)' }}>
-                  {lastClear}
+            {/* Right — Stats */}
+            <div className="flex flex-col gap-2" style={{ width: 100 }}>
+              {renderPiecePreview(nextPiece, 'Næste')}
+              <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div className="flex items-center gap-1 mb-0.5"><Trophy size={7} className="text-yellow-400/60" /><span className="text-[7px] text-white/25 uppercase tracking-[0.15em]">Score</span></div>
+                <div className="font-heading font-black text-sm" style={{ background: 'linear-gradient(135deg, #ffd60a, #ff9f0a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{score.toLocaleString()}</div>
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                <div className="rounded-lg px-1.5 py-1.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div className="flex items-center gap-0.5"><Zap size={6} className="text-cyan-400/50" /><span className="text-[6px] text-white/20 uppercase">Lvl</span></div>
+                  <div className="font-heading font-bold text-xs text-cyan-400">{level}</div>
+                </div>
+                <div className="rounded-lg px-1.5 py-1.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div className="flex items-center gap-0.5"><Star size={6} className="text-purple-400/50" /><span className="text-[6px] text-white/20 uppercase">Linjer</span></div>
+                  <div className="font-heading font-bold text-xs text-purple-400">{lines}</div>
                 </div>
               </div>
-            )}
-            {paused && !gameOver && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl" style={{ background: 'rgba(5,8,15,0.85)', backdropFilter: 'blur(6px)' }}>
-                <div className="text-center">
-                  <Pause size={24} className="text-cyan-400 mx-auto mb-2" />
-                  <div className="font-heading font-bold text-base" style={{ background: 'linear-gradient(135deg, #00d4ff, #bf5af2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PAUSE</div>
-                  <div className="text-white/25 text-[10px] mt-1">Tryk P</div>
+              {combo > 1 && (
+                <div className="rounded-lg px-2 py-1 text-center animate-scale-in relative overflow-hidden" style={{ border: '1px solid rgba(255,159,10,0.25)' }}>
+                  <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,159,10,0.08), rgba(255,55,95,0.08))' }} />
+                  <div className="relative text-[9px] font-black uppercase tracking-wider" style={{ background: 'linear-gradient(135deg, #ff9f0a, #ff375f)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>🔥 ×{combo}</div>
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right — Stats */}
-          <div className="flex flex-col gap-2" style={{ width: 110 }}>
-            {renderPiecePreview(nextPiece, 'Næste')}
-            <div className="rounded-lg px-2.5 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <div className="flex items-center gap-1 mb-0.5"><Trophy size={8} className="text-yellow-400/60" /><span className="text-[8px] text-white/25 uppercase tracking-[0.15em]">Score</span></div>
-              <div className="font-heading font-black text-base" style={{ background: 'linear-gradient(135deg, #ffd60a, #ff9f0a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{score.toLocaleString()}</div>
+              )}
+              <button onClick={togglePause} className="rounded-lg px-2 py-1.5 text-[9px] flex items-center justify-center gap-1 font-semibold transition-all duration-200 active:scale-95 cursor-pointer border text-white/50 hover:text-white/80" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' }}>
+                {paused ? <><Play size={10} /> Fortsæt</> : <><Pause size={10} /> Pause</>}
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              <div className="rounded-lg px-2 py-1.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="flex items-center gap-0.5"><Zap size={7} className="text-cyan-400/50" /><span className="text-[7px] text-white/20 uppercase">Lvl</span></div>
-                <div className="font-heading font-bold text-sm text-cyan-400">{level}</div>
-              </div>
-              <div className="rounded-lg px-2 py-1.5" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <div className="flex items-center gap-0.5"><Star size={7} className="text-purple-400/50" /><span className="text-[7px] text-white/20 uppercase">Linjer</span></div>
-                <div className="font-heading font-bold text-sm text-purple-400">{lines}</div>
-              </div>
-            </div>
-            {combo > 1 && (
-              <div className="rounded-lg px-2 py-1.5 text-center animate-scale-in relative overflow-hidden" style={{ border: '1px solid rgba(255,159,10,0.25)' }}>
-                <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,159,10,0.08), rgba(255,55,95,0.08))' }} />
-                <div className="relative text-[10px] font-black uppercase tracking-wider" style={{ background: 'linear-gradient(135deg, #ff9f0a, #ff375f)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>🔥 ×{combo}</div>
-              </div>
-            )}
-            <button onClick={togglePause} className="rounded-lg px-2 py-1.5 text-[10px] flex items-center justify-center gap-1 font-semibold transition-all duration-200 active:scale-95 cursor-pointer border text-white/50 hover:text-white/80" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' }}>
-              {paused ? <><Play size={11} /> Fortsæt</> : <><Pause size={11} /> Pause</>}
-            </button>
           </div>
         </div>
       </div>
 
-      {/* Highscore panel */}
-      <div className="w-[220px] border-l flex flex-col py-5 px-4 shrink-0" style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
+      {/* Highscore sidebar */}
+      <div className="w-[200px] border-l border-border/40 flex flex-col py-5 px-3.5 shrink-0 bg-card">
         <div className="flex items-center gap-2 mb-4">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #ffd60a, #ff9f0a)', boxShadow: '0 0 15px rgba(255,214,10,0.2)' }}>
-            <Crown size={14} className="text-white" strokeWidth={2} />
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #ffd60a, #ff9f0a)', boxShadow: '0 2px 10px rgba(255,214,10,0.15)' }}>
+            <Crown size={13} className="text-white" strokeWidth={2} />
           </div>
           <div>
-            <div className="font-heading font-bold text-xs text-white/80 tracking-tight">Highscores</div>
-            <div className="text-[9px] text-white/25">Top 10</div>
+            <div className="font-heading font-bold text-xs text-foreground tracking-tight">Highscores</div>
+            <div className="text-[9px] text-muted-foreground">Top 10</div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-1.5">
           {highScores.length === 0 && (
-            <div className="text-center text-white/15 text-[11px] mt-8">Ingen scores endnu</div>
+            <div className="text-center text-muted-foreground/50 text-[11px] mt-8">Ingen scores endnu</div>
           )}
           {highScores.map((hs, i) => (
-            <div key={hs.id} className="rounded-lg px-3 py-2 flex items-center gap-2.5 transition-all"
-              style={{ background: i < 3 ? `rgba(${i === 0 ? '255,214,10' : i === 1 ? '192,192,192' : '205,127,50'},0.06)` : 'rgba(255,255,255,0.02)', border: `1px solid ${i < 3 ? `rgba(${i === 0 ? '255,214,10' : i === 1 ? '192,192,192' : '205,127,50'},0.12)` : 'rgba(255,255,255,0.04)'}` }}>
+            <div key={hs.id} className="rounded-lg px-2.5 py-2 flex items-center gap-2 transition-all bg-secondary/50 border border-border/30">
               <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
-                style={{ background: i < 3 ? `rgba(${i === 0 ? '255,214,10' : i === 1 ? '192,192,192' : '205,127,50'},0.2)` : 'rgba(255,255,255,0.05)', color: i < 3 ? medalColors[i] : 'rgba(255,255,255,0.3)' }}>
+                style={{ background: i < 3 ? `rgba(${i === 0 ? '255,214,10' : i === 1 ? '192,192,192' : '205,127,50'},0.15)` : 'hsl(var(--muted))', color: i < 3 ? medalColors[i] : 'hsl(var(--muted-foreground))' }}>
                 {i + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[11px] font-semibold text-white/70 truncate">{hs.player_name}</div>
-                <div className="text-[9px] text-white/25">Lvl {hs.level} · {hs.lines_cleared} linjer</div>
+                <div className="text-[10px] font-semibold text-foreground/80 truncate">{hs.player_name}</div>
+                <div className="text-[8px] text-muted-foreground">Lvl {hs.level} · {hs.lines_cleared} linjer</div>
               </div>
-              <div className="text-[11px] font-bold tabular-nums shrink-0" style={{ color: i < 3 ? medalColors[i] : 'rgba(255,255,255,0.4)' }}>
+              <div className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: i < 3 ? medalColors[i] : 'hsl(var(--muted-foreground))' }}>
                 {hs.score.toLocaleString()}
               </div>
             </div>
           ))}
         </div>
 
-        <div className="mt-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-          <div className="text-[8px] text-white/15 uppercase tracking-[0.15em] text-center">
+        <div className="mt-3 pt-3 border-t border-border/30">
+          <div className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.15em] text-center">
             Spil for at komme på listen
           </div>
         </div>
