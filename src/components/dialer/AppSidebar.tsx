@@ -51,6 +51,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onL
         );
       })}
       <div className="flex-1" />
+      <SpotifyPlayer />
       {isAdmin && onAdminNav && (
         <button
           onClick={onAdminNav}
