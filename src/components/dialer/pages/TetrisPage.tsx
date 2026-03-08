@@ -333,6 +333,9 @@ export const TetrisPage: React.FC = () => {
               <button onClick={togglePause} className="rounded-lg px-2 py-1.5 text-[9px] flex items-center justify-center gap-1 font-semibold transition-all duration-200 active:scale-95 cursor-pointer border text-white/50 hover:text-white/80" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' }}>
                 {paused ? <><Play size={10} /> Fortsæt</> : <><Pause size={10} /> Pause</>}
               </button>
+              <button onClick={() => initGame()} className="rounded-lg px-2 py-1.5 text-[9px] flex items-center justify-center gap-1 font-semibold transition-all duration-200 active:scale-95 cursor-pointer border text-white/50 hover:text-white/80" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' }}>
+                🔄 Genstart
+              </button>
             </div>
           </div>
         </div>
