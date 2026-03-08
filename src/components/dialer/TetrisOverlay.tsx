@@ -8,6 +8,7 @@ interface TetrisOverlayProps {
   callSeconds: number;
   formatTime: (s: number) => string;
   onEndCall: () => void;
+  activeDialNumber?: string | null;
 }
 
 const COLS = 10, ROWS = 20, BLOCK = 20;
@@ -19,7 +20,7 @@ const PIECES = [
 ];
 
 export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
-  visible, currentLead, callSeconds, formatTime, onEndCall,
+  visible, currentLead, callSeconds, formatTime, onEndCall, activeDialNumber,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const gameRef = useRef<any>({});
@@ -150,8 +151,12 @@ export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
           <Phone size={15} className="text-success" strokeWidth={2} />
         </div>
         <div>
-          <div className="font-heading font-bold text-[14px] tracking-tight">{currentLead.company}</div>
-          <div className="text-[12px] text-muted-foreground/50 tabular-nums">{currentLead.phone}</div>
+          <div className="font-heading font-bold text-[14px] tracking-tight">
+            {activeDialNumber && activeDialNumber !== currentLead.phone ? 'Manuel opkald' : currentLead.company}
+          </div>
+          <div className="text-[12px] text-muted-foreground/50 tabular-nums">
+            {activeDialNumber || currentLead.phone}
+          </div>
         </div>
         <div className="font-heading font-bold text-[14px] text-primary ml-auto tabular-nums tracking-wider">{formatTime(callSeconds)}</div>
         <button onClick={onEndCall}

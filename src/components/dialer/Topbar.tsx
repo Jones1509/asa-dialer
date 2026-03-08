@@ -15,6 +15,7 @@ interface TopbarProps {
   onTwilioCall?: (number: string) => Promise<boolean>;
   onTwilioHangUp?: () => void;
   canMakeVoipCall?: boolean;
+  onActiveDialNumberChange?: (number: string | null) => void;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -25,10 +26,16 @@ export const Topbar: React.FC<TopbarProps> = ({
   onTwilioCall,
   onTwilioHangUp,
   canMakeVoipCall = false,
+  onActiveDialNumberChange,
 }) => {
   const [showManualDial, setShowManualDial] = useState(false);
   const [manualNumber, setManualNumber] = useState('');
-  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
+  const [activeDialNumber, _setActiveDialNumber] = useState<string | null>(null);
+
+  const setActiveDialNumber = (num: string | null) => {
+    _setActiveDialNumber(num);
+    onActiveDialNumberChange?.(num);
+  };
 
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
@@ -18,6 +18,7 @@ const Index = () => {
   const twilio = useTwilioDevice();
   const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
   const handleLogout = async () => {
     await signOut();
@@ -100,6 +101,7 @@ const Index = () => {
             onTwilioCall={twilio.makeCall}
             onTwilioHangUp={twilio.hangUp}
             canMakeVoipCall={twilio.canMakeVoipCall}
+            onActiveDialNumberChange={setActiveDialNumber}
           />
         )}
         <div className="flex-1 flex overflow-hidden">
@@ -113,6 +115,7 @@ const Index = () => {
           callSeconds={state.callSeconds}
           formatTime={state.formatTime}
           onEndCall={state.endCall}
+          activeDialNumber={activeDialNumber}
         />
       )}
       <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
