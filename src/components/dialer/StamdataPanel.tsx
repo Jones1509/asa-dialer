@@ -239,8 +239,6 @@ const InlineTetris: React.FC = () => {
 
   return (
     <div ref={containerRef} className="flex w-full h-full items-center justify-center relative">
-      {/* Hidden YouTube player */}
-      <div id="yt-inline-music" className="hidden" />
 
       {/* Ambient glows */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
