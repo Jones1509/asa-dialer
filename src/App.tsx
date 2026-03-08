@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 };
 
 const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading, isAdmin, isApproved } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
     return (
@@ -42,7 +42,6 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  if (!isApproved) return <Navigate to="/pending" replace />;
   if (!isAdmin) return <Navigate to="/" replace />;
 
   return <>{children}</>;
@@ -73,7 +72,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/pending" element={<PendingPage />} />
             <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
