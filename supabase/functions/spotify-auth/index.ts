@@ -180,12 +180,12 @@ serve(async (req) => {
     if (action === "status") {
       const { data: tokenRow } = await supabase
         .from("spotify_tokens")
-        .select("expires_at")
+        .select("expires_at, spotify_display_name")
         .eq("user_id", userId)
         .single();
 
       return new Response(
-        JSON.stringify({ connected: !!tokenRow }),
+        JSON.stringify({ connected: !!tokenRow, spotify_display_name: tokenRow?.spotify_display_name || null }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
