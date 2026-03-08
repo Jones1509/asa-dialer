@@ -101,12 +101,33 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
       device.on('unregistered', () => {
         console.log('[Twilio] Device unregistered, attempting re-register...');
         setStatus('offline');
-        // Auto-reconnect when unregistered
         setTimeout(() => {
           if (deviceRef.current === device) {
             device.register().catch(e => console.error('[Twilio] Re-register failed:', e));
           }
         }, 3000);
+      });
+
+      // Handle incoming calls
+      device.on('incoming', (call: Call) => {
+        console.log('[Twilio] Incoming call from:', call.parameters?.From);
+        activeCallRef.current = call;
+
+        call.on('disconnect', () => {
+          console.log('[Twilio] Incoming call disconnected');
+          activeCallRef.current = null;
+          options?.onCallDisconnected?.();
+        });
+        call.on('cancel', () => {
+          console.log('[Twilio] Incoming call cancelled');
+          activeCallRef.current = null;
+          options?.onCallDisconnected?.();
+        });
+
+        options?.onIncomingCall?.({
+          from: call.parameters?.From || 'Ukendt',
+          callObject: call,
+        });
       });
 
       device.on('tokenWillExpire', async () => {
