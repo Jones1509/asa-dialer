@@ -83,8 +83,9 @@ export function useSpotify() {
       show_dialog: 'true',
     });
     const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    // Navigate directly to Spotify auth (not popup) so the callback has the auth session
-    window.location.href = authUrl;
+    // Force Spotify logout first so each user MUST enter their own credentials
+    // This prevents one user from accessing another user's Spotify account
+    window.location.href = `https://accounts.spotify.com/logout?continue=${encodeURIComponent(authUrl)}`;
   };
 
   const exchangeCode = async (code: string) => {
