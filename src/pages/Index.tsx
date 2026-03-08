@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
+import { useTwilioDevice } from '@/hooks/useTwilioDevice';
 import { AppSidebar } from '@/components/dialer/AppSidebar';
 import { Topbar } from '@/components/dialer/Topbar';
 import { TetrisOverlay } from '@/components/dialer/TetrisOverlay';
