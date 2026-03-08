@@ -165,7 +165,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       {callActive && (
         <button
           onClick={handleEndCall}
-          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100 animate-pulse"
+          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100"
           title="Afslut opkald"
         >
           <PhoneOff size={15} strokeWidth={2.2} />
