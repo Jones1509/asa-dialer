@@ -38,9 +38,9 @@ const AdminPage: React.FC = () => {
     <div className="flex min-h-screen h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center py-5 gap-1 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-destructive flex items-center justify-center font-heading font-extrabold text-[9px] text-destructive-foreground mb-6 tracking-widest"
-          style={{ boxShadow: '0 4px 14px hsl(0 72% 51% / 0.3)' }}>
-          ADM
+        <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-heading font-extrabold text-[9px] text-primary-foreground mb-6 tracking-widest"
+          style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.3)' }}>
+          ASA
         </div>
         {tabs.map(item => {
           const Icon = item.icon;
