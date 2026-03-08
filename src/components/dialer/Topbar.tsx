@@ -112,7 +112,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   };
 
   return (
-    <div className="h-[56px] bg-card border-b border-border/40 flex items-center px-5 gap-3.5 shrink-0"
+    <div className="h-[56px] bg-card border-b border-border/40 flex items-center justify-start px-5 gap-3.5 shrink-0"
       style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
       
       {/* Twilio status */}
