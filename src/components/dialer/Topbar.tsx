@@ -12,8 +12,9 @@ interface TopbarProps {
   onActivity: () => void;
   twilioStatus?: 'loading' | 'ready' | 'error' | 'offline';
   twilioError?: string | null;
-  onTwilioCall?: (number: string) => void;
+  onTwilioCall?: (number: string) => Promise<boolean>;
   onTwilioHangUp?: () => void;
+  canMakeVoipCall?: boolean;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -23,12 +24,11 @@ export const Topbar: React.FC<TopbarProps> = ({
   twilioError,
   onTwilioCall,
   onTwilioHangUp,
+  canMakeVoipCall = false,
 }) => {
   const [showManualDial, setShowManualDial] = useState(false);
   const [manualNumber, setManualNumber] = useState('');
   const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
-
-  const isTwilioReady = twilioStatus === 'ready';
 
   // The number currently being displayed — manual number takes priority when active
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
