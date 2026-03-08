@@ -5,6 +5,7 @@ import { AdminUsersTab } from '@/components/admin/AdminUsersTab';
 import { AdminCampaignsTab } from '@/components/admin/AdminCampaignsTab';
 import { AdminProductsTab } from '@/components/admin/AdminProductsTab';
 import { Users, LayoutGrid, ShoppingBag, Phone, LogOut } from 'lucide-react';
+import asaIcon from '@/assets/asa-icon.png';
 
 const tabs = [
   { id: 'users', icon: Users, label: 'Brugere' },
