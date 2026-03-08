@@ -151,8 +151,12 @@ export const TetrisOverlay: React.FC<TetrisOverlayProps> = ({
           <Phone size={15} className="text-success" strokeWidth={2} />
         </div>
         <div>
-          <div className="font-heading font-bold text-[14px] tracking-tight">{currentLead.company}</div>
-          <div className="text-[12px] text-muted-foreground/50 tabular-nums">{currentLead.phone}</div>
+          <div className="font-heading font-bold text-[14px] tracking-tight">
+            {activeDialNumber && activeDialNumber !== currentLead.phone ? 'Manuel opkald' : currentLead.company}
+          </div>
+          <div className="text-[12px] text-muted-foreground/50 tabular-nums">
+            {activeDialNumber || currentLead.phone}
+          </div>
         </div>
         <div className="font-heading font-bold text-[14px] text-primary ml-auto tabular-nums tracking-wider">{formatTime(callSeconds)}</div>
         <button onClick={onEndCall}
