@@ -146,7 +146,7 @@ const InlineTetris: React.FC = () => {
       ctx.beginPath(); ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2); ctx.fill();
     });
     // Grid
-    ctx.strokeStyle = 'rgba(100,140,255,0.04)'; ctx.lineWidth = 0.5;
+    ctx.strokeStyle = 'rgba(100,140,255,0.1)'; ctx.lineWidth = 0.5;
     for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(0, r * BLOCK); ctx.lineTo(w, r * BLOCK); ctx.stroke(); }
     for (let c = 0; c <= COLS; c++) { ctx.beginPath(); ctx.moveTo(c * BLOCK, 0); ctx.lineTo(c * BLOCK, h); ctx.stroke(); }
     if (!g.board) { ctx.restore(); return; }
