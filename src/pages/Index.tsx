@@ -15,7 +15,13 @@ import { SettingsPage } from '@/components/dialer/pages/SettingsPage';
 
 const Index = () => {
   const state = useDialerState();
-  const twilio = useTwilioDevice();
+  const twilio = useTwilioDevice({
+    onCallDisconnected: () => {
+      if (state.callActive) {
+        state.endCall();
+      }
+    },
+  });
   const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
