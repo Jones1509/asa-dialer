@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
+import { useTwilioDevice } from '@/hooks/useTwilioDevice';
 import { AppSidebar } from '@/components/dialer/AppSidebar';
 import { Topbar } from '@/components/dialer/Topbar';
 import { TetrisOverlay } from '@/components/dialer/TetrisOverlay';
@@ -14,6 +15,7 @@ import { SettingsPage } from '@/components/dialer/pages/SettingsPage';
 
 const Index = () => {
   const state = useDialerState();
+  const twilio = useTwilioDevice();
   const { signOut, isAdmin } = useAuth();
   const navigate = useNavigate();
 
@@ -93,6 +95,10 @@ const Index = () => {
             onStartCall={state.startCall}
             onEndCall={state.endCall}
             onActivity={() => state.showNotif('Aktivitet gemt')}
+            twilioStatus={twilio.status}
+            twilioError={twilio.error}
+            onTwilioCall={twilio.makeCall}
+            onTwilioHangUp={twilio.hangUp}
           />
         )}
         <div className="flex-1 flex overflow-hidden">
