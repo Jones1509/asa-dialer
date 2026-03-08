@@ -20,9 +20,12 @@ const navItems = [
 export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isAdmin, onAdminNav }) => {
   return (
     <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center py-5 gap-1 shrink-0">
-      <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center font-heading font-extrabold text-[10px] text-primary-foreground mb-6 tracking-wider"
-        style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.3)' }}>
-        ASA
+      <div className="flex flex-col items-center mb-6 gap-0.5">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center font-heading font-extrabold text-[11px] text-primary-foreground tracking-wider"
+          style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.35)' }}>
+          ASA
+        </div>
+        <span className="font-heading font-semibold text-[7px] tracking-[0.18em] uppercase text-primary/60">Dialer</span>
       </div>
       {navItems.map(item => {
         const Icon = item.icon;
