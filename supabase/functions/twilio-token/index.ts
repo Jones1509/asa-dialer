@@ -3,11 +3,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 async function getOrCreateConfig(supabaseAdmin: any) {
-  // Check if we already have API key and TwiML app stored
   const { data: configs } = await supabaseAdmin
     .from('twilio_config')
     .select('key, value');
@@ -23,7 +22,6 @@ async function getOrCreateConfig(supabaseAdmin: any) {
   const authToken = Deno.env.get('TWILIO_AUTH_TOKEN')!;
   const authHeader = btoa(`${accountSid}:${authToken}`);
 
-  // Create TwiML App if not exists
   if (!configMap['twiml_app_sid']) {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const voiceUrl = `${supabaseUrl}/functions/v1/twilio-voice`;
@@ -50,7 +48,6 @@ async function getOrCreateConfig(supabaseAdmin: any) {
     await supabaseAdmin.from('twilio_config').upsert({ key: 'twiml_app_sid', value: app.sid }, { onConflict: 'key' });
   }
 
-  // Create API Key if not exists
   if (!configMap['api_key_sid'] || !configMap['api_key_secret']) {
     const res = await fetch(
       `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Keys.json`,
@@ -84,7 +81,6 @@ function generateAccessToken(
   identity: string,
   twimlAppSid: string
 ): string {
-  // Build JWT manually for Twilio Access Token
   const header = { alg: 'HS256', typ: 'JWT', cty: 'twilio-fpa;v=1' };
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -113,11 +109,9 @@ function generateAccessToken(
   const payloadB64 = encode(payload);
   const signingInput = `${headerB64}.${payloadB64}`;
 
-  // HMAC-SHA256
   const keyData = new TextEncoder().encode(apiKeySecret);
   const data = new TextEncoder().encode(signingInput);
   
-  // Use Web Crypto API
   return (async () => {
     const cryptoKey = await crypto.subtle.importKey(
       'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
@@ -135,10 +129,12 @@ serve(async (req) => {
   }
 
   try {
-    // Verify user is authenticated
+    console.log('[twilio-token] Request received');
+    
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.error('[twilio-token] No auth header');
+      return new Response(JSON.stringify({ error: 'Missing authorization header' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -148,24 +144,30 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 
-    // Verify user
+    // Validate user token explicitly (verify_jwt is false)
+    const token = authHeader.replace('Bearer ', '');
     const userClient = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
     });
-    const { data: { user }, error: userError } = await userClient.auth.getUser();
+    
+    const { data: { user }, error: userError } = await userClient.auth.getUser(token);
     if (userError || !user) {
+      console.error('[twilio-token] Auth failed:', userError?.message || 'No user');
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    console.log('[twilio-token] Authenticated user:', user.id);
+
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')!;
 
     const config = await getOrCreateConfig(adminClient);
+    console.log('[twilio-token] Config loaded, generating token...');
     
-    const token = await generateAccessToken(
+    const twilioToken = await generateAccessToken(
       accountSid,
       config['api_key_sid'],
       config['api_key_secret'],
@@ -173,11 +175,13 @@ serve(async (req) => {
       config['twiml_app_sid']
     );
 
-    return new Response(JSON.stringify({ token, identity: user.id }), {
+    console.log('[twilio-token] Token generated successfully');
+
+    return new Response(JSON.stringify({ token: twilioToken, identity: user.id }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error generating token:', error);
+    console.error('[twilio-token] Error:', error.message);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
