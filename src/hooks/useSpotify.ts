@@ -301,12 +301,35 @@ export function useSpotify() {
   };
 
   const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
-    if (!accessToken) return [];
-    try {
+    let token = accessToken;
+    if (!token) return [];
+    
+    const doFetch = async (t: string) => {
       const resp = await fetch(
         `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=50`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        { headers: { Authorization: `Bearer ${t}` } }
       );
+      return resp;
+    };
+
+    try {
+      let resp = await doFetch(token);
+      
+      // If 403/401, try refreshing the token and retry
+      if (resp.status === 403 || resp.status === 401) {
+        console.log('Spotify token expired/forbidden, refreshing...');
+        const newToken = await refreshToken();
+        if (newToken) {
+          token = newToken;
+          resp = await doFetch(newToken);
+        }
+      }
+      
+      if (!resp.ok) {
+        console.error('Fetch playlist tracks failed:', resp.status, await resp.text());
+        return [];
+      }
+      
       const data = await resp.json();
       return (data.items || [])
         .filter((item: any) => item.track)
