@@ -13,6 +13,7 @@ import { CampaignsPage } from '@/components/dialer/pages/CampaignsPage';
 import { ShopPage } from '@/components/dialer/pages/ShopPage';
 import { ReportsPage } from '@/components/dialer/pages/ReportsPage';
 import { SettingsPage } from '@/components/dialer/pages/SettingsPage';
+import { TetrisPage } from '@/components/dialer/pages/TetrisPage';
 
 const Index = () => {
   const state = useDialerState();
@@ -97,6 +98,7 @@ const Index = () => {
             showNotif={state.showNotif}
           />
         );
+      case 'tetris': return <TetrisPage />;
       default: return null;
     }
   };

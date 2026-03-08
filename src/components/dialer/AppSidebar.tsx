@@ -1,5 +1,5 @@
 import React from 'react';
-import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield } from 'lucide-react';
+import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2 } from 'lucide-react';
 
 interface SidebarProps {
   activePage: string;
@@ -15,6 +15,7 @@ const navItems = [
   { id: 'campaigns', icon: LayoutGrid, label: 'Kampagner' },
   { id: 'shop', icon: ShoppingBag, label: 'Produktshop' },
   { id: 'reports', icon: BarChart3, label: 'Rapporter' },
+  { id: 'tetris', icon: Gamepad2, label: 'Tetris' },
 ];
 
 export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isAdmin, onAdminNav }) => {
