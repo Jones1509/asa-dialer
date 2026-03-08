@@ -13,7 +13,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ tetrisEnabled, onTog
     <button
       onClick={onClick}
       className={`w-12 h-[26px] rounded-full border-none cursor-pointer relative transition-all duration-300 ease-out ${
-        on ? 'bg-primary shadow-[0_2px_8px_hsl(25_95%_53%/0.3)]' : 'bg-secondary'
+        on ? 'bg-primary shadow-[0_2px_8px_hsl(217_91%_60%/0.3)]' : 'bg-secondary'
       }`}
     >
       <span className={`absolute top-[3px] left-[3px] w-5 h-5 rounded-full bg-card shadow-sm transition-all duration-300 ease-out ${
@@ -31,18 +31,18 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ tetrisEnabled, onTog
         <div className="grid grid-cols-2 gap-5">
           <div className="flex flex-col gap-2">
             <label className="label-clean">Fornavn</label>
-            <input className="input-clean" defaultValue="J.rydendahl@gmail.com" />
+            <input className="input-clean" defaultValue="Jonas" />
           </div>
           <div className="flex flex-col gap-2">
             <label className="label-clean">Efternavn</label>
-            <input className="input-clean" defaultValue="Jonas Rydendahl" />
+            <input className="input-clean" defaultValue="Rydendahl" />
           </div>
         </div>
         <div className="flex flex-col gap-2">
           <label className="label-clean">Email</label>
           <input className="input-clean" defaultValue="j.rydendahl@gmail.com" />
         </div>
-        <button onClick={() => showNotif('💾 Profil gemt!')} className="btn-primary-smooth">
+        <button onClick={() => showNotif('💾 Profil gemt!')} className="btn-primary-smooth w-fit">
           💾 Gem profil
         </button>
       </div>

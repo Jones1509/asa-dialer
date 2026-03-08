@@ -11,8 +11,10 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ onSave, onNext, onVoic
   const [status, setStatus] = useState('Ubehandlet');
 
   return (
-    <div className="w-[320px] border-l border-border/50 p-6 flex flex-col gap-5 shrink-0 overflow-y-auto bg-card/50">
-      <div className="font-heading font-bold text-[15px] pb-3 border-b border-border/50 tracking-tight">📋 Resultatdata</div>
+    <div className="w-[300px] border-l border-border/50 p-6 flex flex-col gap-5 shrink-0 overflow-y-auto bg-card">
+      <div className="font-heading font-bold text-[15px] pb-3 border-b border-border/50 tracking-tight flex items-center gap-2">
+        📋 Resultatdata
+      </div>
       <div className="flex flex-col gap-2">
         <label className="label-clean">Note</label>
         <textarea
