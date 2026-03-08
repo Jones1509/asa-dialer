@@ -12,8 +12,9 @@ interface TopbarProps {
   onActivity: () => void;
   twilioStatus?: 'loading' | 'ready' | 'error' | 'offline';
   twilioError?: string | null;
-  onTwilioCall?: (number: string) => void;
+  onTwilioCall?: (number: string) => Promise<boolean>;
   onTwilioHangUp?: () => void;
+  canMakeVoipCall?: boolean;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -23,24 +24,29 @@ export const Topbar: React.FC<TopbarProps> = ({
   twilioError,
   onTwilioCall,
   onTwilioHangUp,
+  canMakeVoipCall = false,
 }) => {
   const [showManualDial, setShowManualDial] = useState(false);
   const [manualNumber, setManualNumber] = useState('');
   const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
-  const isTwilioReady = twilioStatus === 'ready';
-
   // The number currently being displayed — manual number takes priority when active
   const displayNumber = activeDialNumber || currentLead?.phone || '—';
 
-  const dialNumber = (number: string) => {
+  const dialNumber = async (number: string) => {
     if (!number) return;
     const cleanNumber = number.replace(/\s/g, '');
     console.log('=== DIALING ===', cleanNumber);
     setActiveDialNumber(cleanNumber);
-    if (isTwilioReady && onTwilioCall) {
-      onTwilioCall(cleanNumber);
-    } else {
+
+    let usedVoip = false;
+    if (canMakeVoipCall && onTwilioCall) {
+      usedVoip = await onTwilioCall(cleanNumber);
+    }
+    
+    if (!usedVoip) {
+      // Always fall back to tel: link
+      console.log('Using tel: fallback for:', cleanNumber);
       const telLink = document.createElement('a');
       telLink.href = `tel:${cleanNumber}`;
       telLink.click();
@@ -136,11 +142,11 @@ export const Topbar: React.FC<TopbarProps> = ({
             onClick={handleCallLead}
             disabled={twilioStatus === 'loading'}
             className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-100 ${
-              isTwilioReady
+              canMakeVoipCall
                 ? 'bg-success text-success-foreground hover:shadow-[0_0_16px_hsl(152_69%_41%/0.35)]'
                 : 'bg-success/60 text-success-foreground'
             }`}
-            title={isTwilioReady ? `Ring til ${currentLead.phone} via VoIP` : `Ring til ${currentLead.phone} via telefon`}
+            title={canMakeVoipCall ? `Ring til ${currentLead.phone} via VoIP` : `Ring til ${currentLead.phone} via telefon`}
           >
             <Phone size={15} strokeWidth={2.2} />
           </button>
@@ -214,7 +220,7 @@ export const Topbar: React.FC<TopbarProps> = ({
       {callActive && (
         <div className="flex items-center gap-2 bg-success/10 border border-success/20 rounded-lg px-3 py-1.5 text-[12px] font-medium text-success">
           <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
-          Opkald i gang {isTwilioReady ? '(VoIP)' : ''}
+          Opkald i gang {canMakeVoipCall ? '(VoIP)' : ''}
         </div>
       )}
 

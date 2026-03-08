@@ -7,9 +7,23 @@ type TwilioStatus = 'loading' | 'ready' | 'error' | 'offline';
 export function useTwilioDevice() {
   const [status, setStatus] = useState<TwilioStatus>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [micAllowed, setMicAllowed] = useState<boolean | null>(null);
   const deviceRef = useRef<Device | null>(null);
   const activeCallRef = useRef<Call | null>(null);
   const initAttemptedRef = useRef(false);
+
+  // Check mic permission on mount
+  useEffect(() => {
+    navigator.mediaDevices?.getUserMedia({ audio: true })
+      .then((stream) => {
+        // Got permission, stop the stream immediately
+        stream.getTracks().forEach(t => t.stop());
+        setMicAllowed(true);
+      })
+      .catch(() => {
+        setMicAllowed(false);
+      });
+  }, []);
 
   const initDevice = useCallback(async () => {
     try {
@@ -41,7 +55,6 @@ export function useTwilioDevice() {
 
       const { token } = await response.json();
 
-      // Destroy existing device
       if (deviceRef.current) {
         deviceRef.current.destroy();
       }
@@ -63,16 +76,13 @@ export function useTwilioDevice() {
       });
 
       device.on('unregistered', () => {
-        console.log('Twilio Device unregistered');
         setStatus('offline');
       });
 
       device.on('tokenWillExpire', async () => {
-        console.log('Twilio token expiring, refreshing...');
         try {
           const { data: { session: newSession } } = await supabase.auth.getSession();
           if (!newSession) return;
-          
           const res = await fetch(
             `https://${projectId}.supabase.co/functions/v1/twilio-token`,
             {
@@ -105,7 +115,6 @@ export function useTwilioDevice() {
       initAttemptedRef.current = true;
       initDevice();
     }
-
     return () => {
       if (deviceRef.current) {
         deviceRef.current.destroy();
@@ -114,19 +123,25 @@ export function useTwilioDevice() {
     };
   }, [initDevice]);
 
-  const makeCall = useCallback(async (phoneNumber: string) => {
+  const makeCall = useCallback(async (phoneNumber: string): Promise<boolean> => {
+    // If mic is not allowed, don't even try Twilio — return false so caller uses tel: fallback
+    if (!micAllowed) {
+      console.log('Mic not allowed, skipping Twilio');
+      return false;
+    }
+
     if (!deviceRef.current || status !== 'ready') {
       console.error('Device not ready, status:', status);
-      return null;
+      return false;
     }
 
     try {
       const call = await deviceRef.current.connect({
         params: { To: phoneNumber },
       });
-      
+
       activeCallRef.current = call;
-      
+
       call.on('disconnect', () => {
         console.log('Call disconnected');
         activeCallRef.current = null;
@@ -137,12 +152,12 @@ export function useTwilioDevice() {
         activeCallRef.current = null;
       });
 
-      return call;
+      return true;
     } catch (err) {
       console.error('Failed to connect call:', err);
-      return null;
+      return false;
     }
-  }, [status]);
+  }, [status, micAllowed]);
 
   const hangUp = useCallback(() => {
     if (activeCallRef.current) {
@@ -151,11 +166,16 @@ export function useTwilioDevice() {
     }
   }, []);
 
+  // canMakeVoipCall is true only when device is ready AND mic is allowed
+  const canMakeVoipCall = status === 'ready' && micAllowed === true;
+
   return {
     status,
     error,
     makeCall,
     hangUp,
     reinitialize: initDevice,
+    micAllowed,
+    canMakeVoipCall,
   };
 }

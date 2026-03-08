@@ -99,6 +99,7 @@ const Index = () => {
             twilioError={twilio.error}
             onTwilioCall={twilio.makeCall}
             onTwilioHangUp={twilio.hangUp}
+            canMakeVoipCall={twilio.canMakeVoipCall}
           />
         )}
         <div className="flex-1 flex overflow-hidden">
