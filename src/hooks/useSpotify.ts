@@ -83,20 +83,8 @@ export function useSpotify() {
       show_dialog: 'true',
     });
     const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    
-    // First log out of any existing Spotify session, then redirect to auth
-    // This prevents users from accidentally connecting to someone else's Spotify
-    const popup = window.open('https://accounts.spotify.com/logout', '_blank', 'noopener,noreferrer,width=500,height=600');
-    
-    // After logout completes, redirect to auth URL
-    setTimeout(() => {
-      if (popup && !popup.closed) {
-        popup.location.href = authUrl;
-      } else {
-        // If popup was blocked or closed, open auth directly
-        window.open(authUrl, '_blank', 'noopener,noreferrer');
-      }
-    }, 1500);
+    // Navigate directly to Spotify auth (not popup) so the callback has the auth session
+    window.location.href = authUrl;
   };
 
   const exchangeCode = async (code: string) => {
