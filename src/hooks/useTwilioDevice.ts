@@ -10,6 +10,7 @@ interface UseTwilioDeviceOptions {
 
 export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
   const [status, setStatus] = useState<TwilioStatus>('loading');
+  const retryCountRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [micAllowed, setMicAllowed] = useState<boolean | null>(null);
   const deviceRef = useRef<Device | null>(null);
