@@ -361,15 +361,18 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden animate-fade-in bg-background">
-      {/* Top section: Campaign + Stamdata */}
-      <div className="p-5 pb-3 shrink-0">
-        <div className="flex items-center gap-3 mb-3">
-          <span className="bg-accent text-accent-foreground rounded-md px-2.5 py-1 text-[11px] font-semibold">{campaignName}</span>
-          <span className="text-[11px] text-muted-foreground/50 tabular-nums">ID: {lead.id.slice(0, 8)}</span>
-          {saving && <span className="text-[11px] text-primary/60 ml-auto">Gemmer...</span>}
+      {/* Header — matches LeadsPanel and ResultPanel */}
+      <div className="h-[48px] px-5 border-b border-border/40 flex items-center justify-between shrink-0">
+        <span className="font-heading font-bold text-[13px] tracking-tight">Stamdata</span>
+        <div className="flex items-center gap-2">
+          <span className="bg-accent text-accent-foreground rounded-md px-2 py-0.5 text-[11px] font-semibold">{campaignName}</span>
+          {saving && <span className="text-[11px] text-primary/60">Gemmer...</span>}
         </div>
+      </div>
 
-        <h2 className="font-heading font-bold text-base tracking-tight mb-3">Stamdata</h2>
+      {/* Fields */}
+      <div className="p-5 shrink-0">
+        <div className="text-[11px] text-muted-foreground/50 tabular-nums mb-4">ID: {lead.id.slice(0, 8)}</div>
 
         {showTetris ? (
           <div className="grid grid-cols-3 gap-3">
@@ -395,7 +398,7 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-4">
             <div className="flex flex-col gap-1.5">
               <label className="label-clean flex items-center gap-1.5"><Building2 size={11} /> Virksomhed</label>
               <input className="input-clean" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
@@ -412,7 +415,7 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
               <label className="label-clean flex items-center gap-1.5"><Globe size={11} /> Hjemmeside</label>
               <input className="input-clean" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
             </div>
-            <div className="col-span-2 flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5">
               <label className="label-clean flex items-center gap-1.5"><User size={11} /> Kontaktperson</label>
               <input className="input-clean" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
             </div>
