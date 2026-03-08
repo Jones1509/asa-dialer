@@ -10,6 +10,7 @@ interface UseTwilioDeviceOptions {
 
 export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
   const [status, setStatus] = useState<TwilioStatus>('loading');
+  const retryCountRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [micAllowed, setMicAllowed] = useState<boolean | null>(null);
   const deviceRef = useRef<Device | null>(null);
@@ -128,8 +129,13 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
       deviceRef.current = device;
     } catch (err: any) {
       console.error('Twilio init error:', err);
-      setStatus('error');
+      setStatus('loading'); // Never show offline/error — keep trying
       setError(err.message);
+      // Auto-retry with exponential backoff
+      const delay = Math.min(3000 * Math.pow(2, retryCountRef.current), 30000);
+      retryCountRef.current += 1;
+      console.log(`[Twilio] Retrying in ${delay}ms (attempt ${retryCountRef.current})...`);
+      setTimeout(() => initDevice(), delay);
     }
   }, []);
 
