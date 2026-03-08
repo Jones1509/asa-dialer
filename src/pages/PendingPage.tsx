@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 const PendingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, isAdmin, isApproved, user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && user) {
+      if (isAdmin) { navigate('/admin', { replace: true }); return; }
+      if (isApproved) { navigate('/', { replace: true }); return; }
+    }
+    if (!loading && !user) { navigate('/login', { replace: true }); }
+  }, [loading, user, isAdmin, isApproved]);
 
   const handleLogout = async () => {
     await signOut();
