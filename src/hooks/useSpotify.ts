@@ -519,6 +519,7 @@ export function useSpotify() {
   return {
     isConnected,
     loading,
+    initError,
     spotifyDisplayName,
     login,
     exchangeCode,
