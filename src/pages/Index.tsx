@@ -17,6 +17,7 @@ import { TetrisPage } from '@/components/dialer/pages/TetrisPage';
 
 const Index = () => {
   const state = useDialerState();
+  const music = useTetrisMusic();
   const [incomingCall, setIncomingCall] = useState<IncomingCallInfo | null>(null);
   const [activeDialNumber, setActiveDialNumber] = useState<string | null>(null);
 
