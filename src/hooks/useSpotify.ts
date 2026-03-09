@@ -65,7 +65,12 @@ export function useSpotify() {
       if (!error && data?.connected) {
         setIsConnected(true);
         setSpotifyDisplayName(data.spotify_display_name || null);
-        await refreshToken();
+        // Get fresh token and pass it DIRECTLY to fetchPlaylists
+        // because React state (accessToken) won't be updated synchronously
+        const freshToken = await refreshToken();
+        if (freshToken) {
+          await fetchPlaylists(freshToken);
+        }
       }
     } catch (e) {
       console.error('Spotify status check failed:', e);
