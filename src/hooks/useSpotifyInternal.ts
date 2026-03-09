@@ -415,7 +415,7 @@ export function useSpotifyInternal() {
     setAccessToken(data.access_token);
     setSpotifyDisplayName(data.spotify_display_name || null);
     setIsConnected(true);
-    await fetchPlaylists(data.access_token);
+    // Don't fetch playlists here - let SpotifyPage handle it lazily
     return data.access_token;
   };
 

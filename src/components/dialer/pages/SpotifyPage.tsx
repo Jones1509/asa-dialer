@@ -36,21 +36,28 @@ export const SpotifyPage: React.FC = () => {
   const [addedToPlaylist, setAddedToPlaylist] = useState<string | null>(null);
 
   const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+  const [playlistsLoaded, setPlaylistsLoaded] = useState(false);
 
-  // Lazy-load playlists only when Spotify page is opened
-  useEffect(() => {
-    const loadPlaylists = async () => {
-      if (spotify.isConnected && spotify.playlists.length === 0 && !spotify.loading && !loadingPlaylists) {
-        setLoadingPlaylists(true);
-        // Ensure we have a fresh token before fetching playlists
-        if (!spotify.accessToken) {
-          await spotify.refreshToken();
-        }
-        await spotify.fetchPlaylists();
-        setLoadingPlaylists(false);
+  // Load playlists manually - NO automatic fetching
+  const loadPlaylists = async (force = false) => {
+    if (loadingPlaylists) return;
+    setLoadingPlaylists(true);
+    try {
+      if (!spotify.accessToken) {
+        await spotify.refreshToken();
       }
-    };
-    loadPlaylists();
+      await spotify.fetchPlaylists(undefined, force);
+      setPlaylistsLoaded(true);
+    } finally {
+      setLoadingPlaylists(false);
+    }
+  };
+
+  // Only auto-load once when page first opens and connected
+  useEffect(() => {
+    if (spotify.isConnected && !spotify.loading && !playlistsLoaded && spotify.playlists.length === 0) {
+      loadPlaylists();
+    }
   }, [spotify.isConnected, spotify.loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpenPlaylist = async (playlistId: string) => {
