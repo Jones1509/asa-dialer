@@ -116,22 +116,21 @@ export function useSpotifyInternal() {
     let resp = await attempt(token);
     console.log('[Spotify] playlists initial response:', resp.status);
 
-    // Handle 429 — exponential backoff up to 5 retries with longer waits
-    for (let i = 0; i < 5 && resp.status === 429; i++) {
+    // Handle 429 — exponential backoff with very long waits
+    for (let i = 0; i < 3 && resp.status === 429; i++) {
       const retryAfterHeader = resp.headers.get('Retry-After');
-      const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 5;
-      // Use longer exponential backoff: 5s, 10s, 20s, 40s, 80s
-      const wait = Math.max(retryAfter * 1000, Math.pow(2, i + 2) * 1000);
-      console.log(`[Spotify] Rate limited, waiting ${wait / 1000}s (attempt ${i + 1}/5)...`);
+      const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 30;
+      // Start at 30s minimum, then 60s, 120s
+      const wait = Math.max(retryAfter * 1000, 30000 * Math.pow(2, i));
+      console.log(`[Spotify] Rate limited, waiting ${wait / 1000}s (attempt ${i + 1}/3)...`);
       await new Promise((r) => setTimeout(r, wait));
       resp = await attempt(token);
       if (resp.status !== 429) break;
     }
 
-    // Still rate limited after all retries
     if (resp.status === 429) {
-      console.error('[Spotify] Still rate limited after 5 retries');
-      throw new Error('HTTP 429 - For mange forespørgsler. Vent et par minutter og prøv igen.');
+      console.error('[Spotify] Still rate limited after retries');
+      throw new Error('Spotify er midlertidigt utilgængelig (rate limit). Vent 2-3 minutter og prøv igen.');
     }
 
     if (resp.status === 401 || resp.status === 403) {
@@ -415,7 +414,7 @@ export function useSpotifyInternal() {
     setAccessToken(data.access_token);
     setSpotifyDisplayName(data.spotify_display_name || null);
     setIsConnected(true);
-    await fetchPlaylists(data.access_token);
+    // Don't fetch playlists here - let SpotifyPage handle it lazily
     return data.access_token;
   };
 
