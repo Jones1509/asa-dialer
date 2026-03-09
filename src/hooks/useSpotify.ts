@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 const SPOTIFY_CLIENT_ID = 'f554930a88254934b21c11e02ef5ba4c';
@@ -49,25 +49,32 @@ export function useSpotify() {
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Refs to avoid stale closures — never cause re-renders
+  const accessTokenRef = useRef<string | null>(null);
+  const deviceIdRef = useRef<string | null>(null);
+  const playerRef = useRef<Spotify.Player | null>(null);
+  const volumeRef = useRef(50);
   const progressInterval = useRef<number | null>(null);
   const sdkReady = useRef(false);
+  const initialized = useRef(false);
 
-  // ===== KEY FIX: Keep a ref in sync with accessToken state =====
-  // This allows callbacks to always read the latest token without stale closures
-  const accessTokenRef = useRef<string | null>(null);
-  useEffect(() => {
-    accessTokenRef.current = accessToken;
-  }, [accessToken]);
+  // Keep refs in sync
+  useEffect(() => { accessTokenRef.current = accessToken; }, [accessToken]);
+  useEffect(() => { deviceIdRef.current = deviceId; }, [deviceId]);
+  useEffect(() => { playerRef.current = player; }, [player]);
+  useEffect(() => { volumeRef.current = volume; }, [volume]);
 
-  // Internal token refresh - always returns the new token
-  const doRefreshToken = useCallback(async (): Promise<string | null> => {
+  // ---- Token helpers (no deps, use refs) ----
+
+  const doRefreshToken = async (): Promise<string | null> => {
     try {
       const { data, error } = await supabase.functions.invoke('spotify-auth', {
         body: { action: 'refresh' },
       });
       if (!error && data?.access_token) {
-        setAccessToken(data.access_token);
         accessTokenRef.current = data.access_token;
+        setAccessToken(data.access_token);
         setIsConnected(true);
         return data.access_token;
       }
@@ -75,44 +82,38 @@ export function useSpotify() {
       console.error('Token refresh failed:', e);
     }
     return null;
-  }, []);
+  };
 
-  // Internal helper: get a valid token (refresh if needed)
-  const getValidToken = useCallback(async (): Promise<string | null> => {
-    const token = accessTokenRef.current;
-    if (token) return token;
-    return doRefreshToken();
-  }, [doRefreshToken]);
+  const getToken = async (): Promise<string | null> => {
+    return accessTokenRef.current ?? doRefreshToken();
+  };
 
-  // Fetch playlists using ref-based token
-  const fetchPlaylists = useCallback(async (tokenOverride?: string) => {
-    const token = tokenOverride ?? accessTokenRef.current;
-    if (!token) {
-      console.error('fetchPlaylists: no token');
-      return;
-    }
+  // ---- Playlists ----
+
+  const fetchPlaylists = async (tokenOverride?: string): Promise<void> => {
+    let token = tokenOverride ?? accessTokenRef.current;
+    if (!token) return;
 
     try {
       let resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Auto-refresh on 401
       if (resp.status === 401 || resp.status === 403) {
         const newToken = await doRefreshToken();
         if (!newToken) return;
+        token = newToken;
         resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-          headers: { Authorization: `Bearer ${newToken}` },
+          headers: { Authorization: `Bearer ${token}` },
         });
       }
 
       if (!resp.ok) {
-        console.error('fetchPlaylists failed:', resp.status, await resp.text().catch(() => ''));
+        console.error('fetchPlaylists failed:', resp.status);
         return;
       }
 
       const data = await resp.json();
-      console.log('Playlists fetched:', data.items?.length);
       setPlaylists(
         (data.items || []).map((p: any) => ({
           id: p.id,
@@ -124,22 +125,19 @@ export function useSpotify() {
     } catch (e) {
       console.error('Playlists fetch error:', e);
     }
-  }, [doRefreshToken]);
+  };
 
-  // Fetch all tracks for a playlist with pagination
-  const fetchPlaylistTracks = useCallback(async (playlistId: string): Promise<SpotifyTrack[]> => {
-    let token = await getValidToken();
-    if (!token) {
-      console.error('fetchPlaylistTracks: no token');
-      return [];
-    }
+  // ---- Playlist tracks ----
+
+  const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
+    let token = await getToken();
+    if (!token) return [];
 
     const allTracks: SpotifyTrack[] = [];
     let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
     let pageCount = 0;
-    const MAX_PAGES = 50;
 
-    while (url && pageCount < MAX_PAGES) {
+    while (url && pageCount < 50) {
       pageCount++;
       let resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
 
@@ -151,14 +149,12 @@ export function useSpotify() {
       }
 
       if (!resp.ok) {
-        console.error(`Spotify tracks error ${resp.status}:`, await resp.text().catch(() => ''));
+        console.error(`Tracks error ${resp.status}`);
         break;
       }
 
       const data = await resp.json();
-      const items: any[] = data.items || [];
-
-      const tracks = items
+      const tracks = (data.items || [])
         .filter((item: any) => item?.track?.id)
         .map((item: any) => ({
           id: item.track.id,
@@ -177,13 +173,16 @@ export function useSpotify() {
       url = data.next || null;
     }
 
-    console.log(`fetchPlaylistTracks: fetched ${allTracks.length} tracks`);
     return allTracks;
-  }, [getValidToken, doRefreshToken]);
+  };
 
-  // Check connection on mount
+  // ---- Init on mount ----
+
   useEffect(() => {
-    const checkConnection = async () => {
+    if (initialized.current) return;
+    initialized.current = true;
+
+    const init = async () => {
       try {
         const { data, error } = await supabase.functions.invoke('spotify-auth', {
           body: { action: 'status' },
@@ -191,68 +190,27 @@ export function useSpotify() {
         if (!error && data?.connected) {
           setIsConnected(true);
           setSpotifyDisplayName(data.spotify_display_name || null);
-          // Get fresh token and update ref BEFORE fetching playlists
           const freshToken = await doRefreshToken();
           if (freshToken) {
             await fetchPlaylists(freshToken);
           }
         }
       } catch (e) {
-        console.error('Spotify status check failed:', e);
+        console.error('Spotify init failed:', e);
       } finally {
         setLoading(false);
       }
     };
-    checkConnection();
+
+    init();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const login = () => {
-    const params = new URLSearchParams({
-      response_type: 'code',
-      client_id: SPOTIFY_CLIENT_ID,
-      scope: SPOTIFY_SCOPES,
-      redirect_uri: REDIRECT_URI,
-      show_dialog: 'true',
-    });
-    const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    window.location.href = `https://accounts.spotify.com/logout?continue=${encodeURIComponent(authUrl)}`;
-  };
+  // ---- SDK init ----
 
-  const exchangeCode = async (code: string) => {
-    const { data, error } = await supabase.functions.invoke('spotify-auth', {
-      body: { action: 'exchange', code, redirect_uri: REDIRECT_URI },
-    });
-    if (error) throw error;
-    setAccessToken(data.access_token);
-    accessTokenRef.current = data.access_token;
-    setSpotifyDisplayName(data.spotify_display_name || null);
-    setIsConnected(true);
-    await fetchPlaylists(data.access_token);
-    return data.access_token;
-  };
-
-  const disconnect = async () => {
-    player?.disconnect();
-    setPlayer(null);
-    setDeviceId(null);
-    setCurrentTrack(null);
-    setIsPlaying(false);
-    setSpotifyDisplayName(null);
-    setPlaylists([]);
-    await supabase.functions.invoke('spotify-auth', {
-      body: { action: 'disconnect' },
-    });
-    setAccessToken(null);
-    accessTokenRef.current = null;
-    setIsConnected(false);
-  };
-
-  // Initialize Spotify Web Playback SDK
   useEffect(() => {
     if (!accessToken || sdkReady.current) return;
 
-    const script = document.getElementById('spotify-sdk') as HTMLScriptElement;
-    if (!script) {
+    if (!document.getElementById('spotify-sdk')) {
       const s = document.createElement('script');
       s.id = 'spotify-sdk';
       s.src = 'https://sdk.scdn.co/spotify-player.js';
@@ -269,16 +227,17 @@ export function useSpotify() {
       sdkReady.current = true;
       initPlayer(accessToken);
     }
-  }, [accessToken]);
+  }, [accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const initPlayer = (token: string) => {
     const p = new window.Spotify.Player({
       name: 'ASA Dialer',
-      getOAuthToken: (cb: (token: string) => void) => cb(token),
-      volume: volume / 100,
+      getOAuthToken: (cb: (t: string) => void) => cb(token),
+      volume: volumeRef.current / 100,
     });
 
     p.addListener('ready', ({ device_id }: { device_id: string }) => {
+      deviceIdRef.current = device_id;
       setDeviceId(device_id);
     });
 
@@ -302,35 +261,86 @@ export function useSpotify() {
     });
 
     p.connect();
+    playerRef.current = p;
     setPlayer(p);
   };
 
-  // Progress ticker
+  // ---- Progress ticker ----
+
   useEffect(() => {
-    if (progressInterval.current) clearInterval(progressInterval.current);
+    if (progressInterval.current) {
+      clearInterval(progressInterval.current);
+      progressInterval.current = null;
+    }
     if (isPlaying) {
       progressInterval.current = window.setInterval(() => {
-        setProgress((prev) => Math.min(prev + 1000, duration));
+        setProgress((prev) => prev + 1000);
       }, 1000);
     }
     return () => {
-      if (progressInterval.current) clearInterval(progressInterval.current);
+      if (progressInterval.current) {
+        clearInterval(progressInterval.current);
+        progressInterval.current = null;
+      }
     };
-  }, [isPlaying, duration]);
+  }, [isPlaying]);
+
+  // ---- Controls ----
+
+  const login = () => {
+    const params = new URLSearchParams({
+      response_type: 'code',
+      client_id: SPOTIFY_CLIENT_ID,
+      scope: SPOTIFY_SCOPES,
+      redirect_uri: REDIRECT_URI,
+      show_dialog: 'true',
+    });
+    const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
+    window.location.href = `https://accounts.spotify.com/logout?continue=${encodeURIComponent(authUrl)}`;
+  };
+
+  const exchangeCode = async (code: string) => {
+    const { data, error } = await supabase.functions.invoke('spotify-auth', {
+      body: { action: 'exchange', code, redirect_uri: REDIRECT_URI },
+    });
+    if (error) throw error;
+    accessTokenRef.current = data.access_token;
+    setAccessToken(data.access_token);
+    setSpotifyDisplayName(data.spotify_display_name || null);
+    setIsConnected(true);
+    await fetchPlaylists(data.access_token);
+    return data.access_token;
+  };
+
+  const disconnect = async () => {
+    playerRef.current?.disconnect();
+    setPlayer(null);
+    setDeviceId(null);
+    setCurrentTrack(null);
+    setIsPlaying(false);
+    setSpotifyDisplayName(null);
+    setPlaylists([]);
+    await supabase.functions.invoke('spotify-auth', { body: { action: 'disconnect' } });
+    accessTokenRef.current = null;
+    setAccessToken(null);
+    setIsConnected(false);
+  };
 
   const play = async (uri?: string) => {
-    const token = await getValidToken();
-    if (!token || !deviceId) return;
+    const token = await getToken();
+    const did = deviceIdRef.current;
+    if (!token || !did) return;
+
     if (uri) {
-      const resp = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+      const resp = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${did}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: [uri] }),
       });
-      if (resp.status === 403 || resp.status === 401) {
+      if (resp.status === 401 || resp.status === 403) {
         const newToken = await doRefreshToken();
         if (newToken) {
-          await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+          await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${did}`, {
             method: 'PUT',
             headers: { Authorization: `Bearer ${newToken}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ uris: [uri] }),
@@ -338,31 +348,29 @@ export function useSpotify() {
         }
       }
     } else {
-      player?.resume();
+      playerRef.current?.resume();
     }
   };
 
-  const pause = () => player?.pause();
+  const pause = () => playerRef.current?.pause();
   const togglePlay = () => { if (isPlaying) pause(); else play(); };
-  const nextTrack = () => player?.nextTrack();
-  const prevTrack = () => player?.previousTrack();
+  const nextTrack = () => playerRef.current?.nextTrack();
+  const prevTrack = () => playerRef.current?.previousTrack();
 
   const seek = (ms: number) => {
-    player?.seek(ms);
+    playerRef.current?.seek(ms);
     setProgress(ms);
   };
 
   const setPlayerVolume = (v: number) => {
     setVolume(v);
-    player?.setVolume(v / 100);
+    volumeRef.current = v;
+    playerRef.current?.setVolume(v / 100);
   };
 
   const search = async (query: string) => {
     const token = accessTokenRef.current;
-    if (!token || !query.trim()) {
-      setSearchResults([]);
-      return;
-    }
+    if (!token || !query.trim()) { setSearchResults([]); return; }
     try {
       const resp = await fetch(
         `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
@@ -381,14 +389,15 @@ export function useSpotify() {
         }))
       );
     } catch (e) {
-      console.error('Spotify search error:', e);
+      console.error('Search error:', e);
     }
   };
 
   const playPlaylist = async (playlistId: string) => {
-    const token = await getValidToken();
-    if (!token || !deviceId) return;
-    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+    const token = await getToken();
+    const did = deviceIdRef.current;
+    if (!token || !did) return;
+    await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${did}`, {
       method: 'PUT',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ context_uri: `spotify:playlist:${playlistId}` }),
@@ -396,7 +405,7 @@ export function useSpotify() {
   };
 
   const createPlaylist = async (name: string): Promise<string | null> => {
-    const token = await getValidToken();
+    const token = await getToken();
     if (!token) return null;
     try {
       const meResp = await fetch('https://api.spotify.com/v1/me', {
@@ -418,7 +427,7 @@ export function useSpotify() {
   };
 
   const addTrackToPlaylist = async (playlistId: string, trackUri: string) => {
-    const token = await getValidToken();
+    const token = await getToken();
     if (!token) return false;
     try {
       const resp = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
@@ -426,10 +435,7 @@ export function useSpotify() {
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: [trackUri] }),
       });
-      if (resp.ok) {
-        await fetchPlaylists();
-        return true;
-      }
+      if (resp.ok) { await fetchPlaylists(); return true; }
       return false;
     } catch (e) {
       console.error('Add track error:', e);
