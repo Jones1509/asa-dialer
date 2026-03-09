@@ -74,16 +74,22 @@ export function useSpotify() {
       const { data, error } = await supabase.functions.invoke('spotify-auth', {
         body: { action: 'refresh' },
       });
-      console.log('[Spotify] refresh response:', { data: data ? 'has data' : 'no data', error, hasToken: !!data?.access_token });
-      if (!error && data?.access_token) {
-        accessTokenRef.current = data.access_token;
-        setAccessToken(data.access_token);
-        setIsConnected(true);
-        return data.access_token;
+      console.log('[Spotify] refresh response:', { hasData: !!data, error: error?.message, hasToken: !!data?.access_token });
+      if (error) {
+        setInitError(`Token refresh fejlede: ${error.message}`);
+        return null;
       }
-      console.error('[Spotify] refresh returned no token:', { data, error });
-    } catch (e) {
+      if (!data?.access_token) {
+        setInitError(`Ingen access token modtaget. Svar: ${JSON.stringify(data)}`);
+        return null;
+      }
+      accessTokenRef.current = data.access_token;
+      setAccessToken(data.access_token);
+      setIsConnected(true);
+      return data.access_token;
+    } catch (e: any) {
       console.error('[Spotify] Token refresh failed:', e);
+      setInitError(`Token refresh exception: ${e?.message || String(e)}`);
     }
     return null;
   };
