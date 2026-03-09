@@ -207,6 +207,20 @@ export const SpotifyPage: React.FC = () => {
           )}
         </div>
 
+        {/* Error banner */}
+        {spotify.initError && (
+          <div className="mx-3 mb-2 bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+            <p className="text-[10px] font-medium text-destructive mb-1">Fejl:</p>
+            <p className="text-[10px] text-destructive/80 font-mono break-all leading-relaxed">{spotify.initError}</p>
+            <button
+              onClick={() => spotify.fetchPlaylists()}
+              className="mt-2 text-[10px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0"
+            >
+              Prøv igen
+            </button>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto px-3 pb-3 flex flex-col gap-0.5">
           {spotify.playlists.map((pl) => (
             <button
