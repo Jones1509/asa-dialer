@@ -357,7 +357,7 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
     );
   }
 
-  const showTetris = callActive && tetrisEnabled;
+  const showTetris = tetrisEnabled;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden animate-fade-in bg-background">
