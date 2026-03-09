@@ -35,11 +35,22 @@ export const SpotifyPage: React.FC = () => {
   const [addingTrack, setAddingTrack] = useState<{ uri: string; name: string } | null>(null);
   const [addedToPlaylist, setAddedToPlaylist] = useState<string | null>(null);
 
+  const [loadingPlaylists, setLoadingPlaylists] = useState(false);
+
   // Lazy-load playlists only when Spotify page is opened
   useEffect(() => {
-    if (spotify.isConnected && spotify.playlists.length === 0 && !spotify.loading) {
-      spotify.fetchPlaylists();
-    }
+    const loadPlaylists = async () => {
+      if (spotify.isConnected && spotify.playlists.length === 0 && !spotify.loading && !loadingPlaylists) {
+        setLoadingPlaylists(true);
+        // Ensure we have a fresh token before fetching playlists
+        if (!spotify.accessToken) {
+          await spotify.refreshToken();
+        }
+        await spotify.fetchPlaylists();
+        setLoadingPlaylists(false);
+      }
+    };
+    loadPlaylists();
   }, [spotify.isConnected, spotify.loading]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleOpenPlaylist = async (playlistId: string) => {
@@ -220,15 +231,28 @@ export const SpotifyPage: React.FC = () => {
             <p className="text-[10px] font-medium text-destructive mb-1">Fejl:</p>
             <p className="text-[10px] text-destructive/80 font-mono break-all leading-relaxed">{spotify.initError}</p>
             <button
-              onClick={() => spotify.fetchPlaylists()}
-              className="mt-2 text-[10px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0"
+              onClick={async () => {
+                setLoadingPlaylists(true);
+                if (!spotify.accessToken) {
+                  await spotify.refreshToken();
+                }
+                await spotify.fetchPlaylists(undefined, true);
+                setLoadingPlaylists(false);
+              }}
+              disabled={loadingPlaylists}
+              className="mt-2 text-[10px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0 disabled:opacity-50"
             >
-              Prøv igen
+              {loadingPlaylists ? 'Henter...' : 'Prøv igen'}
             </button>
           </div>
         )}
 
         <div className="flex-1 overflow-y-auto px-3 pb-3 flex flex-col gap-0.5">
+          {loadingPlaylists && spotify.playlists.length === 0 && (
+            <div className="flex items-center justify-center py-8">
+              <div className="text-muted-foreground text-xs">Henter playlister...</div>
+            </div>
+          )}
           {spotify.playlists.map((pl) => (
             <button
               key={pl.id}
