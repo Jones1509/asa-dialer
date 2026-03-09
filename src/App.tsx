@@ -10,7 +10,7 @@ import RegisterPage from "./pages/RegisterPage";
 import PendingPage from "./pages/PendingPage";
 import AdminPage from "./pages/AdminPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
-import SpotifyCallbackPage from "./pages/SpotifyCallbackPage";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
