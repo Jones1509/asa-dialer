@@ -208,6 +208,7 @@ const InlineTetris: React.FC = () => {
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const g = gameRef.current;
+      if (!gameStarted) return;
       if (e.key === 'r' || e.key === 'R') { if (g.gameOver) initGame(); e.preventDefault(); return; }
       if (e.key === 'p' || e.key === 'P') { g.paused = !g.paused; setPaused(g.paused); e.preventDefault(); return; }
       if (g.paused || g.gameOver) return;
@@ -222,7 +223,7 @@ const InlineTetris: React.FC = () => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [initGame, doHold, triggerShake]);
+  }, [gameStarted, initGame, doHold, triggerShake]);
 
   const togglePause = () => { gameRef.current.paused = !gameRef.current.paused; setPaused(gameRef.current.paused); };
 
