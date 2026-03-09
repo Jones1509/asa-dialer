@@ -96,6 +96,12 @@ export const SpotifyPage: React.FC = () => {
               Forbind din Spotify Premium-konto for at lytte til musik mens du ringer. Din konto er privat og kun synlig for dig.
             </p>
           </div>
+          {spotify.initError && (
+            <div className="w-full bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2 text-left">
+              <p className="text-[11px] font-medium text-destructive mb-0.5">Fejl ved forbindelse:</p>
+              <p className="text-[11px] text-destructive/80 font-mono break-all">{spotify.initError}</p>
+            </div>
+          )}
           <button
             onClick={spotify.login}
             className="px-6 py-2.5 rounded-xl bg-[#1DB954] text-white font-semibold text-sm cursor-pointer border-none hover:bg-[#1DB954]/90 transition-colors shadow-lg shadow-[#1DB954]/20"
