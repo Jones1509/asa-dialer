@@ -277,7 +277,7 @@ export const SpotifyPage: React.FC = () => {
             <div className="text-center py-6">
               <p className="text-[11px] text-muted-foreground mb-2">Ingen playlister fundet</p>
               <button
-                onClick={() => spotify.fetchPlaylists()}
+                onClick={() => loadPlaylists(true)}
                 className="text-[11px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0"
               >
                 Genindlæs
