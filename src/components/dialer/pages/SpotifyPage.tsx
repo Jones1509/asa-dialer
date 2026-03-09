@@ -39,14 +39,17 @@ export const SpotifyPage: React.FC = () => {
     setOpenPlaylistId(playlistId);
     setView('playlist');
     setLoadingTracks(true);
+    setPlaylistTracks([]);
     try {
       const tracks = await spotify.fetchPlaylistTracks(playlistId);
       setPlaylistTracks(tracks);
     } catch (e) {
       console.error('Failed to load playlist tracks:', e);
       setPlaylistTracks([]);
+    } finally {
+      // ALWAYS stop spinner — even if fetch hangs or throws
+      setLoadingTracks(false);
     }
-    setLoadingTracks(false);
   };
 
   const handleCreatePlaylist = async () => {
