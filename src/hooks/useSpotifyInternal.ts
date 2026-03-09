@@ -116,13 +116,22 @@ export function useSpotifyInternal() {
     let resp = await attempt(token);
     console.log('[Spotify] playlists initial response:', resp.status);
 
-    // Handle 429 — exponential backoff up to 5 retries
+    // Handle 429 — exponential backoff up to 5 retries with longer waits
     for (let i = 0; i < 5 && resp.status === 429; i++) {
-      const retryAfter = parseInt(resp.headers.get('Retry-After') || '3', 10);
-      const wait = Math.max(retryAfter, Math.pow(2, i + 1)) * 1000;
-      console.log(`[Spotify] Rate limited, waiting ${wait / 1000}s (attempt ${i + 1})...`);
+      const retryAfterHeader = resp.headers.get('Retry-After');
+      const retryAfter = retryAfterHeader ? parseInt(retryAfterHeader, 10) : 5;
+      // Use longer exponential backoff: 5s, 10s, 20s, 40s, 80s
+      const wait = Math.max(retryAfter * 1000, Math.pow(2, i + 2) * 1000);
+      console.log(`[Spotify] Rate limited, waiting ${wait / 1000}s (attempt ${i + 1}/5)...`);
       await new Promise((r) => setTimeout(r, wait));
       resp = await attempt(token);
+      if (resp.status !== 429) break;
+    }
+
+    // Still rate limited after all retries
+    if (resp.status === 429) {
+      console.error('[Spotify] Still rate limited after 5 retries');
+      throw new Error('HTTP 429 - For mange forespørgsler. Vent et par minutter og prøv igen.');
     }
 
     if (resp.status === 401 || resp.status === 403) {
