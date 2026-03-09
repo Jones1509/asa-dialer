@@ -26,6 +26,7 @@ const InlineTetris: React.FC = () => {
   const [lines, setLines] = useState(0);
   const [paused, setPaused] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const [blockSize, setBlockSize] = useState(14);
   const [nextPiece, setNextPiece] = useState<number[][] | null>(null);
   const [holdPiece, setHoldPiece] = useState<number[][] | null>(null);
@@ -121,6 +122,7 @@ const InlineTetris: React.FC = () => {
     g.board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     g.score = 0; g.lines = 0; g.level = 1; g.paused = false; g.gameOver = false; g.combo = 0; g.hold = null; g.canHold = true;
     setScore(0); setLines(0); setLevel(1); setPaused(false); setGameOver(false); setCombo(0); setLastClear(null); setHoldPiece(null);
+    setGameStarted(true);
     spawnPiece(g);
   }, [spawnPiece]);
 
@@ -172,12 +174,13 @@ const InlineTetris: React.FC = () => {
     ctx.restore();
   }, [BLOCK]);
 
+  // Render loop (always runs for background animation, but game logic only when started)
   useEffect(() => {
-    initGame(); lastDropRef.current = performance.now();
+    lastDropRef.current = performance.now();
     const loop = (time: number) => {
-      const gg = gameRef.current; if (!gg.board) return;
-      const speed = Math.max(80, 500 - (gg.level - 1) * 45);
-      if (!gg.paused && !gg.gameOver && time - lastDropRef.current > speed) {
+      const gg = gameRef.current;
+      const speed = Math.max(80, 500 - ((gg.level || 1) - 1) * 45);
+      if (gameStarted && gg.board && !gg.paused && !gg.gameOver && time - lastDropRef.current > speed) {
         lastDropRef.current = time;
         if (!collides(gg.board, gg.piece, gg.pieceX, gg.pieceY + 1)) gg.pieceY++;
         else {
@@ -200,11 +203,12 @@ const InlineTetris: React.FC = () => {
     };
     animRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animRef.current);
-  }, [initGame, render, spawnParticles, triggerShake, spawnPiece]);
+  }, [gameStarted, render, spawnParticles, triggerShake, spawnPiece]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       const g = gameRef.current;
+      if (!gameStarted) return;
       if (e.key === 'r' || e.key === 'R') { if (g.gameOver) initGame(); e.preventDefault(); return; }
       if (e.key === 'p' || e.key === 'P') { g.paused = !g.paused; setPaused(g.paused); e.preventDefault(); return; }
       if (g.paused || g.gameOver) return;
@@ -219,7 +223,7 @@ const InlineTetris: React.FC = () => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [initGame, doHold, triggerShake]);
+  }, [gameStarted, initGame, doHold, triggerShake]);
 
   const togglePause = () => { gameRef.current.paused = !gameRef.current.paused; setPaused(gameRef.current.paused); };
 
@@ -275,7 +279,19 @@ const InlineTetris: React.FC = () => {
               </div>
             </div>
           )}
-          {paused && !gameOver && (
+          {!gameStarted && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl" style={{ background: 'rgba(5,8,15,0.9)', backdropFilter: 'blur(6px)' }}>
+              <div className="text-center">
+                <Gamepad2 size={20} className="text-cyan-400 mx-auto mb-2" />
+                <div className="font-heading font-bold text-sm mb-3" style={{ background: 'linear-gradient(135deg, #00d4ff, #bf5af2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TETRIS</div>
+                <button onClick={initGame} className="rounded-lg px-4 py-1.5 text-[10px] font-semibold text-white/80 hover:text-white transition-all duration-200 active:scale-95 cursor-pointer border"
+                  style={{ background: 'rgba(0,212,255,0.15)', borderColor: 'rgba(0,212,255,0.3)' }}>
+                  <Play size={10} className="inline mr-1" /> Start Spil
+                </button>
+              </div>
+            </div>
+          )}
+          {paused && !gameOver && gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl" style={{ background: 'rgba(5,8,15,0.85)', backdropFilter: 'blur(6px)' }}>
               <div className="text-center">
                 <Pause size={16} className="text-cyan-400 mx-auto mb-1" />
@@ -357,7 +373,7 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
     );
   }
 
-  const showTetris = callActive && tetrisEnabled;
+  const showTetris = tetrisEnabled;
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden animate-fade-in bg-background">
