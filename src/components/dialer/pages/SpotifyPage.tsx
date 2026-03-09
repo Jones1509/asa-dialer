@@ -231,10 +231,18 @@ export const SpotifyPage: React.FC = () => {
             <p className="text-[10px] font-medium text-destructive mb-1">Fejl:</p>
             <p className="text-[10px] text-destructive/80 font-mono break-all leading-relaxed">{spotify.initError}</p>
             <button
-              onClick={() => spotify.fetchPlaylists()}
-              className="mt-2 text-[10px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0"
+              onClick={async () => {
+                setLoadingPlaylists(true);
+                if (!spotify.accessToken) {
+                  await spotify.refreshToken();
+                }
+                await spotify.fetchPlaylists(undefined, true);
+                setLoadingPlaylists(false);
+              }}
+              disabled={loadingPlaylists}
+              className="mt-2 text-[10px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0 disabled:opacity-50"
             >
-              Prøv igen
+              {loadingPlaylists ? 'Henter...' : 'Prøv igen'}
             </button>
           </div>
         )}
