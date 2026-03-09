@@ -49,6 +49,7 @@ export function useSpotify() {
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
 
   // Refs to avoid stale closures — never cause re-renders
   const accessTokenRef = useRef<string | null>(null);
