@@ -78,7 +78,7 @@ const App = () => (
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/pending" element={<PendingPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/callback" element={<SpotifyCallbackPage />} />
+            
             <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
             <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
