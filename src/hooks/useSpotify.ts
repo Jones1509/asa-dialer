@@ -49,6 +49,7 @@ export function useSpotify() {
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
   const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
   const [loading, setLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
 
   // Refs to avoid stale closures — never cause re-renders
   const accessTokenRef = useRef<string | null>(null);
@@ -69,17 +70,26 @@ export function useSpotify() {
 
   const doRefreshToken = async (): Promise<string | null> => {
     try {
+      console.log('[Spotify] doRefreshToken calling edge function...');
       const { data, error } = await supabase.functions.invoke('spotify-auth', {
         body: { action: 'refresh' },
       });
-      if (!error && data?.access_token) {
-        accessTokenRef.current = data.access_token;
-        setAccessToken(data.access_token);
-        setIsConnected(true);
-        return data.access_token;
+      console.log('[Spotify] refresh response:', { hasData: !!data, error: error?.message, hasToken: !!data?.access_token });
+      if (error) {
+        setInitError(`Token refresh fejlede: ${error.message}`);
+        return null;
       }
-    } catch (e) {
-      console.error('Token refresh failed:', e);
+      if (!data?.access_token) {
+        setInitError(`Ingen access token modtaget. Svar: ${JSON.stringify(data)}`);
+        return null;
+      }
+      accessTokenRef.current = data.access_token;
+      setAccessToken(data.access_token);
+      setIsConnected(true);
+      return data.access_token;
+    } catch (e: any) {
+      console.error('[Spotify] Token refresh failed:', e);
+      setInitError(`Token refresh exception: ${e?.message || String(e)}`);
     }
     return null;
   };
@@ -92,7 +102,11 @@ export function useSpotify() {
 
   const fetchPlaylists = async (tokenOverride?: string): Promise<void> => {
     let token = tokenOverride ?? accessTokenRef.current;
-    if (!token) return;
+    if (!token) {
+      console.error('[Spotify] fetchPlaylists: no token');
+      setInitError('Ingen Spotify token tilgængelig for at hente playlister');
+      return;
+    }
 
     const attempt = async (t: string): Promise<Response> => {
       return fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
@@ -102,15 +116,18 @@ export function useSpotify() {
 
     try {
       let resp = await attempt(token);
+      console.log('[Spotify] playlists initial response:', resp.status);
 
       // Handle 429 rate limit — wait and retry up to 3 times
       for (let i = 0; i < 3 && resp.status === 429; i++) {
         const retryAfter = parseInt(resp.headers.get('Retry-After') || '2', 10);
+        console.log(`[Spotify] Rate limited, waiting ${retryAfter + 1}s...`);
         await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000));
         resp = await attempt(token);
       }
 
       if (resp.status === 401 || resp.status === 403) {
+        console.log('[Spotify] Token expired, refreshing...');
         const newToken = await doRefreshToken();
         if (!newToken) return;
         token = newToken;
@@ -118,11 +135,14 @@ export function useSpotify() {
       }
 
       if (!resp.ok) {
-        console.error('fetchPlaylists failed:', resp.status);
+        const errText = await resp.text().catch(() => '');
+        console.error('[Spotify] fetchPlaylists failed:', resp.status, errText);
+        setInitError(`Kunne ikke hente playlister: HTTP ${resp.status}`);
         return;
       }
 
       const data = await resp.json();
+      console.log('[Spotify] playlists response items:', data.items?.length || 0);
       const items: SpotifyPlaylist[] = [];
 
       // Paginate through all playlists
@@ -151,9 +171,12 @@ export function useSpotify() {
         nextUrl = nextData.next || null;
       }
 
+      console.log('[Spotify] Total playlists fetched:', items.length);
       setPlaylists(items);
-    } catch (e) {
-      console.error('Playlists fetch error:', e);
+      setInitError(null); // Clear any previous errors
+    } catch (e: any) {
+      console.error('[Spotify] Playlists fetch error:', e);
+      setInitError(`Playliste-fejl: ${e?.message || String(e)}`);
     }
   };
 
@@ -213,22 +236,42 @@ export function useSpotify() {
     initialized.current = true;
 
     const init = async () => {
+      console.log('[Spotify] init starting...');
       try {
         const { data, error } = await supabase.functions.invoke('spotify-auth', {
           body: { action: 'status' },
         });
-        if (!error && data?.connected) {
-          setIsConnected(true);
-          setSpotifyDisplayName(data.spotify_display_name || null);
-          const freshToken = await doRefreshToken();
-          if (freshToken) {
-            await fetchPlaylists(freshToken);
-          }
+        console.log('[Spotify] status response:', { data, error });
+
+        if (error) {
+          console.error('[Spotify] status error:', error);
+          return;
+        }
+
+        if (!data?.connected) {
+          console.log('[Spotify] not connected');
+          return;
+        }
+
+        setIsConnected(true);
+        setSpotifyDisplayName(data.spotify_display_name || null);
+        console.log('[Spotify] connected, refreshing token...');
+
+        const freshToken = await doRefreshToken();
+        console.log('[Spotify] freshToken:', freshToken ? `${freshToken.substring(0, 20)}...` : 'NULL');
+
+        if (freshToken) {
+          console.log('[Spotify] fetching playlists...');
+          await fetchPlaylists(freshToken);
+          console.log('[Spotify] playlists fetch complete');
+        } else {
+          console.error('[Spotify] No fresh token — cannot fetch playlists');
         }
       } catch (e) {
-        console.error('Spotify init failed:', e);
+        console.error('[Spotify] init failed:', e);
       } finally {
         setLoading(false);
+        console.log('[Spotify] init done');
       }
     };
 
@@ -476,6 +519,7 @@ export function useSpotify() {
   return {
     isConnected,
     loading,
+    initError,
     spotifyDisplayName,
     login,
     exchangeCode,

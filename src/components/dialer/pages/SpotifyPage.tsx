@@ -96,6 +96,12 @@ export const SpotifyPage: React.FC = () => {
               Forbind din Spotify Premium-konto for at lytte til musik mens du ringer. Din konto er privat og kun synlig for dig.
             </p>
           </div>
+          {spotify.initError && (
+            <div className="w-full bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2 text-left">
+              <p className="text-[11px] font-medium text-destructive mb-0.5">Fejl ved forbindelse:</p>
+              <p className="text-[11px] text-destructive/80 font-mono break-all">{spotify.initError}</p>
+            </div>
+          )}
           <button
             onClick={spotify.login}
             className="px-6 py-2.5 rounded-xl bg-[#1DB954] text-white font-semibold text-sm cursor-pointer border-none hover:bg-[#1DB954]/90 transition-colors shadow-lg shadow-[#1DB954]/20"
@@ -201,6 +207,20 @@ export const SpotifyPage: React.FC = () => {
           )}
         </div>
 
+        {/* Error banner */}
+        {spotify.initError && (
+          <div className="mx-3 mb-2 bg-destructive/10 border border-destructive/30 rounded-lg px-3 py-2">
+            <p className="text-[10px] font-medium text-destructive mb-1">Fejl:</p>
+            <p className="text-[10px] text-destructive/80 font-mono break-all leading-relaxed">{spotify.initError}</p>
+            <button
+              onClick={() => spotify.fetchPlaylists()}
+              className="mt-2 text-[10px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0"
+            >
+              Prøv igen
+            </button>
+          </div>
+        )}
+
         <div className="flex-1 overflow-y-auto px-3 pb-3 flex flex-col gap-0.5">
           {spotify.playlists.map((pl) => (
             <button
@@ -222,8 +242,16 @@ export const SpotifyPage: React.FC = () => {
               </div>
             </button>
           ))}
-          {spotify.playlists.length === 0 && (
-            <p className="text-[11px] text-muted-foreground text-center py-6">Ingen playlister fundet</p>
+          {spotify.playlists.length === 0 && !spotify.initError && (
+            <div className="text-center py-6">
+              <p className="text-[11px] text-muted-foreground mb-2">Ingen playlister fundet</p>
+              <button
+                onClick={() => spotify.fetchPlaylists()}
+                className="text-[11px] text-[#1DB954] underline cursor-pointer border-none bg-transparent p-0"
+              >
+                Genindlæs
+              </button>
+            </div>
           )}
         </div>
       </div>
