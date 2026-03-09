@@ -1,1 +1,0 @@
-ALTER TABLE public.spotify_tokens ADD COLUMN IF NOT EXISTS spotify_display_name text DEFAULT '';

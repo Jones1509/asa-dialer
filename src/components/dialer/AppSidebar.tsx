@@ -1,5 +1,6 @@
 import React from 'react';
-import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2, Music } from 'lucide-react';
+import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2 } from 'lucide-react';
+import { SpotifyPlayer } from './SpotifyPlayer';
 
 interface SidebarProps {
   activePage: string;
@@ -15,23 +16,21 @@ const navItems = [
   { id: 'campaigns', icon: LayoutGrid, label: 'Kampagner' },
   { id: 'shop', icon: ShoppingBag, label: 'Produktshop' },
   { id: 'reports', icon: BarChart3, label: 'Rapporter' },
-  { id: 'spotify', icon: Music, label: 'Spotify' },
   { id: 'tetris', icon: Gamepad2, label: 'Tetris' },
 ];
 
 export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onLogout, isAdmin, onAdminNav }) => {
   return (
-    <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center pt-0 pb-5 gap-1 shrink-0">
-      <div className="flex flex-col items-center justify-center h-[56px] mb-2 gap-0">
-        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center font-heading font-extrabold text-[10px] text-primary-foreground tracking-wider"
+    <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center py-5 gap-1 shrink-0">
+      <div className="flex flex-col items-center mb-6 gap-0.5">
+        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center font-heading font-extrabold text-[11px] text-primary-foreground tracking-wider"
           style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.35)' }}>
           ASA
         </div>
+        <span className="font-heading font-semibold text-[7px] tracking-[0.18em] uppercase text-primary/60">Dialer</span>
       </div>
       {navItems.map(item => {
         const Icon = item.icon;
-        const isSpotify = item.id === 'spotify';
-        const isActive = activePage === item.id;
         return (
           <button
             key={item.id}
@@ -39,16 +38,12 @@ export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onL
             title={item.label}
             className={`w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center relative group
               transition-all duration-200 ease-out
-              ${isActive
-                ? isSpotify
-                  ? 'bg-[#1DB954] text-white shadow-[0_2px_10px_rgba(29,185,84,0.3)]'
-                  : 'bg-primary text-primary-foreground shadow-[0_2px_10px_hsl(217_91%_60%/0.25)]'
-                : isSpotify
-                  ? 'bg-transparent text-[#1DB954]/70 hover:bg-[#1DB954]/10 hover:text-[#1DB954]'
-                  : 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
+              ${activePage === item.id
+                ? 'bg-primary text-primary-foreground shadow-[0_2px_10px_hsl(217_91%_60%/0.25)]'
+                : 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
               }`}
           >
-            <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+            <Icon size={18} strokeWidth={activePage === item.id ? 2.2 : 1.8} />
             <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
               {item.label}
             </span>
@@ -56,6 +51,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onL
         );
       })}
       <div className="flex-1" />
+      <SpotifyPlayer />
       {isAdmin && onAdminNav && (
         <button
           onClick={onAdminNav}

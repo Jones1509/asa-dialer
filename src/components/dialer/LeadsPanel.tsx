@@ -27,8 +27,8 @@ export const LeadsPanel: React.FC<LeadsPanelProps> = ({
 }) => {
   return (
     <div className="w-[320px] border-r border-border/40 flex flex-col shrink-0 bg-card">
-      <div className="h-[48px] px-5 border-b border-border/40 flex items-center justify-between shrink-0">
-        <span className="font-heading font-bold text-[13px] tracking-tight">Emner</span>
+      <div className="px-4 py-3.5 border-b border-border/40 flex items-center justify-between">
+        <span className="font-heading font-bold text-[14px] tracking-tight">Emner</span>
         <span className="bg-secondary text-muted-foreground rounded-md px-2 py-0.5 text-[11px] font-semibold tabular-nums">{allLeads.length}</span>
       </div>
       <div className="px-3 py-2.5 border-b border-border/40">

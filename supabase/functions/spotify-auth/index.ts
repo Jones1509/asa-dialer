@@ -32,14 +32,14 @@ serve(async (req) => {
     );
 
     const token = authHeader.replace("Bearer ", "");
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
+    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    const userId = user.id;
+    const userId = claimsData.claims.sub as string;
 
     const { action, code, redirect_uri } = await req.json();
 
@@ -72,13 +72,6 @@ serve(async (req) => {
       const data = await resp.json();
       const expiresAt = new Date(Date.now() + data.expires_in * 1000).toISOString();
 
-      // Fetch Spotify user profile to get display name
-      const profileResp = await fetch("https://api.spotify.com/v1/me", {
-        headers: { Authorization: `Bearer ${data.access_token}` },
-      });
-      const profile = profileResp.ok ? await profileResp.json() : {};
-      const spotifyDisplayName = profile.display_name || profile.email || "Ukendt";
-
       // Use service role to upsert tokens
       const adminClient = createClient(
         Deno.env.get("SUPABASE_URL")!,
@@ -93,7 +86,6 @@ serve(async (req) => {
             access_token: data.access_token,
             refresh_token: data.refresh_token,
             expires_at: expiresAt,
-            spotify_display_name: spotifyDisplayName,
             updated_at: new Date().toISOString(),
           },
           { onConflict: "user_id" }
@@ -108,7 +100,7 @@ serve(async (req) => {
       }
 
       return new Response(
-        JSON.stringify({ access_token: data.access_token, expires_in: data.expires_in, spotify_display_name: spotifyDisplayName }),
+        JSON.stringify({ access_token: data.access_token, expires_in: data.expires_in }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -180,12 +172,12 @@ serve(async (req) => {
     if (action === "status") {
       const { data: tokenRow } = await supabase
         .from("spotify_tokens")
-        .select("expires_at, spotify_display_name")
+        .select("expires_at")
         .eq("user_id", userId)
         .single();
 
       return new Response(
-        JSON.stringify({ connected: !!tokenRow, spotify_display_name: tokenRow?.spotify_display_name || null }),
+        JSON.stringify({ connected: !!tokenRow }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
