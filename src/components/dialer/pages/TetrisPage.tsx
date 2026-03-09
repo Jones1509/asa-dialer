@@ -197,7 +197,8 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
     g.score = 0; g.lines = 0; g.level = 1; g.paused = false; g.gameOver = false; g.combo = 0; g.hold = null; g.canHold = true;
     setScore(0); setLines(0); setLevel(1); setPaused(false); setGameOver(false); setCombo(0); setLastClear(null); setHoldPiece(null); setScoreSaved(false);
     spawnPiece(g);
-  }, [spawnPiece]);
+    music.startMusic();
+  }, [spawnPiece, music.startMusic]);
 
   useEffect(() => {
     initGame();
