@@ -35,6 +35,12 @@ interface SpotifyPlaylist {
   trackCount: number;
 }
 
+// Module-level cache & dedup — survives re-mounts
+let _cachedPlaylists: SpotifyPlaylist[] | null = null;
+let _lastFetchTime = 0;
+let _fetchPromise: Promise<SpotifyPlaylist[]> | null = null;
+const CACHE_TTL = 5 * 60 * 1000; // 5 min
+
 export function useSpotifyInternal() {
   const [isConnected, setIsConnected] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
