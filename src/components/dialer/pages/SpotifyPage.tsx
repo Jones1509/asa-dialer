@@ -35,6 +35,13 @@ export const SpotifyPage: React.FC = () => {
   const [addingTrack, setAddingTrack] = useState<{ uri: string; name: string } | null>(null);
   const [addedToPlaylist, setAddedToPlaylist] = useState<string | null>(null);
 
+  // Lazy-load playlists only when Spotify page is opened
+  useEffect(() => {
+    if (spotify.isConnected && spotify.playlists.length === 0 && !spotify.loading) {
+      spotify.fetchPlaylists();
+    }
+  }, [spotify.isConnected, spotify.loading]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleOpenPlaylist = async (playlistId: string) => {
     setOpenPlaylistId(playlistId);
     setView('playlist');
