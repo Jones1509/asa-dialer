@@ -290,13 +290,8 @@ export function useSpotifyInternal() {
         const freshToken = await doRefreshToken();
         console.log('[Spotify] freshToken:', freshToken ? `${freshToken.substring(0, 20)}...` : 'NULL');
 
-        if (freshToken) {
-          console.log('[Spotify] fetching playlists...');
-          await fetchPlaylists(freshToken);
-          console.log('[Spotify] playlists fetch complete');
-        } else {
-          console.error('[Spotify] No fresh token — cannot fetch playlists');
-        }
+        // NOTE: Do NOT fetch playlists here — wait until user opens Spotify page
+        // This prevents 429 errors from Spotify API on every app load
       } catch (e) {
         console.error('[Spotify] init failed:', e);
       } finally {
