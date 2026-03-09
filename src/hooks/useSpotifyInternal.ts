@@ -53,7 +53,7 @@ export function useSpotifyInternal() {
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(50);
   const [searchResults, setSearchResults] = useState<SpotifyTrack[]>([]);
-  const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>([]);
+  const [playlists, setPlaylists] = useState<SpotifyPlaylist[]>(_cachedPlaylists ?? []);
   const [loading, setLoading] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
 
