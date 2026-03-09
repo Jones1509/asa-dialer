@@ -69,18 +69,18 @@ export const TetrisPage: React.FC = () => {
     };
   }, []);
 
-  // Sync music with pause/gameOver state
+  // Sync music with gameOver/musicMuted state only (NOT game pause)
   useEffect(() => {
     const player = ytPlayerRef.current;
     if (!player || !musicReady) return;
     try {
-      if (paused || gameOver || musicMuted) {
+      if (gameOver || musicMuted) {
         player.pauseVideo();
       } else {
         player.playVideo();
       }
     } catch {}
-  }, [paused, gameOver, musicMuted, musicReady]);
+  }, [gameOver, musicMuted, musicReady]);
 
   const toggleMusic = () => setMusicMuted(m => !m);
 
