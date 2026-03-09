@@ -94,18 +94,27 @@ export function useSpotify() {
     let token = tokenOverride ?? accessTokenRef.current;
     if (!token) return;
 
-    try {
-      let resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-        headers: { Authorization: `Bearer ${token}` },
+    const attempt = async (t: string): Promise<Response> => {
+      return fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+        headers: { Authorization: `Bearer ${t}` },
       });
+    };
+
+    try {
+      let resp = await attempt(token);
+
+      // Handle 429 rate limit — wait and retry up to 3 times
+      for (let i = 0; i < 3 && resp.status === 429; i++) {
+        const retryAfter = parseInt(resp.headers.get('Retry-After') || '2', 10);
+        await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000));
+        resp = await attempt(token);
+      }
 
       if (resp.status === 401 || resp.status === 403) {
         const newToken = await doRefreshToken();
         if (!newToken) return;
         token = newToken;
-        resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        resp = await attempt(token);
       }
 
       if (!resp.ok) {
@@ -114,14 +123,35 @@ export function useSpotify() {
       }
 
       const data = await resp.json();
-      setPlaylists(
-        (data.items || []).map((p: any) => ({
+      const items: SpotifyPlaylist[] = [];
+
+      // Paginate through all playlists
+      let nextUrl: string | null = data.next;
+      items.push(
+        ...(data.items || []).map((p: any) => ({
           id: p.id,
           name: p.name,
           image: p.images?.[0]?.url || '',
           trackCount: p.tracks?.total ?? 0,
         }))
       );
+
+      while (nextUrl) {
+        const nextResp = await fetch(nextUrl, { headers: { Authorization: `Bearer ${token}` } });
+        if (!nextResp.ok) break;
+        const nextData = await nextResp.json();
+        items.push(
+          ...(nextData.items || []).map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            image: p.images?.[0]?.url || '',
+            trackCount: p.tracks?.total ?? 0,
+          }))
+        );
+        nextUrl = nextData.next || null;
+      }
+
+      setPlaylists(items);
     } catch (e) {
       console.error('Playlists fetch error:', e);
     }
