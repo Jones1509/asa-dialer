@@ -69,17 +69,20 @@ export function useSpotify() {
 
   const doRefreshToken = async (): Promise<string | null> => {
     try {
+      console.log('[Spotify] doRefreshToken calling edge function...');
       const { data, error } = await supabase.functions.invoke('spotify-auth', {
         body: { action: 'refresh' },
       });
+      console.log('[Spotify] refresh response:', { data: data ? 'has data' : 'no data', error, hasToken: !!data?.access_token });
       if (!error && data?.access_token) {
         accessTokenRef.current = data.access_token;
         setAccessToken(data.access_token);
         setIsConnected(true);
         return data.access_token;
       }
+      console.error('[Spotify] refresh returned no token:', { data, error });
     } catch (e) {
-      console.error('Token refresh failed:', e);
+      console.error('[Spotify] Token refresh failed:', e);
     }
     return null;
   };
