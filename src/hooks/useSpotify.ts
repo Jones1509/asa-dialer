@@ -301,48 +301,45 @@ export function useSpotify() {
   };
 
   const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
-    let token = accessToken;
+    // Always get a fresh token to avoid stale closure values
+    let token = await refreshToken();
     if (!token) return [];
-
-    // If token is expired, refresh first
-    const tryRefresh = async () => {
-      const newToken = await refreshToken();
-      if (newToken) token = newToken;
-      return token;
-    };
-
-    const fetchPage = async (url: string, t: string) => {
-      const resp = await fetch(url, { headers: { Authorization: `Bearer ${t}` } });
-      if (resp.status === 401 || resp.status === 403) {
-        const refreshed = await tryRefresh();
-        if (!refreshed) return null;
-        const retry = await fetch(url, { headers: { Authorization: `Bearer ${refreshed}` } });
-        if (!retry.ok) return null;
-        return retry.json();
-      }
-      if (!resp.ok) return null;
-      return resp.json();
-    };
 
     try {
       const allTracks: SpotifyTrack[] = [];
-      let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100&fields=next,items(track(id,name,uri,duration_ms,artists(name),album(name,images)))`;
+      // NO fields filter - use plain URL so pagination next links work correctly
+      let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
 
       while (url) {
-        const data = await fetchPage(url, token!);
-        if (!data) break;
-        const items = data.items || [];
+        const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+
+        if (resp.status === 401 || resp.status === 403) {
+          const newToken = await refreshToken();
+          if (!newToken) break;
+          token = newToken;
+          continue; // retry same url with new token
+        }
+
+        if (!resp.ok) {
+          console.error('Spotify playlist tracks fetch failed:', resp.status, await resp.text());
+          break;
+        }
+
+        const data = await resp.json();
+        const items: any[] = data.items || [];
+
         const tracks = items
           .filter((item: any) => item?.track?.id)
           .map((item: any) => ({
             id: item.track.id,
             name: item.track.name,
-            artist: item.track.artists.map((a: any) => a.name).join(', '),
+            artist: item.track.artists?.map((a: any) => a.name).join(', ') || '',
             album: item.track.album?.name || '',
             albumArt: item.track.album?.images?.[1]?.url || item.track.album?.images?.[0]?.url || '',
             uri: item.track.uri,
-            duration_ms: item.track.duration_ms,
+            duration_ms: item.track.duration_ms || 0,
           }));
+
         allTracks.push(...tracks);
         url = data.next || null;
       }
