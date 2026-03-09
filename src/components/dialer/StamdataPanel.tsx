@@ -174,12 +174,13 @@ const InlineTetris: React.FC = () => {
     ctx.restore();
   }, [BLOCK]);
 
+  // Render loop (always runs for background animation, but game logic only when started)
   useEffect(() => {
-    initGame(); lastDropRef.current = performance.now();
+    lastDropRef.current = performance.now();
     const loop = (time: number) => {
-      const gg = gameRef.current; if (!gg.board) return;
-      const speed = Math.max(80, 500 - (gg.level - 1) * 45);
-      if (!gg.paused && !gg.gameOver && time - lastDropRef.current > speed) {
+      const gg = gameRef.current;
+      const speed = Math.max(80, 500 - ((gg.level || 1) - 1) * 45);
+      if (gameStarted && gg.board && !gg.paused && !gg.gameOver && time - lastDropRef.current > speed) {
         lastDropRef.current = time;
         if (!collides(gg.board, gg.piece, gg.pieceX, gg.pieceY + 1)) gg.pieceY++;
         else {
@@ -202,7 +203,7 @@ const InlineTetris: React.FC = () => {
     };
     animRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(animRef.current);
-  }, [initGame, render, spawnParticles, triggerShake, spawnPiece]);
+  }, [gameStarted, render, spawnParticles, triggerShake, spawnPiece]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
