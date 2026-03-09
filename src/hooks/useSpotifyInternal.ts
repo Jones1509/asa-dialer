@@ -35,7 +35,7 @@ interface SpotifyPlaylist {
   trackCount: number;
 }
 
-export function useSpotify() {
+export function useSpotifyInternal() {
   const [isConnected, setIsConnected] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [spotifyDisplayName, setSpotifyDisplayName] = useState<string | null>(null);
