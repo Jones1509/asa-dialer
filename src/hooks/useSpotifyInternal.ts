@@ -128,10 +128,9 @@ export function useSpotifyInternal() {
       if (resp.status !== 429) break;
     }
 
-    // Still rate limited after all retries
     if (resp.status === 429) {
-      console.error('[Spotify] Still rate limited after 5 retries');
-      throw new Error('HTTP 429 - For mange forespørgsler. Vent et par minutter og prøv igen.');
+      console.error('[Spotify] Still rate limited after retries');
+      throw new Error('Spotify er midlertidigt utilgængelig (rate limit). Vent 2-3 minutter og prøv igen.');
     }
 
     if (resp.status === 401 || resp.status === 403) {
