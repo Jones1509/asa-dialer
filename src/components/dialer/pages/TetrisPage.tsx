@@ -2,6 +2,18 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Gamepad2, Pause, Play, Trophy, Zap, Star, Crown, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
+interface TetrisMusic {
+  musicMuted: boolean;
+  musicReady: boolean;
+  musicStarted: boolean;
+  startMusic: () => void;
+  toggleMusic: () => void;
+  stopMusic: () => void;
+}
+
+interface TetrisPageProps {
+  music: TetrisMusic;
+}
 const COLS = 10, ROWS = 20;
 
 const COLORS = ['', '#00d4ff', '#00ff87', '#bf5af2', '#ff9f0a', '#0a84ff', '#ff375f', '#ffd60a'];
