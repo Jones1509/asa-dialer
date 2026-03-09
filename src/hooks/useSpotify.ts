@@ -301,29 +301,48 @@ export function useSpotify() {
   };
 
   const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
-    // Always get a fresh token to avoid stale closure values
-    let token = await refreshToken();
-    if (!token) return [];
+    // Always get a fresh token - never rely on closure value which may be stale
+    let token = accessToken;
+    if (!token) {
+      token = await refreshToken();
+    }
+    if (!token) {
+      console.error('No Spotify token available');
+      return [];
+    }
 
     try {
       const allTracks: SpotifyTrack[] = [];
-      // NO fields filter - use plain URL so pagination next links work correctly
       let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+      let didRefresh = false; // Only allow one token refresh to prevent infinite loops
+      let pageCount = 0;
+      const MAX_PAGES = 50; // Safety limit
 
-      while (url) {
+      while (url && pageCount < MAX_PAGES) {
+        pageCount++;
         const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
 
-        if (resp.status === 401 || resp.status === 403) {
+        if ((resp.status === 401 || resp.status === 403) && !didRefresh) {
+          // Token expired — refresh once, then retry
+          didRefresh = true;
           const newToken = await refreshToken();
-          if (!newToken) break;
+          if (!newToken) {
+            console.error('Token refresh failed, stopping');
+            break;
+          }
           token = newToken;
-          continue; // retry same url with new token
+          // Don't advance URL — retry this same page with fresh token
+          continue;
         }
 
         if (!resp.ok) {
-          console.error('Spotify playlist tracks fetch failed:', resp.status, await resp.text());
+          const errBody = await resp.text().catch(() => '');
+          console.error(`Spotify API error ${resp.status}:`, errBody);
           break;
         }
+
+        // Reset refresh flag on success so we can refresh again for next page if needed
+        didRefresh = false;
 
         const data = await resp.json();
         const items: any[] = data.items || [];
