@@ -1,6 +1,5 @@
 import React from 'react';
 import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2 } from 'lucide-react';
-import { SpotifyPlayer } from './SpotifyPlayer';
 
 interface SidebarProps {
   activePage: string;
@@ -51,7 +50,7 @@ export const AppSidebar: React.FC<SidebarProps> = ({ activePage, onNavigate, onL
         );
       })}
       <div className="flex-1" />
-      <SpotifyPlayer />
+      
       {isAdmin && onAdminNav && (
         <button
           onClick={onAdminNav}
