@@ -102,7 +102,11 @@ export function useSpotify() {
 
   const fetchPlaylists = async (tokenOverride?: string): Promise<void> => {
     let token = tokenOverride ?? accessTokenRef.current;
-    if (!token) return;
+    if (!token) {
+      console.error('[Spotify] fetchPlaylists: no token');
+      setInitError('Ingen Spotify token tilgængelig for at hente playlister');
+      return;
+    }
 
     const attempt = async (t: string): Promise<Response> => {
       return fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
@@ -112,15 +116,18 @@ export function useSpotify() {
 
     try {
       let resp = await attempt(token);
+      console.log('[Spotify] playlists initial response:', resp.status);
 
       // Handle 429 rate limit — wait and retry up to 3 times
       for (let i = 0; i < 3 && resp.status === 429; i++) {
         const retryAfter = parseInt(resp.headers.get('Retry-After') || '2', 10);
+        console.log(`[Spotify] Rate limited, waiting ${retryAfter + 1}s...`);
         await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000));
         resp = await attempt(token);
       }
 
       if (resp.status === 401 || resp.status === 403) {
+        console.log('[Spotify] Token expired, refreshing...');
         const newToken = await doRefreshToken();
         if (!newToken) return;
         token = newToken;
@@ -128,11 +135,14 @@ export function useSpotify() {
       }
 
       if (!resp.ok) {
-        console.error('fetchPlaylists failed:', resp.status);
+        const errText = await resp.text().catch(() => '');
+        console.error('[Spotify] fetchPlaylists failed:', resp.status, errText);
+        setInitError(`Kunne ikke hente playlister: HTTP ${resp.status}`);
         return;
       }
 
       const data = await resp.json();
+      console.log('[Spotify] playlists response items:', data.items?.length || 0);
       const items: SpotifyPlaylist[] = [];
 
       // Paginate through all playlists
@@ -161,9 +171,12 @@ export function useSpotify() {
         nextUrl = nextData.next || null;
       }
 
+      console.log('[Spotify] Total playlists fetched:', items.length);
       setPlaylists(items);
-    } catch (e) {
-      console.error('Playlists fetch error:', e);
+      setInitError(null); // Clear any previous errors
+    } catch (e: any) {
+      console.error('[Spotify] Playlists fetch error:', e);
+      setInitError(`Playliste-fejl: ${e?.message || String(e)}`);
     }
   };
 
