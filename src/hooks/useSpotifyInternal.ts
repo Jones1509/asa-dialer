@@ -104,9 +104,78 @@ export function useSpotifyInternal() {
     return accessTokenRef.current ?? doRefreshToken();
   };
 
-  // ---- Playlists ----
+  // ---- Playlists (cached + deduped) ----
 
-  const fetchPlaylists = async (tokenOverride?: string): Promise<void> => {
+  const _doFetchPlaylists = async (token: string): Promise<SpotifyPlaylist[]> => {
+    const attempt = async (t: string): Promise<Response> => {
+      return fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+        headers: { Authorization: `Bearer ${t}` },
+      });
+    };
+
+    let resp = await attempt(token);
+    console.log('[Spotify] playlists initial response:', resp.status);
+
+    // Handle 429 — exponential backoff up to 5 retries
+    for (let i = 0; i < 5 && resp.status === 429; i++) {
+      const retryAfter = parseInt(resp.headers.get('Retry-After') || '3', 10);
+      const wait = Math.max(retryAfter, Math.pow(2, i + 1)) * 1000;
+      console.log(`[Spotify] Rate limited, waiting ${wait / 1000}s (attempt ${i + 1})...`);
+      await new Promise((r) => setTimeout(r, wait));
+      resp = await attempt(token);
+    }
+
+    if (resp.status === 401 || resp.status === 403) {
+      console.log('[Spotify] Token expired, refreshing...');
+      const newToken = await doRefreshToken();
+      if (!newToken) return [];
+      token = newToken;
+      resp = await attempt(token);
+    }
+
+    if (!resp.ok) {
+      console.error('[Spotify] fetchPlaylists failed:', resp.status);
+      throw new Error(`HTTP ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const items: SpotifyPlaylist[] = (data.items || []).map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      image: p.images?.[0]?.url || '',
+      trackCount: p.tracks?.total ?? 0,
+    }));
+
+    let nextUrl: string | null = data.next;
+    while (nextUrl) {
+      // Small delay between pagination requests
+      await new Promise((r) => setTimeout(r, 300));
+      const nextResp = await fetch(nextUrl, { headers: { Authorization: `Bearer ${token}` } });
+      if (!nextResp.ok) break;
+      const nextData = await nextResp.json();
+      items.push(
+        ...(nextData.items || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          image: p.images?.[0]?.url || '',
+          trackCount: p.tracks?.total ?? 0,
+        }))
+      );
+      nextUrl = nextData.next || null;
+    }
+
+    return items;
+  };
+
+  const fetchPlaylists = async (tokenOverride?: string, force = false): Promise<void> => {
+    // Return cached if fresh
+    if (!force && _cachedPlaylists && Date.now() - _lastFetchTime < CACHE_TTL) {
+      console.log('[Spotify] Using cached playlists:', _cachedPlaylists.length);
+      setPlaylists(_cachedPlaylists);
+      setInitError(null);
+      return;
+    }
+
     let token = tokenOverride ?? accessTokenRef.current;
     if (!token) {
       console.error('[Spotify] fetchPlaylists: no token');
@@ -114,75 +183,30 @@ export function useSpotifyInternal() {
       return;
     }
 
-    const attempt = async (t: string): Promise<Response> => {
-      return fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-        headers: { Authorization: `Bearer ${t}` },
-      });
-    };
+    // Deduplicate concurrent calls
+    if (_fetchPromise) {
+      console.log('[Spotify] Reusing in-flight fetch');
+      try {
+        const items = await _fetchPromise;
+        setPlaylists(items);
+        setInitError(null);
+      } catch {}
+      return;
+    }
 
     try {
-      let resp = await attempt(token);
-      console.log('[Spotify] playlists initial response:', resp.status);
-
-      // Handle 429 rate limit — wait and retry up to 3 times
-      for (let i = 0; i < 3 && resp.status === 429; i++) {
-        const retryAfter = parseInt(resp.headers.get('Retry-After') || '2', 10);
-        console.log(`[Spotify] Rate limited, waiting ${retryAfter + 1}s...`);
-        await new Promise((r) => setTimeout(r, (retryAfter + 1) * 1000));
-        resp = await attempt(token);
-      }
-
-      if (resp.status === 401 || resp.status === 403) {
-        console.log('[Spotify] Token expired, refreshing...');
-        const newToken = await doRefreshToken();
-        if (!newToken) return;
-        token = newToken;
-        resp = await attempt(token);
-      }
-
-      if (!resp.ok) {
-        const errText = await resp.text().catch(() => '');
-        console.error('[Spotify] fetchPlaylists failed:', resp.status, errText);
-        setInitError(`Kunne ikke hente playlister: HTTP ${resp.status}`);
-        return;
-      }
-
-      const data = await resp.json();
-      console.log('[Spotify] playlists response items:', data.items?.length || 0);
-      const items: SpotifyPlaylist[] = [];
-
-      // Paginate through all playlists
-      let nextUrl: string | null = data.next;
-      items.push(
-        ...(data.items || []).map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          image: p.images?.[0]?.url || '',
-          trackCount: p.tracks?.total ?? 0,
-        }))
-      );
-
-      while (nextUrl) {
-        const nextResp = await fetch(nextUrl, { headers: { Authorization: `Bearer ${token}` } });
-        if (!nextResp.ok) break;
-        const nextData = await nextResp.json();
-        items.push(
-          ...(nextData.items || []).map((p: any) => ({
-            id: p.id,
-            name: p.name,
-            image: p.images?.[0]?.url || '',
-            trackCount: p.tracks?.total ?? 0,
-          }))
-        );
-        nextUrl = nextData.next || null;
-      }
-
+      _fetchPromise = _doFetchPlaylists(token);
+      const items = await _fetchPromise;
+      _cachedPlaylists = items;
+      _lastFetchTime = Date.now();
       console.log('[Spotify] Total playlists fetched:', items.length);
       setPlaylists(items);
-      setInitError(null); // Clear any previous errors
+      setInitError(null);
     } catch (e: any) {
       console.error('[Spotify] Playlists fetch error:', e);
-      setInitError(`Playliste-fejl: ${e?.message || String(e)}`);
+      setInitError(`Kunne ikke hente playlister: ${e?.message || String(e)}`);
+    } finally {
+      _fetchPromise = null;
     }
   };
 
