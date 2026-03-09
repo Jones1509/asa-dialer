@@ -279,7 +279,19 @@ const InlineTetris: React.FC = () => {
               </div>
             </div>
           )}
-          {paused && !gameOver && (
+          {!gameStarted && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl" style={{ background: 'rgba(5,8,15,0.9)', backdropFilter: 'blur(6px)' }}>
+              <div className="text-center">
+                <Gamepad2 size={20} className="text-cyan-400 mx-auto mb-2" />
+                <div className="font-heading font-bold text-sm mb-3" style={{ background: 'linear-gradient(135deg, #00d4ff, #bf5af2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>TETRIS</div>
+                <button onClick={initGame} className="rounded-lg px-4 py-1.5 text-[10px] font-semibold text-white/80 hover:text-white transition-all duration-200 active:scale-95 cursor-pointer border"
+                  style={{ background: 'rgba(0,212,255,0.15)', borderColor: 'rgba(0,212,255,0.3)' }}>
+                  <Play size={10} className="inline mr-1" /> Start Spil
+                </button>
+              </div>
+            </div>
+          )}
+          {paused && !gameOver && gameStarted && (
             <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl" style={{ background: 'rgba(5,8,15,0.85)', backdropFilter: 'blur(6px)' }}>
               <div className="text-center">
                 <Pause size={16} className="text-cyan-400 mx-auto mb-1" />
