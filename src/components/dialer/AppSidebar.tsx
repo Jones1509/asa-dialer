@@ -1,6 +1,5 @@
 import React from 'react';
 import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2 } from 'lucide-react';
-import { SpotifyPlayer } from './SpotifyPlayer';
 
 interface SidebarProps {
   activePage: string;
