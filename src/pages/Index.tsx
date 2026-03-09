@@ -101,7 +101,7 @@ const Index = () => {
             showNotif={state.showNotif}
           />
         );
-      case 'tetris': return <TetrisPage />;
+      case 'tetris': return <TetrisPage music={music} />;
       default: return null;
     }
   };
