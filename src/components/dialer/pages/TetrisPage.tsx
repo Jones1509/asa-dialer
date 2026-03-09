@@ -23,7 +23,7 @@ const PIECES = [[[1,1,1,1]], [[2,2],[2,2]], [[0,3,0],[3,3,3]], [[4,0],[4,0],[4,4
 interface Particle { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; size: number; }
 interface HighScore { id: string; player_name: string; score: number; lines_cleared: number; level: number; created_at: string; }
 
-export const TetrisPage: React.FC = () => {
+export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<any>({});
