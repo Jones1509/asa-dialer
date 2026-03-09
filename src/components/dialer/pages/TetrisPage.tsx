@@ -44,8 +44,6 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
   const particlesRef = useRef<Particle[]>([]);
   const starsRef = useRef<{ x: number; y: number; size: number; speed: number; opacity: number }[]>([]);
   const shakeRef = useRef({ x: 0, y: 0, intensity: 0 });
-  const ytPlayerRef = useRef<any>(null);
-  const [musicMuted, setMusicMuted] = useState(false);
   const [musicReady, setMusicReady] = useState(false);
 
   // YouTube IFrame API for background music
