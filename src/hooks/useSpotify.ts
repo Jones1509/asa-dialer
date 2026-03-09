@@ -213,22 +213,42 @@ export function useSpotify() {
     initialized.current = true;
 
     const init = async () => {
+      console.log('[Spotify] init starting...');
       try {
         const { data, error } = await supabase.functions.invoke('spotify-auth', {
           body: { action: 'status' },
         });
-        if (!error && data?.connected) {
-          setIsConnected(true);
-          setSpotifyDisplayName(data.spotify_display_name || null);
-          const freshToken = await doRefreshToken();
-          if (freshToken) {
-            await fetchPlaylists(freshToken);
-          }
+        console.log('[Spotify] status response:', { data, error });
+
+        if (error) {
+          console.error('[Spotify] status error:', error);
+          return;
+        }
+
+        if (!data?.connected) {
+          console.log('[Spotify] not connected');
+          return;
+        }
+
+        setIsConnected(true);
+        setSpotifyDisplayName(data.spotify_display_name || null);
+        console.log('[Spotify] connected, refreshing token...');
+
+        const freshToken = await doRefreshToken();
+        console.log('[Spotify] freshToken:', freshToken ? `${freshToken.substring(0, 20)}...` : 'NULL');
+
+        if (freshToken) {
+          console.log('[Spotify] fetching playlists...');
+          await fetchPlaylists(freshToken);
+          console.log('[Spotify] playlists fetch complete');
+        } else {
+          console.error('[Spotify] No fresh token — cannot fetch playlists');
         }
       } catch (e) {
-        console.error('Spotify init failed:', e);
+        console.error('[Spotify] init failed:', e);
       } finally {
         setLoading(false);
+        console.log('[Spotify] init done');
       }
     };
 
