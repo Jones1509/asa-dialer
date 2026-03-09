@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
 import { useTwilioDevice, IncomingCallInfo } from '@/hooks/useTwilioDevice';
+import { useTetrisMusic } from '@/hooks/useTetrisMusic';
 import { AppSidebar } from '@/components/dialer/AppSidebar';
 import { Topbar } from '@/components/dialer/Topbar';
-// TetrisOverlay removed — Tetris is now inline in StamdataPanel
 import { IncomingCallOverlay } from '@/components/dialer/IncomingCallOverlay';
 import { DialerPage } from '@/components/dialer/pages/DialerPage';
 import { IncomingPage } from '@/components/dialer/pages/IncomingPage';
