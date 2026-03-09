@@ -65,7 +65,12 @@ export function useSpotify() {
       if (!error && data?.connected) {
         setIsConnected(true);
         setSpotifyDisplayName(data.spotify_display_name || null);
-        await refreshToken();
+        // Get fresh token and pass it DIRECTLY to fetchPlaylists
+        // because React state (accessToken) won't be updated synchronously
+        const freshToken = await refreshToken();
+        if (freshToken) {
+          await fetchPlaylists(freshToken);
+        }
       }
     } catch (e) {
       console.error('Spotify status check failed:', e);
@@ -271,19 +276,49 @@ export function useSpotify() {
     }
   };
 
-  const fetchPlaylists = useCallback(async () => {
-    if (!accessToken) return;
+  const fetchPlaylists = useCallback(async (tokenOverride?: string) => {
+    const token = tokenOverride || accessToken;
+    if (!token) return;
     try {
       const resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (resp.status === 401 || resp.status === 403) {
+        // Token expired — refresh and retry once
+        const newToken = await refreshToken();
+        if (!newToken) return;
+        const retry = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+          headers: { Authorization: `Bearer ${newToken}` },
+        });
+        if (!retry.ok) {
+          console.error('fetchPlaylists retry failed:', retry.status);
+          return;
+        }
+        const data = await retry.json();
+        setPlaylists(
+          (data.items || []).map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            image: p.images?.[0]?.url || '',
+            trackCount: p.tracks?.total ?? 0,
+          }))
+        );
+        return;
+      }
+
+      if (!resp.ok) {
+        console.error('fetchPlaylists failed:', resp.status);
+        return;
+      }
+
       const data = await resp.json();
       setPlaylists(
         (data.items || []).map((p: any) => ({
           id: p.id,
           name: p.name,
           image: p.images?.[0]?.url || '',
-          trackCount: p.tracks?.total ?? p.items?.total ?? 0,
+          trackCount: p.tracks?.total ?? 0,
         }))
       );
     } catch (e) {
