@@ -26,6 +26,7 @@ const InlineTetris: React.FC = () => {
   const [lines, setLines] = useState(0);
   const [paused, setPaused] = useState(false);
   const [gameOver, setGameOver] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const [blockSize, setBlockSize] = useState(14);
   const [nextPiece, setNextPiece] = useState<number[][] | null>(null);
   const [holdPiece, setHoldPiece] = useState<number[][] | null>(null);
