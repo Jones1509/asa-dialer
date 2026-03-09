@@ -44,55 +44,16 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
   const particlesRef = useRef<Particle[]>([]);
   const starsRef = useRef<{ x: number; y: number; size: number; speed: number; opacity: number }[]>([]);
   const shakeRef = useRef({ x: 0, y: 0, intensity: 0 });
-  const [musicReady, setMusicReady] = useState(false);
 
-  // YouTube IFrame API for background music
+  // Start music when entering Tetris page
   useEffect(() => {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const existing = document.querySelector('script[src="https://www.youtube.com/iframe_api"]');
-    if (!existing) document.head.appendChild(tag);
+    music.startMusic();
+  }, [music.startMusic]);
 
-    const initPlayer = () => {
-      ytPlayerRef.current = new (window as any).YT.Player('yt-music-player', {
-        height: '0',
-        width: '0',
-        videoId: 'vtNJMAyeP0s',
-        playerVars: { autoplay: 1, loop: 1, playlist: 'vtNJMAyeP0s', controls: 0, disablekb: 1, fs: 0, modestbranding: 1 },
-        events: {
-          onReady: (e: any) => { e.target.setVolume(35); setMusicReady(true); },
-          onStateChange: (e: any) => {
-            if (e.data === (window as any).YT.PlayerState.ENDED) e.target.playVideo();
-          },
-        },
-      });
-    };
-
-    if ((window as any).YT && (window as any).YT.Player) {
-      initPlayer();
-    } else {
-      (window as any).onYouTubeIframeAPIReady = initPlayer;
-    }
-
-    return () => {
-      if (ytPlayerRef.current?.destroy) ytPlayerRef.current.destroy();
-    };
-  }, []);
-
-  // Sync music with gameOver/musicMuted state only (NOT game pause)
+  // Stop music on game over
   useEffect(() => {
-    const player = ytPlayerRef.current;
-    if (!player || !musicReady) return;
-    try {
-      if (gameOver || musicMuted) {
-        player.pauseVideo();
-      } else {
-        player.playVideo();
-      }
-    } catch {}
-  }, [gameOver, musicMuted, musicReady]);
-
-  const toggleMusic = () => setMusicMuted(m => !m);
+    if (gameOver) music.stopMusic();
+  }, [gameOver, music.stopMusic]);
 
   // Auto-scale: fit game inside available space (leave room for header, padding, side panels)
   useEffect(() => {
