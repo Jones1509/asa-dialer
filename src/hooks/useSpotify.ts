@@ -52,32 +52,159 @@ export function useSpotify() {
   const progressInterval = useRef<number | null>(null);
   const sdkReady = useRef(false);
 
-  // Check connection status on mount
+  // ===== KEY FIX: Keep a ref in sync with accessToken state =====
+  // This allows callbacks to always read the latest token without stale closures
+  const accessTokenRef = useRef<string | null>(null);
   useEffect(() => {
-    checkConnection();
-  }, []);
+    accessTokenRef.current = accessToken;
+  }, [accessToken]);
 
-  const checkConnection = async () => {
+  // Internal token refresh - always returns the new token
+  const doRefreshToken = useCallback(async (): Promise<string | null> => {
     try {
       const { data, error } = await supabase.functions.invoke('spotify-auth', {
-        body: { action: 'status' },
+        body: { action: 'refresh' },
       });
-      if (!error && data?.connected) {
+      if (!error && data?.access_token) {
+        setAccessToken(data.access_token);
+        accessTokenRef.current = data.access_token;
         setIsConnected(true);
-        setSpotifyDisplayName(data.spotify_display_name || null);
-        // Get fresh token and pass it DIRECTLY to fetchPlaylists
-        // because React state (accessToken) won't be updated synchronously
-        const freshToken = await refreshToken();
-        if (freshToken) {
-          await fetchPlaylists(freshToken);
-        }
+        return data.access_token;
       }
     } catch (e) {
-      console.error('Spotify status check failed:', e);
-    } finally {
-      setLoading(false);
+      console.error('Token refresh failed:', e);
     }
-  };
+    return null;
+  }, []);
+
+  // Internal helper: get a valid token (refresh if needed)
+  const getValidToken = useCallback(async (): Promise<string | null> => {
+    const token = accessTokenRef.current;
+    if (token) return token;
+    return doRefreshToken();
+  }, [doRefreshToken]);
+
+  // Fetch playlists using ref-based token
+  const fetchPlaylists = useCallback(async (tokenOverride?: string) => {
+    const token = tokenOverride ?? accessTokenRef.current;
+    if (!token) {
+      console.error('fetchPlaylists: no token');
+      return;
+    }
+
+    try {
+      let resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Auto-refresh on 401
+      if (resp.status === 401 || resp.status === 403) {
+        const newToken = await doRefreshToken();
+        if (!newToken) return;
+        resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
+          headers: { Authorization: `Bearer ${newToken}` },
+        });
+      }
+
+      if (!resp.ok) {
+        console.error('fetchPlaylists failed:', resp.status, await resp.text().catch(() => ''));
+        return;
+      }
+
+      const data = await resp.json();
+      console.log('Playlists fetched:', data.items?.length);
+      setPlaylists(
+        (data.items || []).map((p: any) => ({
+          id: p.id,
+          name: p.name,
+          image: p.images?.[0]?.url || '',
+          trackCount: p.tracks?.total ?? 0,
+        }))
+      );
+    } catch (e) {
+      console.error('Playlists fetch error:', e);
+    }
+  }, [doRefreshToken]);
+
+  // Fetch all tracks for a playlist with pagination
+  const fetchPlaylistTracks = useCallback(async (playlistId: string): Promise<SpotifyTrack[]> => {
+    let token = await getValidToken();
+    if (!token) {
+      console.error('fetchPlaylistTracks: no token');
+      return [];
+    }
+
+    const allTracks: SpotifyTrack[] = [];
+    let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
+    let pageCount = 0;
+    const MAX_PAGES = 50;
+
+    while (url && pageCount < MAX_PAGES) {
+      pageCount++;
+      let resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+
+      if (resp.status === 401 || resp.status === 403) {
+        const newToken = await doRefreshToken();
+        if (!newToken) break;
+        token = newToken;
+        resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      }
+
+      if (!resp.ok) {
+        console.error(`Spotify tracks error ${resp.status}:`, await resp.text().catch(() => ''));
+        break;
+      }
+
+      const data = await resp.json();
+      const items: any[] = data.items || [];
+
+      const tracks = items
+        .filter((item: any) => item?.track?.id)
+        .map((item: any) => ({
+          id: item.track.id,
+          name: item.track.name,
+          artist: item.track.artists?.map((a: any) => a.name).join(', ') || '',
+          album: item.track.album?.name || '',
+          albumArt:
+            item.track.album?.images?.[1]?.url ||
+            item.track.album?.images?.[0]?.url ||
+            '',
+          uri: item.track.uri,
+          duration_ms: item.track.duration_ms || 0,
+        }));
+
+      allTracks.push(...tracks);
+      url = data.next || null;
+    }
+
+    console.log(`fetchPlaylistTracks: fetched ${allTracks.length} tracks`);
+    return allTracks;
+  }, [getValidToken, doRefreshToken]);
+
+  // Check connection on mount
+  useEffect(() => {
+    const checkConnection = async () => {
+      try {
+        const { data, error } = await supabase.functions.invoke('spotify-auth', {
+          body: { action: 'status' },
+        });
+        if (!error && data?.connected) {
+          setIsConnected(true);
+          setSpotifyDisplayName(data.spotify_display_name || null);
+          // Get fresh token and update ref BEFORE fetching playlists
+          const freshToken = await doRefreshToken();
+          if (freshToken) {
+            await fetchPlaylists(freshToken);
+          }
+        }
+      } catch (e) {
+        console.error('Spotify status check failed:', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkConnection();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = () => {
     const params = new URLSearchParams({
@@ -88,8 +215,6 @@ export function useSpotify() {
       show_dialog: 'true',
     });
     const authUrl = `https://accounts.spotify.com/authorize?${params.toString()}`;
-    // Force Spotify logout first so each user MUST enter their own credentials
-    // This prevents one user from accessing another user's Spotify account
     window.location.href = `https://accounts.spotify.com/logout?continue=${encodeURIComponent(authUrl)}`;
   };
 
@@ -99,25 +224,11 @@ export function useSpotify() {
     });
     if (error) throw error;
     setAccessToken(data.access_token);
+    accessTokenRef.current = data.access_token;
     setSpotifyDisplayName(data.spotify_display_name || null);
     setIsConnected(true);
+    await fetchPlaylists(data.access_token);
     return data.access_token;
-  };
-
-  const refreshToken = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('spotify-auth', {
-        body: { action: 'refresh' },
-      });
-      if (!error && data?.access_token) {
-        setAccessToken(data.access_token);
-        setIsConnected(true);
-        return data.access_token;
-      }
-    } catch (e) {
-      console.error('Token refresh failed:', e);
-    }
-    return null;
   };
 
   const disconnect = async () => {
@@ -127,10 +238,12 @@ export function useSpotify() {
     setCurrentTrack(null);
     setIsPlaying(false);
     setSpotifyDisplayName(null);
+    setPlaylists([]);
     await supabase.functions.invoke('spotify-auth', {
       body: { action: 'disconnect' },
     });
     setAccessToken(null);
+    accessTokenRef.current = null;
     setIsConnected(false);
   };
 
@@ -206,16 +319,16 @@ export function useSpotify() {
   }, [isPlaying, duration]);
 
   const play = async (uri?: string) => {
-    let token = accessToken;
+    const token = await getValidToken();
     if (!token || !deviceId) return;
     if (uri) {
-      let resp = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+      const resp = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: [uri] }),
       });
       if (resp.status === 403 || resp.status === 401) {
-        const newToken = await refreshToken();
+        const newToken = await doRefreshToken();
         if (newToken) {
           await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
             method: 'PUT',
@@ -230,12 +343,7 @@ export function useSpotify() {
   };
 
   const pause = () => player?.pause();
-
-  const togglePlay = () => {
-    if (isPlaying) pause();
-    else play();
-  };
-
+  const togglePlay = () => { if (isPlaying) pause(); else play(); };
   const nextTrack = () => player?.nextTrack();
   const prevTrack = () => player?.previousTrack();
 
@@ -250,14 +358,15 @@ export function useSpotify() {
   };
 
   const search = async (query: string) => {
-    if (!accessToken || !query.trim()) {
+    const token = accessTokenRef.current;
+    if (!token || !query.trim()) {
       setSearchResults([]);
       return;
     }
     try {
       const resp = await fetch(
-        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=10`,
-        { headers: { Authorization: `Bearer ${accessToken}` } }
+        `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=20`,
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       const data = await resp.json();
       setSearchResults(
@@ -276,146 +385,27 @@ export function useSpotify() {
     }
   };
 
-  const fetchPlaylists = useCallback(async (tokenOverride?: string) => {
-    const token = tokenOverride || accessToken;
-    if (!token) return;
-    try {
-      const resp = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (resp.status === 401 || resp.status === 403) {
-        // Token expired — refresh and retry once
-        const newToken = await refreshToken();
-        if (!newToken) return;
-        const retry = await fetch('https://api.spotify.com/v1/me/playlists?limit=50', {
-          headers: { Authorization: `Bearer ${newToken}` },
-        });
-        if (!retry.ok) {
-          console.error('fetchPlaylists retry failed:', retry.status);
-          return;
-        }
-        const data = await retry.json();
-        setPlaylists(
-          (data.items || []).map((p: any) => ({
-            id: p.id,
-            name: p.name,
-            image: p.images?.[0]?.url || '',
-            trackCount: p.tracks?.total ?? 0,
-          }))
-        );
-        return;
-      }
-
-      if (!resp.ok) {
-        console.error('fetchPlaylists failed:', resp.status);
-        return;
-      }
-
-      const data = await resp.json();
-      setPlaylists(
-        (data.items || []).map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          image: p.images?.[0]?.url || '',
-          trackCount: p.tracks?.total ?? 0,
-        }))
-      );
-    } catch (e) {
-      console.error('Playlists fetch error:', e);
-    }
-  }, [accessToken]);
-
   const playPlaylist = async (playlistId: string) => {
-    if (!accessToken || !deviceId) return;
+    const token = await getValidToken();
+    if (!token || !deviceId) return;
     await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ context_uri: `spotify:playlist:${playlistId}` }),
     });
   };
 
-  const fetchPlaylistTracks = async (playlistId: string): Promise<SpotifyTrack[]> => {
-    // Always get a fresh token - never rely on closure value which may be stale
-    let token = accessToken;
-    if (!token) {
-      token = await refreshToken();
-    }
-    if (!token) {
-      console.error('No Spotify token available');
-      return [];
-    }
-
-    try {
-      const allTracks: SpotifyTrack[] = [];
-      let url: string | null = `https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=100`;
-      let didRefresh = false; // Only allow one token refresh to prevent infinite loops
-      let pageCount = 0;
-      const MAX_PAGES = 50; // Safety limit
-
-      while (url && pageCount < MAX_PAGES) {
-        pageCount++;
-        const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-
-        if ((resp.status === 401 || resp.status === 403) && !didRefresh) {
-          // Token expired — refresh once, then retry
-          didRefresh = true;
-          const newToken = await refreshToken();
-          if (!newToken) {
-            console.error('Token refresh failed, stopping');
-            break;
-          }
-          token = newToken;
-          // Don't advance URL — retry this same page with fresh token
-          continue;
-        }
-
-        if (!resp.ok) {
-          const errBody = await resp.text().catch(() => '');
-          console.error(`Spotify API error ${resp.status}:`, errBody);
-          break;
-        }
-
-        // Reset refresh flag on success so we can refresh again for next page if needed
-        didRefresh = false;
-
-        const data = await resp.json();
-        const items: any[] = data.items || [];
-
-        const tracks = items
-          .filter((item: any) => item?.track?.id)
-          .map((item: any) => ({
-            id: item.track.id,
-            name: item.track.name,
-            artist: item.track.artists?.map((a: any) => a.name).join(', ') || '',
-            album: item.track.album?.name || '',
-            albumArt: item.track.album?.images?.[1]?.url || item.track.album?.images?.[0]?.url || '',
-            uri: item.track.uri,
-            duration_ms: item.track.duration_ms || 0,
-          }));
-
-        allTracks.push(...tracks);
-        url = data.next || null;
-      }
-
-      return allTracks;
-    } catch (e) {
-      console.error('Fetch playlist tracks error:', e);
-      return [];
-    }
-  };
-
   const createPlaylist = async (name: string): Promise<string | null> => {
-    if (!accessToken) return null;
+    const token = await getValidToken();
+    if (!token) return null;
     try {
-      // Get user id first
       const meResp = await fetch('https://api.spotify.com/v1/me', {
-        headers: { Authorization: `Bearer ${accessToken}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const me = await meResp.json();
       const resp = await fetch(`https://api.spotify.com/v1/users/${me.id}/playlists`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, public: false }),
       });
       const data = await resp.json();
@@ -428,11 +418,12 @@ export function useSpotify() {
   };
 
   const addTrackToPlaylist = async (playlistId: string, trackUri: string) => {
-    if (!accessToken) return false;
+    const token = await getValidToken();
+    if (!token) return false;
     try {
       const resp = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ uris: [trackUri] }),
       });
       if (resp.ok) {
@@ -445,10 +436,6 @@ export function useSpotify() {
       return false;
     }
   };
-
-  useEffect(() => {
-    if (accessToken) fetchPlaylists();
-  }, [accessToken, fetchPlaylists]);
 
   return {
     isConnected,
@@ -479,5 +466,6 @@ export function useSpotify() {
     fetchPlaylists,
     accessToken,
     deviceId,
+    refreshToken: doRefreshToken,
   };
 }
