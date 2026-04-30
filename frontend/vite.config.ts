@@ -7,6 +7,12 @@ export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
+    allowedHosts: [
+      "backend-stub.cluster-0.preview.emergentcf.cloud",
+      ".preview.emergentcf.cloud",
+      ".preview.emergentagent.com",
+      "localhost",
+    ],
     hmr: {
       overlay: false,
     },
