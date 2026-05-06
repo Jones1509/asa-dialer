@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { Phone, ShoppingCart, RefreshCw, TrendingUp, Clock, CheckCircle2, Trophy, BarChart3, Target, PhoneOff, Calendar } from 'lucide-react';
 

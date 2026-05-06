@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Gamepad2, Pause, Play, Trophy, Zap, Star, Crown, Volume2, VolumeX } from 'lucide-react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 
 interface TetrisMusic {
   musicMuted: boolean;

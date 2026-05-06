@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { Package, Plus, CheckCircle2, Lock, Unlock, Trash2, Pencil, X, Save } from 'lucide-react';
 
 interface Product {

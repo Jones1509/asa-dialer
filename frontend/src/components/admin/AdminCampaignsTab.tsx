@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { CSVUploadModal } from '@/components/dialer/CSVUploadModal';
 import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, ChevronUp, Users, Hash, Calendar } from 'lucide-react';
 

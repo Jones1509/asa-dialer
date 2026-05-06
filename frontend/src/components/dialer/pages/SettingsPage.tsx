@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Lock, Settings as SettingsIcon, Save, Check, Bell, Monitor } from 'lucide-react';
 

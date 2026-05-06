@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Shield, Mail, Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
@@ -43,17 +43,17 @@ const LoginPage: React.FC = () => {
       return;
     }
 
-    // In stub mode: admin derived from email (contains "admin" or "kontor").
-    // The auth state listener in useAuth will update isAdmin; useEffect above
-    // handles navigation. We just clear loading.
     if (isAdminMode) {
-      const mail = email.toLowerCase();
-      const hasAdmin = mail.includes('admin') || mail.includes('kontor');
-      if (!hasAdmin) {
-        await supabase.auth.signOut();
-        setError('Denne konto har ikke admin-adgang');
-        setLoading(false);
-        return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+        const hasAdmin = roleData?.some((r: { role: string }) => r.role === 'admin');
+        if (!hasAdmin) {
+          await supabase.auth.signOut();
+          setError('Denne konto har ikke admin-adgang');
+          setLoading(false);
+          return;
+        }
       }
       setLoading(false);
       navigate('/admin');

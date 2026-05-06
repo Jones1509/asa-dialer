@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { ShoppingBag, Package, Tag, Zap, CreditCard } from 'lucide-react';
 
 interface Product {

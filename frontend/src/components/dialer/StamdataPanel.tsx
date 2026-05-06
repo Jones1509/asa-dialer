@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Lead } from '@/types/leads';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { Building2, Phone as PhoneIcon, Mail, Globe, User, Gamepad2, Pause, Play, Trophy, Zap, Star } from 'lucide-react';
 
 interface StamdataPanelProps {

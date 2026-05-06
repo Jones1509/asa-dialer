@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { KeyRound, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react';
 

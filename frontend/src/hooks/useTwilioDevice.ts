@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Device, Call } from '@twilio/voice-sdk';
-import { supabase } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
 
 type TwilioStatus = 'loading' | 'ready' | 'error' | 'offline';
 

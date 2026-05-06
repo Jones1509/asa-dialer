@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/backend-stub';
-import type { User, Session } from '@/lib/backend-stub';
+import { supabase } from '@/lib/supabase';
+import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   user: User | null;
@@ -32,21 +32,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isApproved, setIsApproved] = useState(false);
   const [profile, setProfile] = useState<AuthContextType['profile']>(null);
 
-  const fetchUserData = useCallback(async (userId: string, email?: string) => {
+  const fetchUserData = useCallback(async (userId: string) => {
     try {
-      // Stub mode: derive admin/approved from email pattern.
-      // Real backend: replace this with profiles + user_roles queries.
-      const mail = (email || '').toLowerCase();
-      const hasAdmin = mail.includes('admin') || mail.includes('kontor');
+      const [profileRes, roleRes] = await Promise.all([
+        supabase.from('profiles').select('full_name, email, approved, active').eq('user_id', userId).single(),
+        supabase.from('user_roles').select('role').eq('user_id', userId),
+      ]);
+
+      const hasAdmin = roleRes.data?.some((r: { role: string }) => r.role === 'admin') ?? false;
       setIsAdmin(hasAdmin);
-      setIsApproved(true);
-      setProfile({
-        full_name: mail.split('@')[0] || 'Bruger',
-        email: email || '',
-        approved: true,
-        active: true,
-      });
-      void userId;
+      setIsApproved(profileRes.data?.approved ?? false);
+      setProfile(profileRes.data ?? null);
     } catch (err) {
       console.error('Error fetching user data:', err);
     }
@@ -66,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           // Use setTimeout to avoid deadlock from awaiting inside callback
           setTimeout(() => {
             if (mounted) {
-              fetchUserData(newSession.user.id, newSession.user.email).then(() => {
+              fetchUserData(newSession.user.id).then(() => {
                 if (mounted) setLoading(false);
               });
             }
@@ -86,7 +82,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (existingSession?.user) {
         setSession(existingSession);
         setUser(existingSession.user);
-        fetchUserData(existingSession.user.id, existingSession.user.email).then(() => {
+        fetchUserData(existingSession.user.id).then(() => {
           if (mounted) setLoading(false);
         });
       } else {
