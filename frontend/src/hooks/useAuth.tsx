@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { resolveUserData, isAdminRole } from '@/lib/auth-roles';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
@@ -34,15 +35,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = useCallback(async (userId: string) => {
     try {
-      const [profileRes, roleRes] = await Promise.all([
-        supabase.from('profiles').select('full_name, email, approved, active').eq('user_id', userId).single(),
-        supabase.from('user_roles').select('role').eq('user_id', userId),
-      ]);
+      const resolved = await resolveUserData(userId);
 
-      const hasAdmin = roleRes.data?.some((r: { role: string }) => r.role === 'admin') ?? false;
-      setIsAdmin(hasAdmin);
-      setIsApproved(profileRes.data?.approved ?? false);
-      setProfile(profileRes.data ?? null);
+      if (!resolved.role) {
+        // Ingen rolle fundet — sign out og lad LoginPage håndtere fejlen.
+        console.error('[auth] No role found for user', userId, '- signing out');
+        await supabase.auth.signOut();
+        return;
+      }
+
+      setIsAdmin(isAdminRole(resolved.role));
+      setIsApproved(resolved.aktiv);
+      setProfile({
+        full_name: resolved.navn,
+        email: resolved.email,
+        approved: resolved.aktiv,
+        active: resolved.aktiv,
+      });
     } catch (err) {
       console.error('Error fetching user data:', err);
     }

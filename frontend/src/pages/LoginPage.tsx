@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { resolveUserData, isAdminRole } from '@/lib/auth-roles';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Shield, Mail, Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
@@ -33,31 +34,53 @@ const LoginPage: React.FC = () => {
     setError('');
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setError(error.message === 'Invalid login credentials'
+    if (signInError) {
+      setError(signInError.message === 'Invalid login credentials'
         ? 'Forkert email eller adgangskode'
-        : error.message);
+        : signInError.message);
       setLoading(false);
       return;
     }
 
+    // Hent bruger + resolve rolle (user_roles → fallback medarbejdere.login_rolle)
+    const { data: { user: signedInUser } } = await supabase.auth.getUser();
+    if (!signedInUser) {
+      setError('Kunne ikke verificere bruger');
+      setLoading(false);
+      return;
+    }
+
+    const resolved = await resolveUserData(signedInUser.id);
+
+    if (!resolved.role) {
+      console.error('[login] No role found for user', signedInUser.id);
+      await supabase.auth.signOut();
+      setError('Ingen rolle fundet for denne bruger – kontakt en administrator');
+      setLoading(false);
+      return;
+    }
+
+    const adminRole = isAdminRole(resolved.role);
+
     if (isAdminMode) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data: roleData } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
-        const hasAdmin = roleData?.some((r: { role: string }) => r.role === 'admin');
-        if (!hasAdmin) {
-          await supabase.auth.signOut();
-          setError('Denne konto har ikke admin-adgang');
-          setLoading(false);
-          return;
-        }
+      if (!adminRole) {
+        await supabase.auth.signOut();
+        setError('Denne konto har ikke admin-adgang');
+        setLoading(false);
+        return;
       }
       setLoading(false);
       navigate('/admin');
     } else {
+      // Bruger-tab: admin/kontor må IKKE logge ind her (streng adskillelse)
+      if (adminRole) {
+        await supabase.auth.signOut();
+        setError('Brug Admin-fanen');
+        setLoading(false);
+        return;
+      }
       setLoading(false);
       navigate('/');
     }
