@@ -34,9 +34,16 @@ const LoginPage: React.FC = () => {
     setError('');
     setLoading(true);
 
+    console.log('[LoginPage] 🚀 handleLogin start', {
+      isAdminMode,
+      tab: isAdminMode ? 'ADMIN' : 'BRUGER',
+      email,
+    });
+
     const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (signInError) {
+      console.warn('[LoginPage] ✗ signInWithPassword failed:', signInError.message);
       setError(signInError.message === 'Invalid login credentials'
         ? 'Forkert email eller adgangskode'
         : signInError.message);
@@ -44,18 +51,30 @@ const LoginPage: React.FC = () => {
       return;
     }
 
+    console.log('[LoginPage] ✓ signInWithPassword OK');
+
     // Hent bruger + resolve rolle (user_roles → fallback medarbejdere.login_rolle)
     const { data: { user: signedInUser } } = await supabase.auth.getUser();
     if (!signedInUser) {
+      console.error('[LoginPage] ✗ getUser returned null after successful sign-in');
       setError('Kunne ikke verificere bruger');
       setLoading(false);
       return;
     }
 
+    console.log('[LoginPage] ✓ getUser OK — userId:', signedInUser.id, 'email:', signedInUser.email);
+
     const resolved = await resolveUserData(signedInUser.id);
 
+    console.log('[LoginPage] 🧩 Resolved from auth-roles helper:', {
+      role: resolved.role,
+      roleType: typeof resolved.role,
+      navn: resolved.navn,
+      aktiv: resolved.aktiv,
+    });
+
     if (!resolved.role) {
-      console.error('[login] No role found for user', signedInUser.id);
+      console.error('[LoginPage] ✗ No role resolved — signing out');
       await supabase.auth.signOut();
       setError('Ingen rolle fundet for denne bruger – kontakt en administrator');
       setLoading(false);
@@ -64,23 +83,37 @@ const LoginPage: React.FC = () => {
 
     const adminRole = isAdminRole(resolved.role);
 
+    console.log('[LoginPage] 🎯 Role check:', {
+      resolvedRole: resolved.role,
+      isAdminRole: adminRole,
+      isAdminMode,
+      ADMIN_ROLES: ['admin', 'kontor'],
+      decision: isAdminMode
+        ? (adminRole ? '→ /admin' : '→ REJECT (admin tab, not admin role)')
+        : (adminRole ? '→ REJECT (user tab, admin role)' : '→ /'),
+    });
+
     if (isAdminMode) {
       if (!adminRole) {
+        console.warn('[LoginPage] ✗ Admin tab but role is not admin/kontor:', JSON.stringify(resolved.role));
         await supabase.auth.signOut();
         setError('Denne konto har ikke admin-adgang');
         setLoading(false);
         return;
       }
+      console.log('[LoginPage] ✓ Admin login OK — navigating to /admin');
       setLoading(false);
       navigate('/admin');
     } else {
       // Bruger-tab: admin/kontor må IKKE logge ind her (streng adskillelse)
       if (adminRole) {
+        console.warn('[LoginPage] ✗ User tab but role is admin/kontor — redirecting to admin tab');
         await supabase.auth.signOut();
         setError('Brug Admin-fanen');
         setLoading(false);
         return;
       }
+      console.log('[LoginPage] ✓ User login OK — navigating to /');
       setLoading(false);
       navigate('/');
     }
