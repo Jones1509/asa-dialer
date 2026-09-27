@@ -1,0 +1,36 @@
+<!doctype html><html lang="da"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DNA-eksempel: Formular</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../asa-tokens.css"><link rel="stylesheet" href="_faelles.css">
+<style>
+/* FORMULAR: labels over felter, 16px tekst i felter (ingen iOS-zoom), 6px radius, hårfin kant, blå glød ved fokus,
+   fejl i kontekst (rød tekst under feltet), primær knap navy. Ét kort omkring hele formularen. */
+.kort { background: var(--farve-hvid); border-radius: var(--radius-kort); padding: var(--trin-5); box-shadow: 0 6px 16px -6px rgba(14,58,93,.12), 0 0 0 1px rgba(14,58,93,.04); max-width: 440px; }
+.felt { display: grid; gap: var(--trin-1); margin-bottom: var(--trin-4); }
+.felt__label { font-size: var(--tekst-sm); font-weight: 600; color: var(--farve-tekst); }
+.felt__hjaelp { font-size: var(--tekst-xs); color: var(--farve-tekst-svag); }
+.felt__input { width: 100%; min-height: 40px; padding: 8px 12px; font: 400 16px var(--font-tekst); color: var(--farve-tekst); background: var(--farve-hvid); border: 1px solid var(--farve-kant); border-radius: var(--radius-felt); transition: border-color var(--overgang), box-shadow var(--overgang); }
+.felt__input::placeholder { color: var(--farve-tekst-svag); }
+.felt__input:hover { border-color: var(--farve-kant-staerk); }
+.felt__input:focus { outline: none; border-color: var(--farve-blaa); box-shadow: var(--gloed-blaa); }
+.felt--fejl .felt__input { border-color: var(--farve-roed); }
+.felt__fejl { font-size: var(--tekst-sm); color: var(--farve-roed-moerk); }
+.knap { display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 var(--trin-5); border-radius: var(--radius-knap); font: 500 13px/1 var(--font-tekst); letter-spacing: .025em; border: 1px solid transparent; transition: background var(--overgang); }
+.knap--primaer { background: var(--farve-navy); color: #fff; } .knap--primaer:hover { background: var(--farve-navy-moerk); }
+.knap--sekundaer { background: #fff; color: var(--farve-tekst); border-color: var(--farve-kant); }
+.handlinger { display: flex; gap: var(--trin-3); justify-content: flex-end; margin-top: var(--trin-5); }
+.tjek { display: flex; align-items: center; gap: var(--trin-2); font-size: var(--tekst-sm); }
+.tjek input { width: 18px; height: 18px; accent-color: var(--farve-navy); }
+</style></head><body>
+<div class="eksempel">
+  <h1>Formular</h1>
+  <p class="meta">Label over felt, 16 px i felter, blå glød ved fokus, fejl lige under feltet, handlinger nederst til højre.</p>
+  <form class="kort" onsubmit="return false">
+    <div class="felt"><label class="felt__label" for="navn">Navn</label><input class="felt__input" id="navn" placeholder="Fulde navn" autocomplete="name"></div>
+    <div class="felt felt--fejl"><label class="felt__label" for="mail">E-mail</label><input class="felt__input" id="mail" value="jonas@asa-el" aria-invalid="true" aria-describedby="mail-fejl"><span class="felt__fejl" id="mail-fejl">Det ligner ikke en e-mail — mangler der et .dk?</span></div>
+    <div class="felt"><label class="felt__label" for="rolle">Rolle</label><select class="felt__input" id="rolle"><option>Medarbejder</option><option>Projektleder</option><option>Administrator</option></select><span class="felt__hjaelp">Kan skrive til systemet og se kontrolrummet. Kan ikke sige ja til noget.</span></div>
+    <label class="tjek"><input type="checkbox" checked> Send en invitation på mail</label>
+    <div class="handlinger"><button class="knap knap--sekundaer" type="button">Annullér</button><button class="knap knap--primaer" type="submit">Invitér</button></div>
+  </form>
+</div>
+</body></html>

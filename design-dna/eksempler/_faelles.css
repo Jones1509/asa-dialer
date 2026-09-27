@@ -1,0 +1,18 @@
+/* _faelles.css — basis til eksemplerne (samme som base.css i repos'ene: nulstil + Manrope + lys baggrund) */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+    margin: 0; background: var(--farve-baggrund); color: var(--farve-tekst);
+    font-family: var(--font-tekst); font-size: var(--tekst-md); line-height: var(--linje-normal); letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased; padding: var(--trin-6) var(--gutter);
+}
+h1, h2, h3 { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.02em; line-height: var(--linje-taet); margin: 0 0 var(--trin-3); }
+h1 { font-size: var(--tekst-2xl); } h2 { font-size: var(--tekst-xl); } h3 { font-size: var(--tekst-lg); font-weight: 600; }
+p { margin: 0 0 var(--trin-4); }
+.meta { color: var(--farve-tekst-svag); font-size: var(--tekst-sm); font-weight: 500; }
+a, button, [role=button], label[for], select, summary { cursor: pointer; }
+:focus-visible { outline: none; box-shadow: var(--fokus-ring); border-radius: var(--radius-knap); }
+.eksempel { max-width: 720px; margin: 0 auto var(--trin-7); }
+.eksempel > h2 { margin-top: var(--trin-6); }
+.raekke { display: flex; gap: var(--trin-3); flex-wrap: wrap; align-items: center; }
+code { font-family: ui-monospace, monospace; font-size: .85em; background: var(--farve-graa-lys); padding: 1px 6px; border-radius: 4px; }

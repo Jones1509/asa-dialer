@@ -1,0 +1,111 @@
+/* asa-tokens.css — ASA DESIGN-DNA: de kanoniske tokens fra asa-el.dk (22. sep 2026), fælles for ALLE ASA Univers-repos.
+   Repoets egen public/styles/tokens.css SKAL have de samme værdier (denne fil er facit — kopiér, tilpas ikke).
+   Lyst tema er reglen: baggrund knækket hvid, flader hvide, navy KUN som accent. Manrope overalt.
+   Google Fonts: <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet"> */
+
+:root {
+    color-scheme: light;
+
+    /* --- Farver (brand) --- */
+    /* asa-el.dk-paletten (præcise hex fra hjemmesidens styles.css, 21. sep 2026) */
+    --farve-navy:           #0E3A5D;   /* --asa-navy */
+    --farve-navy-moerk:     #082843;   /* --asa-navy-deep */
+    --farve-blaa:           #2F80C9;   /* --asa-blue — primærknapper, links */
+    --farve-blaa-hover:     #2971B3;
+    --farve-blaa-lys:       #82B3DF;   /* --asa-blue-light */
+    --farve-flade:          #D5E6F4;
+    --farve-baggrund:       #F2F4F7;   /* --asa-light */
+    --farve-baggrund-lys:   #F5F6F8;
+    --farve-hvid:           #FFFFFF;
+
+    /* --- Farver (tekst) — asa-el.dk: næsten sort brødtekst, VARM grå til meta (ikke kold slate) --- */
+    --farve-tekst:          #171717;   /* foreground oklch(0.15) */
+    --farve-tekst-daempet:  #57534E;   /* --asa-warm-gray */
+    --farve-tekst-svag:     #78716C;   /* --asa-warm-gray-light — meta, placeholders (4,6:1 paa hvid) */
+
+    /* --- Farver (status) --- */
+    --farve-groen:          #1D9E75;   /* asa-el.dk kommune-prik / succes */
+    --farve-gul:            #D98E04;
+    --farve-roed:           #C23B3B;
+    --farve-roed-moerk:     #8F2626;
+
+    /* --- Afledte (lyse flader til beskeder/badges — samme hue, lav mætning) --- */
+    --farve-groen-lys:      #E3F5EE;
+    --farve-gul-lys:        #FBF1DC;
+    --farve-roed-lys:       #F9E4E4;
+    /* Tekst paa de lyse flader (badges/piller): moerke varianter med WCAG AA-kontrast (Mission E, 20. sep 2026) */
+    --farve-groen-tekst:    #12694D;   /* 5,9:1 paa groen-lys */
+    --farve-gul-tekst:      #8A5A00;   /* 5,3:1 paa gul-lys */
+    --farve-roed-tekst:     #8F2626;   /* 7,0:1 paa roed-lys (= --farve-roed-moerk) */
+    --farve-link:           #1E6BA8;   /* 5,6:1 paa hvid (--farve-blaa er 4,2:1) */
+    --farve-blaa-svag:      #E8F1FA;
+    --farve-graa-lys:       #EEF1F5;
+    --farve-kant:           #DDE3EA;   /* linjer, input-kanter */
+    --farve-kant-staerk:    #C3CDD8;
+
+    /* --- Typografi: Manrope overalt (asa-el.dk: body 16px, letter-spacing -0.005em; overskrifter 600–700) --- */
+    --font-display: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-tekst:   'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+    --tekst-xs:   .75rem;    /* 12px — badges, meta */
+    --tekst-sm:   .875rem;   /* 14px — hjælpetekst, tabel */
+    --tekst-md:   1rem;      /* 16px — brødtekst (ingen iOS-zoom i inputs) */
+    --tekst-lg:   1.125rem;  /* 18px */
+    --tekst-xl:   clamp(1.375rem, 1.2rem + .9vw, 1.75rem);   /* h2 */
+    --tekst-2xl:  clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);    /* h1 */
+    --tekst-3xl:  clamp(2.25rem, 1.8rem + 2.4vw, 3.5rem);    /* hero/velkomst */
+
+    --linje-taet: 1.15;
+    --linje-normal: 1.55;
+
+    /* --- 8-punkts skala --- */
+    --trin-1: .25rem;   /*  4px */
+    --trin-2: .5rem;    /*  8px */
+    --trin-3: .75rem;   /* 12px */
+    --trin-4: 1rem;     /* 16px */
+    --trin-5: 1.5rem;   /* 24px */
+    --trin-6: 2rem;     /* 32px */
+    --trin-7: 3rem;     /* 48px */
+    --trin-8: 4rem;     /* 64px */
+    --trin-9: 6rem;     /* 96px */
+
+    /* --- Radius: asa-el.dk = rounded-md 6px paa knapper/felter (Tesla), 16px paa kort --- */
+    --radius:       12px;
+    --radius-kort:  16px;
+    --radius-knap:  6px;
+    --radius-felt:  6px;
+    --radius-pille: 999px;
+
+    /* --- Skygger (balance 21. sep aften: SaaS-værktøj som Linear/Vercel — subtile skygger paa interaktive elementer,
+           navy-tonede som asa-el.dk, aldrig sorte/haarde) --- */
+    --skygge:       0 1px 2px rgba(14, 58, 93, .05), 0 4px 12px -4px rgba(14, 58, 93, .10);
+    --skygge-svag:  0 1px 2px rgba(14, 58, 93, .06);
+    --skygge-hover: 0 2px 4px rgba(14, 58, 93, .06), 0 10px 24px -8px rgba(14, 58, 93, .18);
+    --skygge-staerk: 0 24px 60px -20px rgba(14, 58, 93, .32), 0 6px 16px -6px rgba(14, 58, 93, .14), 0 0 0 1px rgba(14, 58, 93, .04);
+    --skygge-knap:  0 1px 2px rgba(14, 58, 93, .12);
+    --skygge-knap-hover: 0 2px 6px rgba(14, 58, 93, .18);
+    --gloed-blaa:   0 0 0 4px rgba(47, 128, 201, .16);
+    --gloed-groen:  0 0 0 4px rgba(29, 158, 117, .18);
+    --gloed-svag:   0 0 0 3px rgba(47, 128, 201, .12);
+
+    /* --- Bevægelse --- */
+    --overgang: 150ms;
+    --overgang-langsom: 250ms;
+    --kurve: cubic-bezier(.2, .7, .3, 1);
+
+    /* --- Layout-mål --- */
+    --header-hoejde:   64px;   /* asa-el.dk: 64px collapsed */
+    --bundnav-hoejde:  64px;
+    --side-max:        1600px; /* asa-el.dk: --asa-max 1600 */
+    --gutter:          24px;   /* asa-el.dk: --asa-gutter 24 — konsistent, ikke clamp */
+    --touch-min:       44px;
+    --fokus-ring:      0 0 0 2px var(--farve-hvid), 0 0 0 4px var(--farve-blaa);
+}
+
+/* Bevægelse fra: ingen overgange eller animationer (tilgængelighed) */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --overgang: 0ms;
+        --overgang-langsom: 0ms;
+    }
+}

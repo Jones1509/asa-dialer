@@ -1,0 +1,12 @@
+# Alle repoer i ASA-universet. ÉN designfamilie — ingen undtagelser (Jonas 28. sep 2026).
+# Nyt repo? Tilføj navnet her OG kør: scripts/design-dna-synk.sh <navn>   (se docs/onboarding/nyt-repo.md)
+asa-hjemmeside
+asa-univers-core
+asa-univers-hovedapp
+asa-univers-app
+asa-univers-marketing
+asa-univers-orchestrator
+asa-ai-installator
+asa-kls
+lumen-asa
+asadialer

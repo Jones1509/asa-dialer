@@ -1,0 +1,30 @@
+<!doctype html><html lang="da"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DNA-eksempel: Liste</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../asa-tokens.css"><link rel="stylesheet" href="_faelles.css">
+<style>
+/* LISTE: rækker i ét hvidt kort, hårfine skillelinjer, status som farvet prik + menneskesprog, meta i varm grå til højre,
+   hele rækken klikbar (hover = lys flade). Ingen zebra-striber, ingen tunge rammer. */
+.liste { background: var(--farve-hvid); border-radius: var(--radius-kort); box-shadow: 0 6px 16px -6px rgba(14,58,93,.12), 0 0 0 1px rgba(14,58,93,.04); overflow: hidden; margin: 0; padding: 0; list-style: none; }
+.liste__titel { padding: var(--trin-4) var(--trin-5) var(--trin-2); font-size: var(--tekst-xs); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--farve-tekst-svag); }
+.raekke { display: grid; grid-template-columns: 10px auto 1fr auto; gap: var(--trin-3); align-items: center; padding: var(--trin-3) var(--trin-5); border-top: 1px solid var(--farve-kant); text-decoration: none; color: inherit; transition: background var(--overgang); }
+.raekke:hover { background: var(--farve-baggrund-lys); }
+.prik { width: 10px; height: 10px; border-radius: 50%; background: var(--farve-groen); }
+.prik--gul { background: var(--farve-gul); } .prik--roed { background: var(--farve-roed); } .prik--graa { background: var(--farve-kant-staerk); }
+.hvem { font-weight: 600; color: var(--farve-navy); }
+.hvad { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tid { font-size: var(--tekst-sm); font-weight: 500; color: var(--farve-tekst-svag); }
+@media (max-width: 640px) { .raekke { grid-template-columns: 10px 1fr auto; } .hvem { grid-column: 2; } .hvad { grid-column: 2; white-space: normal; } .tid { grid-column: 3; grid-row: 1 / span 2; } }
+</style></head><body>
+<div class="eksempel">
+  <h1>Liste</h1>
+  <p class="meta">Ét kort, hårfine linjer, farvet prik + menneskesprog, hvem/hvad/hvornår. Hele rækken er klikbar.</p>
+  <ul class="liste">
+    <li class="liste__titel">Lige nu</li>
+    <li><a class="raekke" href="#"><span class="prik"></span><span class="hvem">Jonas</span><span class="hvad">Skift teksten på 'Åbn support'-knappen i kunde-appen</span><span class="tid">for 2 min siden</span></a></li>
+    <li><a class="raekke" href="#"><span class="prik prik--gul"></span><span class="hvem">Benjamin</span><span class="hvad">Ny farve på forsiden — venter på dit ja</span><span class="tid">for 14 min siden</span></a></li>
+    <li><a class="raekke" href="#"><span class="prik prik--roed"></span><span class="hvem">Systemet</span><span class="hvad">Medarbejder 3 fik problemer med prissiden</span><span class="tid">for 1 t siden</span></a></li>
+    <li><a class="raekke" href="#"><span class="prik prik--graa"></span><span class="hvem">Jonas</span><span class="hvad">README opdateret — færdig</span><span class="tid">i går</span></a></li>
+  </ul>
+</div>
+</body></html>

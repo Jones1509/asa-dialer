@@ -1,0 +1,42 @@
+<!doctype html><html lang="da"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DNA-eksempel: Knap</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../asa-tokens.css"><link rel="stylesheet" href="_faelles.css">
+<style>
+/* KNAP (asa-el.dk .tesla-btn): 6px radius, 40px høj (44 på touch), 13px/500/.025em, INGEN skygge, farve-overgang 150 ms.
+   Primær = navy + hvid. Sekundær = hvid + mørk tekst + hårfin kant. Blå = accent-variant til "gå videre"-handlinger. */
+.knap {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--trin-2);
+    min-height: 40px; padding: 0 var(--trin-5); border-radius: var(--radius-knap);
+    font: 500 13px/1 var(--font-tekst); letter-spacing: .025em; text-decoration: none;
+    border: 1px solid transparent; transition: background var(--overgang) var(--kurve), border-color var(--overgang) var(--kurve), color var(--overgang) var(--kurve);
+}
+.knap--primaer   { background: var(--farve-navy); color: var(--farve-hvid); }
+.knap--primaer:hover { background: var(--farve-navy-moerk); }
+.knap--blaa      { background: var(--farve-blaa); color: var(--farve-hvid); }
+.knap--blaa:hover { background: var(--farve-blaa-hover); }
+.knap--sekundaer { background: var(--farve-hvid); color: var(--farve-tekst); border-color: var(--farve-kant); }
+.knap--sekundaer:hover { background: var(--farve-baggrund-lys); border-color: var(--farve-kant-staerk); }
+.knap--fare      { background: var(--farve-hvid); color: var(--farve-roed-moerk); border-color: var(--farve-kant); }
+.knap--fare:hover { background: var(--farve-roed-lys); border-color: var(--farve-roed); }
+.knap--ikon      { padding: 0; width: 40px; }
+.knap:disabled, .knap[aria-disabled=true] { opacity: .5; cursor: not-allowed; }
+@media (pointer: coarse) { .knap { min-height: var(--touch-min); } }
+.knap svg { width: 16px; height: 16px; }
+</style></head><body>
+<div class="eksempel">
+  <h1>Knap</h1>
+  <p class="meta">Tesla-stil: lille, flad, rolig. Primær handling = navy. Sekundær = hvid med hårfin kant. Aldrig skygge, aldrig scale-hover.</p>
+  <h2>Varianter</h2>
+  <div class="raekke">
+    <button class="knap knap--primaer" type="button">Godkend</button>
+    <button class="knap knap--sekundaer" type="button">Nej tak</button>
+    <button class="knap knap--blaa" type="button">Send en besked</button>
+    <button class="knap knap--fare" type="button">Stop denne opgave</button>
+    <button class="knap knap--sekundaer knap--ikon" type="button" aria-label="Indstillinger"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="knap knap--primaer" type="button" disabled>Arbejder …</button>
+  </div>
+  <h2>Regler</h2>
+  <p>Højde <code>40px</code> (<code>44px</code> på touch) · radius <code>6px</code> · <code>13px / 500 / .025em</code> · ingen skygge · hover = mørkere flade (150 ms) · fokus = <code>--fokus-ring</code>.</p>
+</div>
+</body></html>
