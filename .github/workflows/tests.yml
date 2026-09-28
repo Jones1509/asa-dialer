@@ -1,0 +1,48 @@
+# Automatiske tests for ASA Dialer.
+# Kører ved hver pull request og ved push til main. Intet må merges med røde tests.
+# Frontend (frontend/): npm ci med lockfile → typecheck (tsc) → unit-/røg-tests (vitest) → build (vite).
+# Backend: syntaks-tjek af backend/server.py (den kræver MongoDB/hemmeligheder for at køre).
+# ESLint er udeladt indtil videre: `npm run lint` er rød på main (31 fejl, mest no-explicit-any)
+# og skal ryddes op i en separat PR, før den kan blive en del af checket.
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Installér afhængigheder (lockfile)
+        run: npm ci --no-audit --no-fund
+
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: Unit- og røg-tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Backend syntaks-tjek
+        working-directory: .
+        run: python3 -m py_compile backend/server.py
