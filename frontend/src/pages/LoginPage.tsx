@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Shield, Mail, Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
 
-import asaLogoIcon from '@/assets/asa-logo-icon.png';
+import asaLogoIcon from '@/assets/asa-dialer-icon.png';
 import asaDialerWordmark from '@/assets/wordmark-asa-dialer.png';
 
 // 1-til-1 kopi af kls.asa-el.dk/login — kun logo, ordmærke og undertitel skifter.
@@ -172,7 +172,7 @@ const LoginPage: React.FC = () => {
 
       <div className="w-full max-w-[480px] relative z-10 flex flex-col items-center">
         {/* ▲ Apex: Logo icon */}
-        <img src={asaLogoIcon} alt="ASA" className="h-28 w-auto mb-3 drop-shadow-[0_4px_32px_hsl(209_63%_49%/0.35)]" />
+        <img src={asaLogoIcon} alt="ASA Dialer" className="h-[114px] w-auto mb-2.5 drop-shadow-[0_4px_32px_hsl(209_63%_49%/0.35)]" />
 
         {/* Text logo */}
         <img src={asaDialerWordmark} alt="ASA Dialer" className="h-[18px] w-auto mb-2.5" />
