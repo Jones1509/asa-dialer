@@ -115,7 +115,7 @@ const LoginPage: React.FC = () => {
       if (!adminRole) {
         console.warn('[LoginPage] ✗ Admin tab but role is not admin/kontor:', JSON.stringify(resolved.role));
         await supabase.auth.signOut();
-        setError('Du har ikke kontor-adgang');
+        setError('Du har ikke admin-adgang');
         setLoading(false);
         return;
       }
@@ -127,7 +127,7 @@ const LoginPage: React.FC = () => {
       if (adminRole) {
         console.warn('[LoginPage] ✗ User tab but role is admin/kontor — redirecting to admin tab');
         await supabase.auth.signOut();
-        setError('Brug Kontor-fanen til at logge ind');
+        setError('Brug Admin-fanen til at logge ind');
         setLoading(false);
         return;
       }
@@ -232,26 +232,26 @@ const LoginPage: React.FC = () => {
         ) : (
           /* ▲ Triangle login flow */
           <div className="w-full flex flex-col items-center">
-            {/* Medarbejder / Kontor (Kontor = admin/kontor-roller) */}
+            {/* Bruger / Admin (Admin = admin/kontor-roller) — KLS-pillestil */}
             <div className="flex justify-center gap-2.5 mb-4">
               <button
                 onClick={() => { setIsAdminMode(false); setError(''); }}
                 className={`${PILLE} ${!isAdminMode ? PILLE_AKTIV : PILLE_INAKTIV}`}
               >
                 <User size={13} strokeWidth={2} />
-                Medarbejder
+                Bruger
               </button>
               <button
                 onClick={() => { setIsAdminMode(true); setError(''); }}
                 className={`${PILLE} ${isAdminMode ? PILLE_AKTIV : PILLE_INAKTIV}`}
               >
                 <Shield size={13} strokeWidth={2} />
-                Kontor
+                Admin
               </button>
             </div>
 
             <p className="text-center text-[11px] mb-4 text-white/30">
-              {isAdminMode ? 'Log ind med din kontor-konto' : 'Log ind med dine oplysninger'}
+              {isAdminMode ? 'Log ind med din administrator-konto' : 'Log ind med dine oplysninger'}
             </p>
 
             <form onSubmit={handleLogin} className="w-full flex flex-col items-center gap-3.5">
