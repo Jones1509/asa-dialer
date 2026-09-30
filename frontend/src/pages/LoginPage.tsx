@@ -5,16 +5,21 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Shield, Mail, Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
 
-// KLS-login-look (samme opskrift som kls.asa-el.dk). Brand: blå #2F80C9 = hsl(209 63% 49%), lyseblå #82B3DF.
+import asaLogoIcon from '@/assets/asa-logo-icon.png';
+import asaDialerWordmark from '@/assets/wordmark-asa-dialer.png';
+
+// 1-til-1 kopi af kls.asa-el.dk/login — kun logo, ordmærke og undertitel skifter.
+// Poppins (brødtekst) + Montserrat (undertitel) som KLS, indlæst via index.html.
 const KLS = {
   bg: 'radial-gradient(ellipse at 60% 10%, hsl(209 63% 25% / 0.6), transparent 50%), radial-gradient(ellipse at 30% 90%, hsl(205 62% 18% / 0.5), transparent 50%), hsl(205 62% 8%)',
-  lysBla: 'hsl(209 63% 70%)',
-  font: "'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif",
+  font: "'Poppins', sans-serif",
+  heading: "'Montserrat', sans-serif",
 };
 const GRAIN = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E")`;
-const INPUT = 'w-full px-4 py-3 rounded-xl text-base sm:text-sm outline-none transition-all duration-200 bg-white/[0.06] text-white border border-white/[0.08] placeholder:text-white/20 focus:border-[hsl(209_63%_49%)] focus:bg-white/[0.1]';
-const KNAP = 'w-full py-3.5 rounded-xl text-sm font-bold cursor-pointer transition-all duration-200 border-none bg-[hsl(209_63%_49%)] text-white shadow-[0_4px_20px_hsl(209_63%_49%/0.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(209_63%_49%/0.45)] active:translate-y-0 active:scale-[.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 motion-reduce:transition-none motion-reduce:hover:translate-y-0';
-const PILLE = 'flex items-center gap-2 px-5 py-2 min-h-[40px] rounded-full text-[12px] font-semibold transition-all duration-300 border';
+const INPUT = 'w-full px-4 py-3 rounded-xl text-[16px] leading-5 sm:text-sm outline-none transition-all duration-200 bg-white/[0.06] text-white border border-white/[0.08] placeholder:text-white/20 focus:border-[hsl(208_62%_49%)] focus:bg-white/[0.1]';
+const INPUT_RESET = 'w-full px-5 py-4 rounded-xl text-[16px] leading-5 sm:text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-[hsl(208_62%_49%)] focus:bg-white/[0.12]';
+const KNAP = 'py-3.5 rounded-xl text-sm font-bold cursor-pointer transition-all duration-200 border-none bg-[hsl(209_63%_49%)] text-white shadow-[0_4px_20px_hsl(209_63%_49%/0.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(209_63%_49%/0.45)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0';
+const PILLE = 'flex items-center gap-2 px-5 py-2 rounded-full text-[12px] font-semibold transition-all duration-300 border';
 const PILLE_AKTIV = 'bg-[hsl(209_63%_49%)] text-white border-[hsl(209_63%_49%)] shadow-[0_4px_14px_hsl(209_63%_49%/0.4)]';
 const PILLE_INAKTIV = 'bg-transparent text-white/50 border-white/10 hover:border-white/25';
 
@@ -110,7 +115,7 @@ const LoginPage: React.FC = () => {
       if (!adminRole) {
         console.warn('[LoginPage] ✗ Admin tab but role is not admin/kontor:', JSON.stringify(resolved.role));
         await supabase.auth.signOut();
-        setError('Denne konto har ikke admin-adgang');
+        setError('Du har ikke admin-adgang');
         setLoading(false);
         return;
       }
@@ -122,7 +127,7 @@ const LoginPage: React.FC = () => {
       if (adminRole) {
         console.warn('[LoginPage] ✗ User tab but role is admin/kontor — redirecting to admin tab');
         await supabase.auth.signOut();
-        setError('Brug Admin-fanen');
+        setError('Brug Admin-fanen til at logge ind');
         setLoading(false);
         return;
       }
@@ -156,42 +161,30 @@ const LoginPage: React.FC = () => {
       className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden"
       style={{ background: KLS.bg, fontFamily: KLS.font }}
     >
-      {/* Svag grain */}
+      {/* Subtle grain overlay */}
       <div className="absolute inset-0 opacity-[0.08] pointer-events-none" style={{ backgroundImage: GRAIN }} />
 
-      {/* Blød glød bag kolonnen */}
+      {/* Soft glow behind card */}
       <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] max-w-[100vw] rounded-full pointer-events-none"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full pointer-events-none"
         style={{ background: 'radial-gradient(circle, hsl(209 63% 49% / 0.06), transparent 70%)' }}
       />
 
       <div className="w-full max-w-[480px] relative z-10 flex flex-col items-center">
-        {/* ▲ Apex: ASA-ordmærke (Dialer har endnu intet eget logo-ikon) */}
-        <div
-          aria-hidden="true"
-          className="h-28 flex items-center mb-3 select-none font-extrabold leading-none tracking-[-0.04em] text-[88px]"
-          style={{
-            color: KLS.lysBla,
-            filter: 'drop-shadow(0 4px 32px hsl(209 63% 49% / 0.35))',
-          }}
-        >
-          ASA
-        </div>
+        {/* ▲ Apex: Logo icon */}
+        <img src={asaLogoIcon} alt="ASA" className="h-28 w-auto mb-3 drop-shadow-[0_4px_32px_hsl(209_63%_49%/0.35)]" />
 
-        {/* Systemnavn */}
-        <div className="font-extrabold text-[20px] leading-tight tracking-[-0.01em] mb-2.5 text-white">
-          <span style={{ color: KLS.lysBla }}>ASA</span> Dialer
-        </div>
+        {/* Text logo */}
+        <img src={asaDialerWordmark} alt="ASA Dialer" className="h-[18px] w-auto mb-2.5" />
 
-        {/* Undertitel */}
-        <div className="font-semibold text-[9.5px] tracking-[0.35em] uppercase text-white/35 mb-6 pl-[0.35em]">
-          Opkaldssystem
+        {/* Subtitle */}
+        <div className="font-semibold text-[9px] tracking-[0.35em] uppercase text-white/35 mb-6" style={{ fontFamily: KLS.heading }}>
+          Kundekommunikation
         </div>
 
         {resetMode ? (
-          /* Password reset view */
-          <div className="w-full min-[480px]:w-[85%] flex flex-col items-center gap-5">
-            <h1 className="[font-family:inherit] font-extrabold text-3xl tracking-tight text-center mb-1 text-white">
+          <div className="w-[85%] flex flex-col items-center gap-5">
+            <h1 className="font-extrabold text-3xl tracking-tight text-center mb-1 text-white" style={{ fontFamily: KLS.heading }}>
               Nulstil adgangskode
             </h1>
             {resetSent ? (
@@ -200,10 +193,12 @@ const LoginPage: React.FC = () => {
                   <Mail size={24} className="text-success" />
                 </div>
                 <p className="text-white/50 text-sm leading-relaxed">
-                  Vi har sendt et link til <strong className="text-white/70">{email}</strong>.<br/>
+                  Vi har sendt et link til{' '}
+                  <strong className="text-white/70">{email}</strong>.<br />
                   Tjek din indbakke og klik på linket for at nulstille din adgangskode.
                 </p>
-                <button onClick={() => { setResetMode(false); setResetSent(false); }} className="text-sm font-semibold bg-transparent border-none cursor-pointer hover:underline" style={{ color: KLS.lysBla }}>
+                <button onClick={() => { setResetMode(false); setResetSent(false); }}
+                  className="text-[hsl(209_63%_49%)] text-sm font-semibold bg-transparent border-none cursor-pointer hover:underline">
                   Tilbage til login
                 </button>
               </div>
@@ -213,44 +208,31 @@ const LoginPage: React.FC = () => {
                   Indtast din email-adresse og vi sender dig et link til at nulstille din adgangskode.
                 </p>
                 <div className="relative">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="din@email.dk"
-                    required
-                    className={INPUT}
-                  />
-                  <Mail size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20" />
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    placeholder="din@email.dk" required className={INPUT_RESET} />
+                  <Mail size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-white/25" />
                 </div>
                 {error && (
-                  <div className="text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">
-                    {error}
-                  </div>
+                  <div className="text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">{error}</div>
                 )}
-                <button type="submit" disabled={loading} className={KNAP}>
+                <button type="submit" disabled={loading} className={`${KNAP} w-full py-4`}>
                   {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Loader2 size={16} className="animate-spin" />
-                      Sender...
-                    </span>
+                    <span className="flex items-center justify-center gap-2"><Loader2 size={16} className="animate-spin" />Sender...</span>
                   ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <KeyRound size={16} />
-                      Send nulstillingslink
-                    </span>
+                    <span className="flex items-center justify-center gap-2"><KeyRound size={16} />Send nulstillingslink</span>
                   )}
                 </button>
-                <button type="button" onClick={() => { setResetMode(false); setError(''); }} className="text-center text-sm text-white/40 bg-transparent border-none cursor-pointer hover:text-white/60 transition-colors">
+                <button type="button" onClick={() => { setResetMode(false); setError(''); }}
+                  className="text-center text-sm text-white/40 bg-transparent border-none cursor-pointer hover:text-white/60 transition-colors">
                   Tilbage til login
                 </button>
               </form>
             )}
           </div>
         ) : (
-          /* ▲ Trekant-login */
+          /* ▲ Triangle login flow */
           <div className="w-full flex flex-col items-center">
-            {/* Bruger / Admin toggle */}
+            {/* Bruger / Admin (Admin = admin/kontor-roller) — KLS-pillestil */}
             <div className="flex justify-center gap-2.5 mb-4">
               <button
                 onClick={() => { setIsAdminMode(false); setError(''); }}
@@ -268,62 +250,33 @@ const LoginPage: React.FC = () => {
               </button>
             </div>
 
-            <h1 className="[font-family:inherit] font-extrabold text-2xl tracking-tight text-center mb-1 text-white">
-              {isAdminMode ? 'Admin Login' : 'Velkommen tilbage!'}
-            </h1>
-            {!isAdminMode && (
-              <p className="text-center text-[12px] mb-5 text-white/35">
-                Har du ikke en konto endnu?{' '}
-                <button onClick={() => navigate('/register')} className="bg-transparent border-none cursor-pointer font-semibold hover:underline" style={{ color: KLS.lysBla }}>
-                  Opret konto
-                </button>
-              </p>
-            )}
-            {isAdminMode && (
-              <p className="text-center text-[12px] mb-5 text-white/35">
-                Log ind med din administrator-konto
-              </p>
-            )}
+            <p className="text-center text-[11px] mb-4 text-white/30">
+              {isAdminMode ? 'Log ind med din administrator-konto' : 'Log ind med dine oplysninger'}
+            </p>
 
             <form onSubmit={handleLogin} className="w-full flex flex-col items-center gap-3.5">
-              <div className="relative w-full min-[480px]:w-[72%]">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="din@email.dk"
-                  required
-                  className={INPUT}
-                />
+              <div className="relative w-[72%]">
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  placeholder="din@email.dk" required className={INPUT} />
                 <Mail size={15} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/20" />
               </div>
 
-              <div className="relative w-full min-[480px]:w-[82%]">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
+              <div className="relative w-[82%]">
+                <input type={showPassword ? 'text' : 'password'} value={password}
                   onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className={INPUT}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/20 hover:text-white/45 transition-colors"
-                >
+                  placeholder="••••••••" required className={INPUT} />
+                <button type="button" onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/20 hover:text-white/45 transition-colors">
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
 
               {error && (
-                <div className="w-full min-[480px]:w-[92%] text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">
-                  {error}
-                </div>
+                <div className="w-[92%] text-sm rounded-xl px-4 py-3 bg-destructive/15 text-destructive/80 border border-destructive/20">{error}</div>
               )}
 
-              {/* Login-knap — bredest: 92% */}
-              <button type="submit" disabled={loading} className={`${KNAP} min-[480px]:w-[92%] mt-1`}>
+              {/* Login button — widest: 92% */}
+              <button type="submit" disabled={loading} className={`${KNAP} w-[92%] mt-1`}>
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
                     <Loader2 size={16} className="animate-spin" />
@@ -333,11 +286,11 @@ const LoginPage: React.FC = () => {
               </button>
             </form>
 
+            {/* Base */}
             <p className="text-center text-[11px] mt-4">
               <button
                 onClick={() => { setResetMode(true); setError(''); }}
-                className="text-white/20 bg-transparent border-none cursor-pointer hover:text-white/40 transition-colors text-[11px]"
-              >
+                className="text-white/20 bg-transparent border-none cursor-pointer hover:text-white/40 transition-colors text-[11px]">
                 Glemt din adgangskode?
               </button>
             </p>
