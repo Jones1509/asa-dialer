@@ -179,7 +179,7 @@ const LoginPage: React.FC = () => {
 
         {/* Subtitle */}
         <div className="font-semibold text-[9px] tracking-[0.35em] uppercase text-white/35 mb-6" style={{ fontFamily: KLS.heading }}>
-          Kundekommunikation
+          Kundekontakt
         </div>
 
         {resetMode ? (
