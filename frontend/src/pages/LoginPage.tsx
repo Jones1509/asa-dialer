@@ -6,7 +6,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { User, Shield, Mail, Eye, EyeOff, Loader2, KeyRound } from 'lucide-react';
 
 import asaDialerLogo from '@/assets/asa-dialer-logo.svg';
-import asaDialerWordmark from '@/assets/wordmark-asa-dialer.png';
 
 // 1-til-1 kopi af kls.asa-el.dk/login — kun logo, ordmærke og undertitel skifter.
 // Poppins (brødtekst) + Montserrat (undertitel) som KLS, indlæst via index.html.
@@ -188,12 +187,15 @@ const LoginPage: React.FC = () => {
         {/* ▲ Apex: Logo icon */}
         <img src={asaDialerLogo} alt="ASA Dialer" className="h-32 w-auto mb-2" />
 
-        {/* Text logo */}
-        <img src={asaDialerWordmark} alt="ASA Dialer" className="h-[18px] w-auto mb-2.5" />
+        {/* Ordmærke + undertitel som i logo-mockuppen v4 (Manrope 800, ASA hvid / DIALER lilla, spatieret).
+            Undertitlen er smallere end ordmærket, så trekant-formen fra KLS-login bevares (ratio < 110 %). */}
+        <h1 className="m-0 mb-1.5 text-[22px] leading-[22px] font-extrabold tracking-[0.2em] text-[#F2F4F7]" style={{ fontFamily: "'Manrope', sans-serif", paddingLeft: "0.2em" }}>
+          ASA <span className="text-[#C4B5FD]">DIALER</span>
+        </h1>
 
         {/* Subtitle */}
-        <div className="font-semibold text-[9px] tracking-[0.35em] uppercase text-white/35 mb-6" style={{ fontFamily: KLS.heading }}>
-          Kundekontakt
+        <div className="text-[13px] font-medium text-[#82B3DF] mb-6" style={{ fontFamily: "'Manrope', sans-serif" }}>
+          Kundekommunikation
         </div>
 
         {resetMode ? (
