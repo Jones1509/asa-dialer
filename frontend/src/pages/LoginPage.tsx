@@ -19,7 +19,7 @@ const GRAIN = `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http:
 const INPUT = 'w-full px-4 py-3 rounded-xl text-[16px] leading-5 sm:text-sm outline-none transition-all duration-200 bg-white/[0.06] text-white border border-white/[0.08] placeholder:text-white/20 focus:border-[hsl(208_62%_49%)] focus:bg-white/[0.1]';
 const INPUT_RESET = 'w-full px-5 py-4 rounded-xl text-[16px] leading-5 sm:text-sm outline-none transition-all duration-300 bg-white/[0.08] text-white border-2 border-white/[0.08] placeholder:text-white/30 focus:border-[hsl(208_62%_49%)] focus:bg-white/[0.12]';
 const KNAP = 'py-3.5 rounded-xl text-sm font-bold cursor-pointer transition-all duration-200 border-none bg-[hsl(209_63%_49%)] text-white shadow-[0_4px_20px_hsl(209_63%_49%/0.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_hsl(209_63%_49%/0.45)] active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0';
-const PILLE = 'flex items-center gap-2 px-5 py-2 rounded-full text-[12px] font-semibold transition-all duration-300 border';
+const PILLE = 'flex min-h-[44px] items-center gap-2 px-5 py-2 rounded-full text-[12px] font-semibold transition-all duration-300 border';
 const PILLE_AKTIV = 'bg-[hsl(209_63%_49%)] text-white border-[hsl(209_63%_49%)] shadow-[0_4px_14px_hsl(209_63%_49%/0.4)]';
 const PILLE_INAKTIV = 'bg-transparent text-white/50 border-white/10 hover:border-white/25';
 
@@ -34,6 +34,20 @@ const LoginPage: React.FC = () => {
   const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
   const { user, isAdmin, isApproved, loading: authLoading } = useAuth();
+
+  // Mørk html/body-baggrund kun på login-ruten, så iOS-overscroll ikke viser en lys kant.
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.background;
+    const prevBody = body.style.background;
+    html.style.background = 'hsl(205 62% 8%)';
+    body.style.background = 'hsl(205 62% 8%)';
+    return () => {
+      html.style.background = prevHtml;
+      body.style.background = prevBody;
+    };
+  }, []);
 
   useEffect(() => {
     if (!authLoading && user && !loading) {
@@ -266,7 +280,8 @@ const LoginPage: React.FC = () => {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••" required className={INPUT} />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white/20 hover:text-white/45 transition-colors">
+                  aria-label={showPassword ? 'Skjul adgangskode' : 'Vis adgangskode'}
+                  className="absolute right-0 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center bg-transparent border-none cursor-pointer text-white/20 hover:text-white/45 transition-colors">
                   {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
@@ -287,10 +302,10 @@ const LoginPage: React.FC = () => {
             </form>
 
             {/* Base */}
-            <p className="text-center text-[11px] mt-4">
+            <p className="text-center text-[11px] mt-1">
               <button
                 onClick={() => { setResetMode(true); setError(''); }}
-                className="text-white/20 bg-transparent border-none cursor-pointer hover:text-white/40 transition-colors text-[11px]">
+                className="px-2 py-3 text-white/55 bg-transparent border-none cursor-pointer hover:text-white/80 transition-colors text-[11px]">
                 Glemt din adgangskode?
               </button>
             </p>
