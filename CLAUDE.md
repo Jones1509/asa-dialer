@@ -1,4 +1,4 @@
-# asadialer — instruktioner til Claude
+# asa-dialer — instruktioner til Claude
 
 ## DESIGN-DNA (ufravigelig — samme i alle ASA Univers-repos)
 
