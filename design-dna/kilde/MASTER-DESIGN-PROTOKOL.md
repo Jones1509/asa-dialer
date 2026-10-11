@@ -31,12 +31,12 @@ foreslår listen, og **bygger dem alle**.
 
 - Tænk som en B2B-virksomhed der udlejer autoriserede elektrikere til større
   virksomheder og installatørfirmaer. Hvilke sider forventer en seriøs kunde?
-- Forslag til side-univers (udvid selv hvis det giver mening):
+- Forslag til sidestruktur (udvid selv hvis det giver mening):
   Forside (LÅST), Sådan virker det, Ydelser/Kompetencer, Priser, Projekter/Cases,
   Om os, Karriere/Bliv lejet ud, Brancher vi løser, FAQ, Kontakt, 404.
 - **Header, footer og navigation opdateres AUTOMATISK** når en side tilføjes —
   ingen døde links, ingen manuel glemte menupunkter.
-- Byg hele universet sammenhængende — samme stil-DNA på tværs.
+- Byg hele platformen sammenhængende — samme stil-DNA på tværs.
 
 ### LOV 2 — ALDRIG HVID A4-SIDE
 Ingen sektion må være "sort tekst på hvid baggrund". **Hver** sektion skal have
