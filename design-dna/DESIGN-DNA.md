@@ -1,7 +1,7 @@
-# ASA DESIGN-DNA — det visuelle sprog fra asa-el.dk (gælder ALLE ASA Univers-repos)
+# ASA DESIGN-DNA — det visuelle sprog fra asa-el.dk (gælder ALLE ASA Industries-repos)
 
 > **Læs FØR du skriver én linje UI.** Dette er "træningen": de samme regler, tokens og eksempler som gør
-> asa-el.dk smuk, oversat til ASA Univers' vanilla HTML/CSS. Kilde: `~/ASA/hjemmeside` (CLAUDE.md, DESIGN-REGLER-JONAS.md,
+> asa-el.dk smuk, oversat til ASA Industries' vanilla HTML/CSS. Kilde: `~/ASA/hjemmeside` (CLAUDE.md, DESIGN-REGLER-JONAS.md,
 > MASTER-DESIGN-PROTOKOL.md, `src/styles.css`). Analyse: se nederst.
 >
 > Filerne i denne mappe er ens i alle repos: `DESIGN-DNA.md` (denne), **`JARVIS-STIL.md` (app-æstetikken — boble, HUD,
@@ -14,7 +14,7 @@
 - **Tesla / Apple / Stripe / Linear-niveau.** Clean, professionel, moderne. Premium, ikke maximalistisk.
 - **Lyst tema med dybde.** Sidebaggrund knækket hvid `#F2F4F7` med en subtil lys gradient — **aldrig flad hvid/grå**
   (Jonas: "kedeligt"); dybde kommer fra kort, grafik og lag. **Navy kun som accent** (knapper, fremhævning, hero).
-  Mørke navy-flader KUN de tre levende steder i `JARVIS-STIL.md` (boblens svar, HUD-status-kort, universkort-lærred).
+  Mørke navy-flader KUN de tre levende steder i `JARVIS-STIL.md` (boblens svar, HUD-status-kort, systemkort-lærred).
 - **Generøs whitespace.** Rytmisk vertikal spacing (8 / 16 / 24 / 32 / 48 / 64). Kompakte sektioner — overblik > fylde.
 - **Hvert element har et formål.** Ingen dekoration uden funktion. Hierarki skal være tydeligt på 3 sekunder.
 - **Interaktive elementer er tydelige:** hover OG focus-state på alt klikbart, `cursor: pointer`, synlige focus-ringe.
@@ -61,7 +61,7 @@
 1. Læs denne fil + `JARVIS-STIL.md` + kig i `eksempler/` (knap, kort, header, formular, liste) — kopiér mønstret, opfind ikke nyt.
 2. Brug KUN tokens (`var(--farve-navy)` osv.) — aldrig rå hex i komponenter.
 3. Før du melder færdig: screenshot i 375 / 768 / 1440 px og spørg: **"Ville Tesla/Apple lave det sådan?"** Nej → byg om.
-4. Sammenlign side om side med asa-el.dk (`docs/fase5/screenshots/design/asa-el-*.png` i core-repoet).
+4. Sammenlign side om side med asa-el.dk (`docs/fase5/screenshots/design/asa-el-*.png` i DB-repoet).
 
 ## 5. Analyse: hvad styrer designet i asa-el.dk-repoet (`~/ASA/hjemmeside`)
 
