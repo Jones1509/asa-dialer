@@ -8,6 +8,7 @@ interface StamdataPanelProps {
   campaignName: string;
   callActive?: boolean;
   tetrisEnabled?: boolean;
+  className?: string;
 }
 
 // ─── Shared constants ──────────────────────────────────────────────
@@ -338,7 +339,7 @@ const InlineTetris: React.FC = () => {
 };
 
 // ─── StamdataPanel ─────────────────────────────────────────────────
-export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName, callActive, tetrisEnabled }) => {
+export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName, callActive, tetrisEnabled, className = '' }) => {
   const [company, setCompany] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
@@ -367,8 +368,8 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
 
   if (!lead) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-background">
-        <div className="text-muted-foreground text-[13px]">Vælg en kampagne for at starte</div>
+      <div className={`flex-1 items-center justify-center bg-background p-6 ${className}`}>
+        <div className="text-sm text-muted-foreground">Vælg et emne i listen for at se stamdata.</div>
       </div>
     );
   }
@@ -376,61 +377,61 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
   const showTetris = tetrisEnabled;
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden animate-fade-in bg-background">
+    <section aria-label="Stamdata" className={`min-w-0 flex-1 flex-col overflow-y-auto bg-background lg:overflow-hidden ${className}`}>
       {/* Top section: Campaign + Stamdata */}
-      <div className="p-5 pb-3 shrink-0">
-        <div className="flex items-center gap-3 mb-3">
-          <span className="bg-accent text-accent-foreground rounded-md px-2.5 py-1 text-[11px] font-semibold">{campaignName}</span>
-          <span className="text-[11px] text-muted-foreground/50 tabular-nums">ID: {lead.id.slice(0, 8)}</span>
-          {saving && <span className="text-[11px] text-primary/60 ml-auto">Gemmer...</span>}
+      <div className="shrink-0 p-4 pb-3 sm:p-6 sm:pb-4">
+        <div className="mb-3 flex flex-wrap items-center gap-3">
+          <span className="badge-clean max-w-full truncate">{campaignName}</span>
+          <span className="text-xs tabular-nums text-muted-foreground">ID: {lead.id.slice(0, 8)}</span>
+          <span className="ml-auto text-xs text-muted-foreground" aria-live="polite">{saving ? 'Gemmer…' : 'Gemmes automatisk'}</span>
         </div>
 
-        <h2 className="font-heading font-bold text-base tracking-tight mb-3">Stamdata</h2>
+        <h2 className="section-title mb-3">Stamdata</h2>
 
         {showTetris ? (
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 2xl:grid-cols-3">
             <div className="flex flex-col gap-1">
-              <label className="label-clean flex items-center gap-1"><Building2 size={10} /> Virksomhed</label>
-              <input className="input-clean text-[12px]" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
+              <label htmlFor="sd-company-1" className="label-clean flex items-center gap-1.5"><Building2 size={16} aria-hidden="true" /> Virksomhed</label>
+              <input id="sd-company-1" className="input-clean" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="label-clean flex items-center gap-1"><PhoneIcon size={10} /> Telefon</label>
-              <input className="input-clean text-[12px]" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
+              <label htmlFor="sd-phone-2" className="label-clean flex items-center gap-1.5"><PhoneIcon size={16} aria-hidden="true" /> Telefon</label>
+              <input id="sd-phone-2" className="input-clean" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="label-clean flex items-center gap-1"><User size={10} /> Kontaktperson</label>
-              <input className="input-clean text-[12px]" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+              <label htmlFor="sd-contact-3" className="label-clean flex items-center gap-1.5"><User size={16} aria-hidden="true" /> Kontaktperson</label>
+              <input id="sd-contact-3" className="input-clean" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="label-clean flex items-center gap-1"><Mail size={10} /> Email</label>
-              <input className="input-clean text-[12px]" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+              <label htmlFor="sd-email-4" className="label-clean flex items-center gap-1.5"><Mail size={16} aria-hidden="true" /> Email</label>
+              <input id="sd-email-4" className="input-clean" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="label-clean flex items-center gap-1"><Globe size={10} /> Hjemmeside</label>
-              <input className="input-clean text-[12px]" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
+              <label htmlFor="sd-website-5" className="label-clean flex items-center gap-1.5"><Globe size={16} aria-hidden="true" /> Hjemmeside</label>
+              <input id="sd-website-5" className="input-clean" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
-              <label className="label-clean flex items-center gap-1.5"><Building2 size={11} /> Virksomhed</label>
-              <input className="input-clean" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
+              <label htmlFor="sd-company-6" className="label-clean flex items-center gap-1.5"><Building2 size={16} aria-hidden="true" /> Virksomhed</label>
+              <input id="sd-company-6" className="input-clean" value={company} onChange={e => setCompany(e.target.value)} onBlur={saveStamdata} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="label-clean flex items-center gap-1.5"><PhoneIcon size={11} /> Telefon</label>
-              <input className="input-clean" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
+              <label htmlFor="sd-phone-7" className="label-clean flex items-center gap-1.5"><PhoneIcon size={16} aria-hidden="true" /> Telefon</label>
+              <input id="sd-phone-7" className="input-clean" value={phone} onChange={e => setPhone(e.target.value)} onBlur={saveStamdata} />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="label-clean flex items-center gap-1.5"><Mail size={11} /> Email</label>
-              <input className="input-clean" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+              <label htmlFor="sd-email-8" className="label-clean flex items-center gap-1.5"><Mail size={16} aria-hidden="true" /> Email</label>
+              <input id="sd-email-8" className="input-clean" value={email} onChange={e => setEmail(e.target.value)} onBlur={saveStamdata} placeholder="—" />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="label-clean flex items-center gap-1.5"><Globe size={11} /> Hjemmeside</label>
-              <input className="input-clean" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
+              <label htmlFor="sd-website-9" className="label-clean flex items-center gap-1.5"><Globe size={16} aria-hidden="true" /> Hjemmeside</label>
+              <input id="sd-website-9" className="input-clean" value={website} onChange={e => setWebsite(e.target.value)} onBlur={saveStamdata} />
             </div>
-            <div className="col-span-2 flex flex-col gap-1.5">
-              <label className="label-clean flex items-center gap-1.5"><User size={11} /> Kontaktperson</label>
-              <input className="input-clean" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <label htmlFor="sd-contact-10" className="label-clean flex items-center gap-1.5"><User size={16} aria-hidden="true" /> Kontaktperson</label>
+              <input id="sd-contact-10" className="input-clean" value={contact} onChange={e => setContact(e.target.value)} onBlur={saveStamdata} placeholder="—" />
             </div>
           </div>
         )}
@@ -438,11 +439,11 @@ export const StamdataPanel: React.FC<StamdataPanelProps> = ({ lead, campaignName
 
       {/* Tetris area — exact Lounge layout, auto-scaled */}
       {showTetris && (
-        <div className="flex-1 min-h-0 mx-5 mb-4 rounded-2xl overflow-hidden"
+        <div className="mx-4 mb-4 hidden min-h-0 flex-1 overflow-hidden rounded-2xl sm:mx-6 lg:block"
           style={{ background: 'radial-gradient(ellipse at center, #0c1020, #060810)', border: '1px solid hsl(var(--border) / 0.2)' }}>
           <InlineTetris />
         </div>
       )}
-    </div>
+    </section>
   );
 };

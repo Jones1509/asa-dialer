@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useDialerState } from '@/hooks/useDialerState';
 import { useTwilioDevice, IncomingCallInfo } from '@/hooks/useTwilioDevice';
 import { useTetrisMusic } from '@/hooks/useTetrisMusic';
-import { AppSidebar } from '@/components/dialer/AppSidebar';
+import { AppShell, ShellNavItem } from '@/components/shell/AppShell';
+import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2, Check } from 'lucide-react';
 import { Topbar } from '@/components/dialer/Topbar';
 import { IncomingCallOverlay } from '@/components/dialer/IncomingCallOverlay';
 import { DialerPage } from '@/components/dialer/pages/DialerPage';
@@ -72,6 +73,7 @@ const Index = () => {
             loadingLeads={state.loadingLeads}
             callActive={state.callActive}
             tetrisEnabled={state.tetrisEnabled}
+            onGoToCampaigns={() => state.setActivePage('campaigns')}
           />
         );
       case 'incoming': return <IncomingPage />;
@@ -108,16 +110,23 @@ const Index = () => {
 
   const showTopbar = state.activePage === 'dialer' && state.leads.length > 0;
 
+  const navItems: ShellNavItem[] = [
+    { id: 'dialer', icon: Phone, label: 'Dialer' },
+    { id: 'incoming', icon: PhoneIncoming, label: 'Indgående' },
+    { id: 'campaigns', icon: LayoutGrid, label: 'Kampagner' },
+    { id: 'shop', icon: ShoppingBag, label: 'Produktshop' },
+    { id: 'reports', icon: BarChart3, label: 'Rapporter' },
+    { id: 'tetris', icon: Gamepad2, label: 'Tetris' },
+  ];
+  const footerItems: ShellNavItem[] = [
+    ...(isAdmin ? [{ id: 'admin', icon: Shield, label: 'Admin panel', onClick: () => navigate('/admin') }] : []),
+    { id: 'settings', icon: Settings, label: 'Indstillinger' },
+    { id: 'logout', icon: LogOut, label: 'Log ud', onClick: handleLogout, tone: 'danger' as const },
+  ];
+  const pageTitle = [...navItems, ...footerItems].find(i => i.id === state.activePage)?.label ?? 'Dialer';
+
   return (
-    <div className="flex min-h-screen h-screen overflow-hidden bg-background">
-      <AppSidebar
-        activePage={state.activePage}
-        onNavigate={state.setActivePage}
-        onLogout={handleLogout}
-        isAdmin={isAdmin}
-        onAdminNav={() => navigate('/admin')}
-      />
-      <div className="flex-1 flex flex-col overflow-hidden">
+    <AppShell items={navItems} footerItems={footerItems} active={state.activePage} onSelect={state.setActivePage} title={pageTitle}>
         {showTopbar && (
           <Topbar
             currentLead={state.currentLead}
@@ -135,10 +144,9 @@ const Index = () => {
             onActiveDialNumberChange={setActiveDialNumber}
           />
         )}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
           {renderPage()}
         </div>
-      </div>
       {/* Tetris is now inline in StamdataPanel — no overlay needed */}
       {/* Incoming call overlay */}
       {incomingCall && !state.callActive && (
@@ -148,19 +156,18 @@ const Index = () => {
           onReject={handleRejectIncoming}
         />
       )}
-      <div className={`fixed bottom-6 right-6 bg-card border border-border/50 rounded-xl px-5 py-3.5 text-sm font-medium flex items-center gap-2.5 z-[200]
-        transition-all duration-500 ease-out
+      <div role="status" aria-live="polite" className={`fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 bg-card border border-border rounded-xl px-4 py-3 text-sm font-medium flex items-center gap-3 z-[200] shadow-lg
+        transition-all duration-150 ease-out
         ${state.notification
-          ? 'translate-y-0 opacity-100 scale-100'
-          : 'translate-y-8 opacity-0 scale-95 pointer-events-none'
-        }`}
-        style={{ boxShadow: '0 8px 32px rgba(0,0,0,0.08)' }}>
-        <div className="w-5 h-5 rounded-full bg-success/15 flex items-center justify-center shrink-0">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5.5L3.5 7.5L8.5 2.5" stroke="hsl(152 69% 41%)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          ? 'translate-y-0 opacity-100'
+          : 'translate-y-4 opacity-0 pointer-events-none'
+        }`}>
+        <div className="w-6 h-6 rounded-full bg-success/15 flex items-center justify-center shrink-0">
+          <Check size={16} strokeWidth={2.5} className="text-success" aria-hidden="true" />
         </div>
         {state.notification}
       </div>
-    </div>
+    </AppShell>
   );
 };
 

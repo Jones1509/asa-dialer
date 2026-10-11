@@ -4,7 +4,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { AdminUsersTab } from '@/components/admin/AdminUsersTab';
 import { AdminCampaignsTab } from '@/components/admin/AdminCampaignsTab';
 import { AdminProductsTab } from '@/components/admin/AdminProductsTab';
-import { Users, LayoutGrid, ShoppingBag, Phone, LogOut } from 'lucide-react';
+import { Users, LayoutGrid, ShoppingBag, Phone, LogOut, Check } from 'lucide-react';
+import { AppShell, ShellNavItem } from '@/components/shell/AppShell';
 
 const tabs = [
   { id: 'users', icon: Users, label: 'Brugere' },
@@ -32,90 +33,32 @@ const AdminPage: React.FC = () => {
     }
   };
 
-  const ActiveIcon = tabs.find(t => t.id === activeTab)?.icon || Users;
+  const activeLabel = tabs.find(t => t.id === activeTab)?.label ?? 'Admin';
+  const footerItems: ShellNavItem[] = [
+    { id: 'to-dialer', icon: Phone, label: 'Til Dialer', onClick: () => navigate('/') },
+    { id: 'logout', icon: LogOut, label: 'Log ud', tone: 'danger', onClick: async () => { await signOut(); navigate('/login'); } },
+  ];
 
   return (
-    <div className="flex min-h-screen h-screen overflow-hidden bg-background">
-      {/* Sidebar */}
-      <div className="w-[68px] bg-card border-r border-border/40 flex flex-col items-center py-5 gap-1 shrink-0">
-        <div className="flex flex-col items-center mb-6 gap-0.5">
-          <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center font-heading font-extrabold text-[11px] text-primary-foreground tracking-wider"
-            style={{ boxShadow: '0 4px 14px hsl(217 91% 60% / 0.35)' }}>
-            ASA
-          </div>
-          <span className="font-heading font-semibold text-[7px] tracking-[0.18em] uppercase text-primary/60">Dialer</span>
-        </div>
-        {tabs.map(item => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              title={item.label}
-              className={`w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center relative group transition-all duration-200 ease-out
-                ${activeTab === item.id
-                  ? 'bg-primary text-primary-foreground shadow-[0_2px_10px_hsl(217_91%_60%/0.25)]'
-                  : 'bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
-                }`}
-            >
-              <Icon size={18} strokeWidth={activeTab === item.id ? 2.2 : 1.8} />
-              <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-        <div className="flex-1" />
-        <button
-          onClick={() => navigate('/')}
-          title="Til Dialer"
-          className="w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground transition-all duration-200 ease-out group relative"
-        >
-          <Phone size={18} strokeWidth={1.8} />
-          <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
-            Til Dialer
-          </span>
-        </button>
-        <button
-          onClick={async () => { await signOut(); navigate('/login'); }}
-          title="Log ud"
-          className="w-10 h-10 rounded-xl border-none cursor-pointer flex items-center justify-center bg-transparent text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all duration-200 ease-out group relative"
-        >
-          <LogOut size={18} strokeWidth={1.8} />
-          <span className="absolute left-full ml-3 px-2.5 py-1.5 rounded-lg bg-foreground text-background text-[11px] font-medium whitespace-nowrap opacity-0 pointer-events-none group-hover:opacity-100 transition-opacity duration-150 z-50 shadow-lg">
-            Log ud
-          </span>
-        </button>
+    <AppShell items={tabs} footerItems={footerItems} active={activeTab} onSelect={setActiveTab} title={activeLabel} badge="Admin">
+      <div className="hidden h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-6 md:flex">
+        <span className="rounded-md bg-accent px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground">Admin</span>
+        <h1 className="font-heading text-lg font-semibold text-navy">{activeLabel}</h1>
       </div>
-
-      {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="h-[56px] bg-card border-b border-border/40 flex items-center px-6 gap-3.5 shrink-0"
-          style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-          <div className="bg-primary/10 text-primary text-[10px] font-bold rounded-md px-2.5 py-1 uppercase tracking-wider">
-            Admin
-          </div>
-          <h1 className="font-heading font-bold text-[15px] tracking-tight flex items-center gap-2">
-            <ActiveIcon size={16} strokeWidth={1.8} className="text-muted-foreground" />
-            {tabs.find(t => t.id === activeTab)?.label}
-          </h1>
-        </div>
-        <div className="flex-1 overflow-y-auto p-8 animate-fade-in">
+      <div className="flex-1 overflow-y-auto">
+        <div key={activeTab} className="page animate-fade-in">
           {renderTab()}
         </div>
       </div>
 
-      {/* Notification */}
-      <div className={`fixed bottom-6 right-6 bg-card border border-border/40 rounded-xl px-4 py-3 text-[13px] font-medium flex items-center gap-2 z-[200]
-        transition-all duration-400 ease-out
-        ${notification
-          ? 'translate-y-0 opacity-100'
-          : 'translate-y-6 opacity-0 pointer-events-none'
-        }`}
-        style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.06)' }}>
+      <div role="status" aria-live="polite" className={`fixed bottom-4 left-4 right-4 z-[200] flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 text-sm font-medium shadow-lg transition-all duration-150 ease-out sm:bottom-6 sm:left-auto sm:right-6
+        ${notification ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'}`}>
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-success/15">
+          <Check size={16} strokeWidth={2.5} className="text-success" aria-hidden="true" />
+        </span>
         {notification}
       </div>
-    </div>
+    </AppShell>
   );
 };
 

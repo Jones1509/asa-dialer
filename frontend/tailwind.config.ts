@@ -12,10 +12,26 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ["Syne", "sans-serif"],
-        body: ["DM Sans", "sans-serif"],
+        heading: ["Fraunces", "Georgia", "serif"],
+        body: ["Geist", "ui-sans-serif", "sans-serif"],
+        sans: ["Geist", "ui-sans-serif", "sans-serif"],
       },
+      transitionDuration: { DEFAULT: "150ms" },
+      transitionTimingFunction: { DEFAULT: "cubic-bezier(0.4, 0, 0.2, 1)" },
       colors: {
+        navy: {
+          DEFAULT: "hsl(var(--navy))",
+          deep: "hsl(var(--navy-deep))",
+          ink: "hsl(var(--navy-ink))",
+        },
+        brand: {
+          blue: "hsl(var(--blue))",
+          "blue-strong": "hsl(var(--blue-strong))",
+          sky: "hsl(var(--sky))",
+          light: "hsl(var(--light))",
+          offwhite: "hsl(var(--offwhite))",
+          "logo-accent": "hsl(var(--logo-accent))",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -40,6 +56,7 @@ export default {
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
+          soft: "hsl(var(--destructive-soft))",
         },
         success: {
           DEFAULT: "hsl(var(--success))",

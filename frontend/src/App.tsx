@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { JarvisWidget } from "@/components/JarvisWidget";
+import { ShellSkeleton } from "@/components/shell/AppShell";
 import Index from "./pages/Index";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -20,11 +21,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   const { user, loading, isApproved } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Indlæser...</div>
-      </div>
-    );
+    return <ShellSkeleton />;
   }
 
   if (!user) return <Navigate to="/login" replace />;
@@ -37,11 +34,7 @@ const AdminRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading, isAdmin } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Indlæser...</div>
-      </div>
-    );
+    return <ShellSkeleton />;
   }
 
   if (!user) return <Navigate to="/login" replace />;
@@ -54,11 +47,7 @@ const PublicRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading, isApproved } = useAuth();
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-muted-foreground text-sm">Indlæser...</div>
-      </div>
-    );
+    return <div className="auth-bg min-h-[100dvh]" aria-busy="true" aria-label="Indlæser" />;
   }
 
   if (user && isApproved) return <Navigate to="/" replace />;

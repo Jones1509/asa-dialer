@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { LayoutGrid, Users, Clock } from 'lucide-react';
+import { LayoutGrid, RefreshCw, ChevronRight } from 'lucide-react';
+import { EmptyState, ErrorState, SkeletonCards } from '@/components/shell/states';
 
 interface Campaign {
   id: string;
@@ -19,15 +20,20 @@ interface CampaignsPageProps {
 export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onSelectCampaign, showNotif }) => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
 
   const fetchCampaigns = async () => {
+    setLoading(true);
+    setFailed(false);
+    try {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    if (!user) { setLoading(false); return; }
 
-    const { data: assignments } = await supabase
+    const { data: assignments, error: assignError } = await supabase
       .from('campaign_users')
       .select('campaign_id')
       .eq('user_id', user.id);
+    if (assignError) throw assignError;
 
     if (!assignments?.length) {
       setCampaigns([]);
@@ -36,12 +42,13 @@ export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onSelectCampaign, 
     }
 
     const campaignIds = assignments.map(a => a.campaign_id);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('campaigns')
       .select('*')
       .in('id', campaignIds)
       .eq('archived', false)
       .order('created_at', { ascending: false });
+    if (error) throw error;
 
     if (data) {
       const withCounts = await Promise.all(data.map(async c => {
@@ -53,47 +60,65 @@ export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onSelectCampaign, 
       }));
       setCampaigns(withCounts);
     }
+    } catch {
+      setFailed(true);
+    }
     setLoading(false);
   };
 
   useEffect(() => { fetchCampaigns(); }, []);
 
-  if (loading) return <div className="p-8 text-muted-foreground/60 text-[13px] animate-fade-in">Indlæser kampagner...</div>;
-
   return (
-    <div className="flex flex-col p-8 gap-6 overflow-y-auto flex-1 animate-fade-in">
-      <h1 className="font-heading font-bold text-xl tracking-tight">Mine Kampagner</h1>
+    <div className="flex-1 overflow-y-auto">
+      <div className="page flex flex-col gap-6">
+        <header>
+          <h1 className="page-title">Mine kampagner</h1>
+          <p className="page-subtitle">Vælg en kampagne for at hente emner til dialeren.</p>
+        </header>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
-        {campaigns.map(c => (
-          <div
-            key={c.id}
-            className="card-surface hover-lift rounded-xl p-5 cursor-pointer"
-            onClick={() => onSelectCampaign(c.id, c.name)}
-          >
-            <div className="font-heading font-bold text-[14px] mb-1 tracking-tight">{c.name}</div>
-            <div className="text-[13px] text-muted-foreground/50 mb-4">{c.description || 'Ingen beskrivelse'}</div>
-            <div className="grid grid-cols-3 gap-2.5">
-              <div className="bg-background rounded-lg px-3 py-2.5">
-                <div className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">Emner</div>
-                <div className="font-heading font-bold text-base text-primary mt-0.5">{c.leadCount}</div>
-              </div>
-              <div className="bg-background rounded-lg px-3 py-2.5">
-                <div className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">At ringe</div>
-                <div className="font-heading font-bold text-base text-success mt-0.5">{c.newCount}</div>
-              </div>
-              <div className="bg-background rounded-lg px-3 py-2.5">
-                <div className="text-[10px] text-muted-foreground/50 font-medium uppercase tracking-wider">Dato</div>
-                <div className="font-heading font-bold text-[12px] text-foreground/70 mt-1">{new Date(c.created_at).toLocaleDateString('da-DK')}</div>
-              </div>
-            </div>
+        {loading ? (
+          <SkeletonCards count={3} height="h-44" className="grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4" />
+        ) : failed ? (
+          <div className="card-surface"><ErrorState title="Kunne ikke hente kampagner" onRetry={fetchCampaigns} /></div>
+        ) : campaigns.length === 0 ? (
+          <div className="card-surface">
+            <EmptyState
+              icon={LayoutGrid}
+              title="Ingen kampagner endnu"
+              message="Du er ikke tildelt nogen kampagner. Bed en administrator om at tildele dig en — så dukker den op her."
+              action={{ label: 'Tjek igen', onClick: fetchCampaigns, icon: RefreshCw }}
+            />
           </div>
-        ))}
-
-        {campaigns.length === 0 && (
-          <div className="card-surface rounded-xl p-10 text-center col-span-full flex flex-col items-center gap-3">
-            <LayoutGrid size={36} className="text-muted-foreground/25" strokeWidth={1.2} />
-            <div className="text-muted-foreground/50 text-[13px]">Du har ingen tildelte kampagner — kontakt en admin.</div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {campaigns.map(c => (
+              <button
+                type="button"
+                key={c.id}
+                className="card-surface hover-lift group flex flex-col p-5 text-left"
+                onClick={() => onSelectCampaign(c.id, c.name)}
+              >
+                <div className="flex w-full items-start gap-2">
+                  <h2 className="section-title flex-1">{c.name}</h2>
+                  <ChevronRight size={20} aria-hidden="true" className="mt-0.5 shrink-0 text-muted-foreground transition-colors duration-150 group-hover:text-primary" />
+                </div>
+                <p className="mb-4 mt-1 line-clamp-2 text-sm text-muted-foreground">{c.description || 'Ingen beskrivelse'}</p>
+                <dl className="mt-auto grid w-full grid-cols-3 gap-2">
+                  <div className="rounded-lg bg-background px-3 py-2">
+                    <dt className="text-xs text-muted-foreground">Emner</dt>
+                    <dd className="mt-0.5 text-lg font-semibold tabular-nums text-navy">{c.leadCount}</dd>
+                  </div>
+                  <div className="rounded-lg bg-background px-3 py-2">
+                    <dt className="text-xs text-muted-foreground">At ringe</dt>
+                    <dd className="mt-0.5 text-lg font-semibold tabular-nums text-success">{c.newCount}</dd>
+                  </div>
+                  <div className="rounded-lg bg-background px-3 py-2">
+                    <dt className="text-xs text-muted-foreground">Oprettet</dt>
+                    <dd className="mt-1 text-sm font-medium tabular-nums text-foreground">{new Date(c.created_at).toLocaleDateString('da-DK', { day: 'numeric', month: 'short' })}</dd>
+                  </div>
+                </dl>
+              </button>
+            ))}
           </div>
         )}
       </div>
