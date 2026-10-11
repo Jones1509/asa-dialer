@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 304 348" width="304" height="348">
+  <!-- LUMEN-mærket (samme geometri som favicon.svg) i mørk-baggrund-variant: hvidt A, lysblå lyskegle -->
+  <defs><linearGradient id="lys" x1="0" y1="118" x2="0" y2="348" gradientUnits="userSpaceOnUse">
+    <stop offset="0" stop-color="#82B3DF"/><stop offset="1" stop-color="#D5E6F4"/></linearGradient></defs>
+  <polygon fill="#FFFFFF" points="149.0,0.0 155.0,0.0 302.0,300.0 230.0,300.0 152.0,147.0 72.0,300.0 1.0,300.0"/>
+  <polygon fill="url(#lys)" points="152.0,118.0 231.9,340.0 225.3,341.0 218.6,342.1 211.9,343.1 205.3,344.0 198.6,344.9 192.0,345.7 185.3,346.3 178.6,346.9 172.0,347.4 165.3,347.7 158.7,347.9 152.0,348.0 145.3,347.9 138.7,347.7 132.0,347.4 125.4,346.9 118.7,346.3 112.0,345.7 105.4,344.9 98.7,344.0 92.1,343.1 85.4,342.1 78.7,341.0 72.1,340.0"/>
+</svg>
