@@ -1,6 +1,6 @@
-# JARVIS-STIL — ASA Univers' app-æstetik (godkendt af Jonas 28. sep 2026)
+# JARVIS-STIL — ASA Industries' app-æstetik (godkendt af Jonas 28. sep 2026)
 
-> **Hvad er det?** Reglerne for hvordan ASA Univers' apps (hovedapp, kunde-app, marketing, AI-Installatør) skal se ud
+> **Hvad er det?** Reglerne for hvordan ASA Industries' apps (hovedapp, kunde-app, marketing, AI-Installatør) skal se ud
 > og føles: som Tony Starks assistent — cinematisk, præcis, rolig og levende. Ikke et gammelt Windows-system.
 >
 > **Rækkefølge ved konflikt:** (1) Jonas' egne regler fra asa-el.dk (`DESIGN-REGLER-JONAS.md`) → (2) denne fil →
@@ -21,13 +21,13 @@
 5. **Levende, ikke støjende** — alt der arbejder, viser det (puls, glød, scanning). Alt der hviler, er stille.
 6. **Feedback på alt** — hover, klik, indlæsning, fejl. Brugeren er aldrig i tvivl om noget skete.
 7. **Mørke er et krydderi** — HUD-flader (mørk navy) bruges som *accent* til det levende: status-kort, boblens
-   svar, universkortet. Resten er lyst (asa-el.dk-reglen: lyst tema, navy som accent — beslutning B).
+   svar, systemkortet. Resten er lyst (asa-el.dk-reglen: lyst tema, navy som accent — beslutning B).
 
 ## 2. Farver — samme palette, Jarvis-brug
 
 | Token | Hex | Jarvis-brug |
 |---|---|---|
-| Navy dyb | `#082843` | HUD-flader (status-kort, boblens svar-kort, universkort-lærred), mørke sektioner som accent |
+| Navy dyb | `#082843` | HUD-flader (status-kort, boblens svar-kort, systemkort-lærred), mørke sektioner som accent |
 | Navy | `#0E3A5D` | primær tekst på lyst, overskrifter, primærknapper |
 | Blå | `#2F80C9` | alt interaktivt: links, fokus-glød, aktive tilstande, "neon"-accent på mørkt |
 | Lyseblå | `#82B3DF` | sekundære accenter, grafer, tekst-accent på mørkt |
@@ -63,7 +63,7 @@
 | Toasts | glider ned fra toppen, forsvinder selv efter 4 s |
 | Modaler / bottom sheets | fade + scale fra .98 (modal) · glid op m. fjeder (sheet) |
 | Menuer | kaskade: punkterne kommer 20 ms efter hinanden |
-| Indlæsning | **skeletons** (lyse flader der "ånder") — aldrig spinnere. Venter vi på en agent: vis *hvad* den laver ("Læser universkort.js …") |
+| Indlæsning | **skeletons** (lyse flader der "ånder") — aldrig spinnere. Venter vi på en agent: vis *hvad* den laver ("Læser systemkort.js …") |
 | Tal der ændres | tæller op/ned over 400 ms (kun ægte tal) |
 | `prefers-reduced-motion` | alt ovenstående slås fra — kun farveskift |
 
@@ -92,7 +92,7 @@ Aldrig ryk, aldrig hop, aldrig layout der skubber sig selv. Aldrig scroll-jackin
   der tæller, sundheds-prik (grøn/gul/rød) der pulserer langsomt når noget kører.
 - Derunder lyst indhold med meget luft og tydeligt hierarki. Ingen tabeller med rammer — lister med 1 px-skillelinjer.
 
-### 5.3 Universkort
+### 5.3 Systemkort
 - Node-lærred (mørk HUD) som Figma: zoom/pan glidende (knibe + scroll), noder som afrundede kort.
 - Forbindelser som linjer der **pulserer** når der løber arbejde igennem dem.
 - Aktive medarbejdere gløder blåt. Pauserede: næsten usynlige (grå, 30 % opacitet). Inaktive vises ALDRIG
@@ -138,5 +138,5 @@ og "Ville Tesla/Apple lave det sådan?" — nej → byg om. 4. `prefers-reduced-
 **A. Ingen serif — heller ikke til citater.** Display-stemmen er Manrope 300 i stor størrelse med −0.03em.
 Fraunces og al anden serif er forbudt (samme regel som asa-el.dk).
 
-**B. Mørkt KUN tre steder:** boblens svar-kort, kommandocentralens status-kort og universkort-lærredet.
+**B. Mørkt KUN tre steder:** boblens svar-kort, kommandocentralens status-kort og systemkort-lærredet.
 Alt andet er lyst (med subtil dybde — aldrig flad hvid). Mørke flader andre steder = byg om.

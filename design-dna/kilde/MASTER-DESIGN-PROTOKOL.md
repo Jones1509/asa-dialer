@@ -1,4 +1,4 @@
-> **KILDE — ordret kopi fra asa-el.dk-repoet (Jones1509/asa-hjemmeside, 2026-09-27).** Kun DESIGN-reglerne gælder i ASA Univers.
+> **KILDE — ordret kopi fra asa-el.dk-repoet (Jones1509/asa-hjemmeside, 2026-09-27).** Kun DESIGN-reglerne gælder i ASA Industries.
 > Hjemmeside-specifikke dele gælder IKKE her: MapLibre-kortet, Elio/FloatingAiAssistant, React-bibliotekerne (framer-motion,
 > gsap, lenis, three), auto-push/rollback-hooks, .env-reglerne, fredet-filer, sider/forsiden, context-procenter. Følg repoets egen CLAUDE.md
 > for arbejdsgang (branch + PR — aldrig direkte push). Aktuel app-stil: `../JARVIS-STIL.md`.
