@@ -7,6 +7,9 @@
 
 # DESIGN-REGLER — ASA HJEMMESIDE (Jonas' krav)
 
+> **Font-regel opdateret 12. okt 2026 (Jonas):** Fraunces (overskrifter) + Geist (brødtekst) overalt, også login. Den tidligere regel "Manrope overalt / aldrig Fraunces" nedenfor gælder IKKE længere.
+
+
 > **Læs FØR du bygger noget.** Opdateres hver gang Jonas siger noget vi skal huske.
 > Denne fil er ufravigelig for ALLE agenter (research, arkitekt, designer, billed,
 > animation, udvikler, copywriter, kritiker). Den supplerer MASTER-DESIGN-PROTOKOL.md.

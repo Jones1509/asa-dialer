@@ -1,5 +1,8 @@
 # JARVIS-STIL — ASA Industries' app-æstetik (godkendt af Jonas 28. sep 2026)
 
+> **Font-regel opdateret 12. okt 2026 (Jonas):** Fraunces (overskrifter) + Geist (brødtekst) overalt, også login. Den tidligere regel "Manrope overalt / aldrig Fraunces" nedenfor gælder IKKE længere.
+
+
 > **Hvad er det?** Reglerne for hvordan ASA Industries' apps (hovedapp, kunde-app, marketing, AI-Installatør) skal se ud
 > og føles: som Tony Starks assistent — cinematisk, præcis, rolig og levende. Ikke et gammelt Windows-system.
 >
