@@ -5,8 +5,9 @@ import asaDialerLogo from '@/assets/asa-dialer-logo.svg';
 /**
  * Fælles ramme for login, opret konto, nulstil adgangskode og afventer godkendelse.
  * Mørk navy-flade, Dialerens eget logo + ordmærke, Fraunces/Geist.
+ * `kort={false}` (login): intet kort — trekant-layoutet ligger frit under logoet, som ASA-logoets trekant.
  */
-export const AuthLayout: React.FC<{ children: React.ReactNode; subtitle?: string }> = ({ children, subtitle = 'Kundekommunikation' }) => {
+export const AuthLayout: React.FC<{ children: React.ReactNode; subtitle?: string; kort?: boolean }> = ({ children, subtitle = 'Kundekommunikation', kort = true }) => {
   // Mørk html/body-baggrund kun på disse ruter, så iOS-overscroll ikke viser en lys kant.
   useEffect(() => {
     const html = document.documentElement;
@@ -23,15 +24,26 @@ export const AuthLayout: React.FC<{ children: React.ReactNode; subtitle?: string
 
   return (
     <div className="auth-bg relative flex min-h-[100dvh] items-center justify-center overflow-hidden px-4 py-12">
-      <div className="relative z-10 flex w-full max-w-[420px] flex-col items-center">
-        <img src={asaDialerLogo} alt="" className="mb-3 h-24 w-auto sm:h-28" />
+      {!kort && (
+        <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,hsl(var(--blue)/0.08),transparent_70%)]" />
+      )}
+      <div className={`relative z-10 flex w-full flex-col items-center ${kort ? 'max-w-[420px]' : 'max-w-[480px]'}`}>
+        <img src={asaDialerLogo} alt="" className={kort ? 'mb-3 h-24 w-auto sm:h-28' : 'mb-3 h-28 w-auto drop-shadow-[0_4px_32px_hsl(var(--blue)/0.35)]'} />
         <div className="mb-1 font-body text-[22px] font-bold leading-none tracking-[0.2em] text-brand-offwhite" style={{ paddingLeft: '0.2em' }} aria-label="ASA Dialer">
           ASA <span className="text-brand-logo-accent">DIALER</span>
         </div>
-        <div className="mb-8 text-sm font-medium text-brand-sky">{subtitle}</div>
-        <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-sm sm:p-8">
-          {children}
-        </div>
+        {kort ? (
+          <div className="mb-8 text-sm font-medium text-brand-sky">{subtitle}</div>
+        ) : (
+          <div className="mb-6 mt-1.5 text-[9px] font-semibold uppercase tracking-[0.35em] text-white/35" style={{ paddingLeft: '0.35em' }}>{subtitle}</div>
+        )}
+        {kort ? (
+          <div className="w-full rounded-2xl border border-white/10 bg-white/[0.04] p-6 shadow-2xl backdrop-blur-sm sm:p-8">
+            {children}
+          </div>
+        ) : (
+          <div className="w-full">{children}</div>
+        )}
       </div>
     </div>
   );
