@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { CSVUploadModal } from '@/components/dialer/CSVUploadModal';
-import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, ChevronUp, Users, Hash, Calendar } from 'lucide-react';
+import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, Users, Hash, Calendar } from 'lucide-react';
+import { EmptyState, SkeletonRows } from '@/components/shell/states';
 
 interface Campaign {
   id: string;
@@ -126,23 +127,23 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
     fetchAll();
   };
 
-  if (loading) return <div className="p-8 text-muted-foreground/60 text-[13px]">Indlæser kampagner...</div>;
+  if (loading) return <div className="card-surface overflow-hidden"><SkeletonRows rows={4} /></div>;
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-heading font-bold text-[14px]">Kampagner ({campaigns.length})</h3>
-        <button onClick={() => { setShowCreate(!showCreate); setCreateStep('info'); }} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
-          <Plus size={14} strokeWidth={2} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="section-title">Kampagner <span className="font-body text-sm font-normal text-muted-foreground">({campaigns.length})</span></h2>
+        <button type="button" onClick={() => { setShowCreate(!showCreate); setCreateStep('info'); }} className="btn-primary">
+          <Plus size={16} strokeWidth={2} aria-hidden="true" />
           Ny kampagne
         </button>
       </div>
 
       {/* Combined create flow */}
       {showCreate && (
-        <div className="card-surface rounded-xl overflow-hidden">
+        <div className="card-surface overflow-hidden">
           {/* Step indicator */}
-          <div className="px-5 py-3 border-b border-border/30 flex items-center gap-4">
+          <div className="flex items-center gap-4 border-b border-border px-5 py-3">
             <div className={`flex items-center gap-1.5 text-[12px] font-medium ${createStep === 'info' ? 'text-primary' : 'text-muted-foreground/50'}`}>
               <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${createStep === 'info' ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>1</div>
               Opret
@@ -158,31 +159,31 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
             {createStep === 'info' && (
               <>
                 <div className="flex flex-col gap-1.5">
-                  <label className="label-clean">Kampagnenavn</label>
-                  <input className="input-clean" value={newName} onChange={e => setNewName(e.target.value)} placeholder="F.eks. 'Elkunder marts 2026'" />
+                  <label htmlFor="cf-name" className="label-clean">Kampagnenavn</label>
+                  <input id="cf-name" className="input-clean" value={newName} onChange={e => setNewName(e.target.value)} placeholder="F.eks. 'Elkunder marts 2026'" />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="label-clean">Beskrivelse</label>
-                  <textarea className="input-clean resize-none h-16" value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Valgfri beskrivelse" />
+                  <label htmlFor="cf-desc" className="label-clean">Beskrivelse</label>
+                  <textarea id="cf-desc" className="input-clean resize-none h-20" value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Valgfri beskrivelse" />
                 </div>
-                <div className="flex gap-2.5">
-                  <button onClick={createCampaign} disabled={!newName.trim()} className={`btn-primary-smooth text-[12px] flex items-center gap-1.5 ${!newName.trim() ? 'opacity-40' : ''}`}>
+                <div className="flex flex-col-reverse gap-2 sm:flex-row">
+                  <button type="button" onClick={createCampaign} disabled={!newName.trim()} className="btn-primary">
                     Opret & importer CSV
                   </button>
-                  <button onClick={() => { setShowCreate(false); setCreateStep(null); }} className="btn-ghost-smooth text-[12px]">Annuller</button>
+                  <button type="button" onClick={() => { setShowCreate(false); setCreateStep(null); }} className="btn-ghost">Annuller</button>
                 </div>
               </>
             )}
 
             {createStep === 'csv' && (
               <div className="text-center py-4">
-                <div className="text-[13px] text-muted-foreground/60 mb-3">Kampagne "{newName}" oprettet — upload nu dine leads</div>
-                <button onClick={() => setShowCSV(true)} className="btn-primary-smooth text-[12px] flex items-center gap-1.5 mx-auto">
-                  <FileUp size={14} strokeWidth={2} /> Upload CSV-fil
+                <div className="mb-3 text-sm text-muted-foreground">Kampagne "{newName}" oprettet — upload nu dine leads</div>
+                <button type="button" onClick={() => setShowCSV(true)} className="btn-primary mx-auto">
+                  <FileUp size={16} strokeWidth={2} aria-hidden="true" /> Upload CSV-fil
                 </button>
                 <button
                   onClick={() => { setShowCreate(false); setCreateStep(null); setNewName(''); setNewDesc(''); fetchAll(); }}
-                  className="btn-ghost-smooth text-[11px] mt-3 mx-auto block"
+                  className="btn-ghost mx-auto mt-3 flex"
                 >
                   Spring over — gør det senere
                 </button>
@@ -194,50 +195,52 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
 
       <div className="flex flex-col gap-3">
         {campaigns.length === 0 ? (
-          <div className="card-surface rounded-xl px-4 py-8 text-center text-muted-foreground/50 text-[13px]">Ingen kampagner endnu</div>
+          <div className="card-surface"><EmptyState icon={LayoutGrid} title="Ingen kampagner endnu" message="Opret en kampagne, importér emner fra en CSV-fil og tildel sælgere." action={{ label: 'Ny kampagne', icon: Plus, onClick: () => { setShowCreate(true); setCreateStep('info'); } }} /></div>
         ) : (
           campaigns.map(c => (
-            <div key={c.id} className="card-surface rounded-xl overflow-hidden">
-              <div
-                className="flex items-center gap-3.5 px-4 py-3.5 cursor-pointer hover:bg-secondary/20 transition-colors duration-150"
+            <div key={c.id} className="card-surface overflow-hidden">
+              <button
+                type="button"
+                aria-expanded={expandedCampaign === c.id}
+                className="flex w-full flex-wrap items-center gap-3 px-4 py-3 text-left transition-colors duration-150 hover:bg-secondary/50"
                 onClick={() => setExpandedCampaign(expandedCampaign === c.id ? null : c.id)}
               >
-                <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center">
-                  <LayoutGrid size={16} className="text-accent-foreground" strokeWidth={1.8} />
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent">
+                  <LayoutGrid size={16} className="text-primary" strokeWidth={1.75} aria-hidden="true" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium text-[13px] flex items-center gap-2">
+                <div className="min-w-[160px] flex-1">
+                  <div className="flex items-center gap-2 text-sm font-medium">
                     {c.name}
-                    {c.archived && <span className="text-[10px] text-muted-foreground/50 bg-secondary rounded-md px-1.5 py-0.5">Arkiveret</span>}
+                    {c.archived && <span className="rounded-md bg-secondary px-1.5 py-0.5 text-xs text-muted-foreground">Arkiveret</span>}
                   </div>
-                  <div className="text-[11px] text-muted-foreground/50">{c.description || 'Ingen beskrivelse'}</div>
+                  <div className="text-xs text-muted-foreground">{c.description || 'Ingen beskrivelse'}</div>
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-muted-foreground/50">
-                  <span className="bg-secondary rounded-md px-2 py-0.5 tabular-nums flex items-center gap-1">
-                    <Hash size={9} /> {c.leadCount} emner
+                <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 tabular-nums">
+                    <Hash size={16} aria-hidden="true" className="h-3.5 w-3.5" /> {c.leadCount} emner
                   </span>
-                  <span className="bg-secondary rounded-md px-2 py-0.5 tabular-nums flex items-center gap-1">
-                    <Users size={9} /> {c.assignedUsers?.length ?? 0}
+                  <span className="flex items-center gap-1 rounded-md bg-secondary px-2 py-0.5 tabular-nums" title="Tildelte brugere">
+                    <Users size={16} aria-hidden="true" className="h-3.5 w-3.5" /> {c.assignedUsers?.length ?? 0}
                   </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar size={9} /> {new Date(c.created_at).toLocaleDateString('da-DK')}
+                  <span className="hidden items-center gap-1 sm:flex">
+                    <Calendar size={16} aria-hidden="true" className="h-3.5 w-3.5" /> {new Date(c.created_at).toLocaleDateString('da-DK')}
                   </span>
                 </div>
-                {expandedCampaign === c.id ? <ChevronUp size={14} className="text-muted-foreground/40" /> : <ChevronDown size={14} className="text-muted-foreground/40" />}
-              </div>
+                <ChevronDown size={20} aria-hidden="true" className={`shrink-0 text-muted-foreground transition-transform duration-150 ${expandedCampaign === c.id ? 'rotate-180' : ''}`} />
+              </button>
 
               {expandedCampaign === c.id && (
-                <div className="px-4 pb-4 pt-2 border-t border-border/20 flex flex-col gap-3.5">
-                  <div className="flex gap-2 flex-wrap">
-                    <button onClick={() => openCSV(c.id)} className="btn-primary-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
-                      <FileUp size={13} strokeWidth={2} /> Importer CSV
+                <div className="flex flex-col gap-4 border-t border-border px-4 pb-4 pt-3">
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => openCSV(c.id)} className="btn-primary btn-sm">
+                      <FileUp size={16} strokeWidth={2} aria-hidden="true" /> Importer CSV
                     </button>
-                    <button onClick={() => setAssignModal(c.id)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5">
-                      <UserPlus size={13} strokeWidth={2} /> Tildel bruger
+                    <button type="button" onClick={() => setAssignModal(c.id)} className="btn-secondary btn-sm">
+                      <UserPlus size={16} strokeWidth={2} aria-hidden="true" /> Tildel bruger
                     </button>
                     {!c.archived && (
-                      <button onClick={() => archiveCampaign(c.id)} className="btn-ghost-smooth text-[11px] py-1.5 px-3 flex items-center gap-1.5 hover:text-destructive">
-                        <Archive size={13} strokeWidth={2} /> Arkiver
+                      <button type="button" onClick={() => archiveCampaign(c.id)} className="btn-ghost btn-sm hover:!text-destructive">
+                        <Archive size={16} strokeWidth={2} aria-hidden="true" /> Arkiver
                       </button>
                     )}
                   </div>
@@ -252,11 +255,11 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
                               {u.full_name?.slice(0, 2).toUpperCase() || '??'}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <div className="text-[13px] font-medium">{u.full_name || u.email}</div>
-                              <div className="text-[11px] text-muted-foreground/50">{u.email}</div>
+                              <div className="text-sm font-medium">{u.full_name || u.email}</div>
+                              <div className="text-xs text-muted-foreground">{u.email}</div>
                             </div>
-                            <button onClick={() => removeUser(c.id, u.user_id)} className="text-muted-foreground/40 hover:text-destructive cursor-pointer bg-transparent border-none transition-colors duration-150">
-                              <X size={14} />
+                            <button type="button" onClick={() => removeUser(c.id, u.user_id)} aria-label={`Fjern ${u.full_name || u.email} fra kampagnen`} className="icon-btn hover:!bg-destructive/10 hover:!text-destructive">
+                              <X size={16} aria-hidden="true" />
                             </button>
                           </div>
                         ))}
@@ -265,8 +268,8 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
                   )}
 
                   {(c.assignedUsers?.length ?? 0) === 0 && (
-                    <div className="bg-warning/5 border border-warning/15 rounded-lg px-3.5 py-2.5 text-[12px] text-warning flex items-center gap-2">
-                      <Users size={13} strokeWidth={2} />
+                    <div className="flex items-center gap-2 rounded-lg border border-warning/30 bg-warning/10 px-3.5 py-2.5 text-sm text-foreground">
+                      <Users size={16} strokeWidth={2} className="shrink-0 text-warning" aria-hidden="true" />
                       Ingen brugere tildelt — kampagnen er ikke synlig for medarbejdere endnu
                     </div>
                   )}
@@ -279,22 +282,23 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
                           <button
                             key={u.user_id}
                             onClick={() => assignUser(c.id, u.user_id)}
-                            className="flex items-center gap-2.5 px-3 py-2 rounded-md hover:bg-accent/50 cursor-pointer bg-transparent border-none text-left w-full transition-colors duration-150"
+                            type="button"
+                            className="flex min-h-11 w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors duration-150 hover:bg-accent/60"
                           >
                             <div className="w-7 h-7 rounded-md bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">
                               {u.full_name?.slice(0, 2).toUpperCase() || '??'}
                             </div>
                             <div>
-                              <div className="text-[13px] font-medium">{u.full_name || u.email}</div>
-                              <div className="text-[11px] text-muted-foreground/50">{u.email}</div>
+                              <div className="text-sm font-medium">{u.full_name || u.email}</div>
+                              <div className="text-xs text-muted-foreground">{u.email}</div>
                             </div>
                           </button>
                         ))}
                         {users.filter(u => !c.assignedUsers?.some(au => au.user_id === u.user_id)).length === 0 && (
-                          <div className="text-[11px] text-muted-foreground/40 py-2">Alle brugere er tildelt</div>
+                          <div className="py-2 text-sm text-muted-foreground">Alle godkendte brugere er allerede tildelt</div>
                         )}
                       </div>
-                      <button onClick={() => setAssignModal(null)} className="btn-ghost-smooth text-[11px] mt-2.5">Luk</button>
+                      <button type="button" onClick={() => setAssignModal(null)} className="btn-ghost btn-sm mt-2">Luk</button>
                     </div>
                   )}
                 </div>

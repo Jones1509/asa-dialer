@@ -6,19 +6,20 @@ interface ResultPanelProps {
   lead: Lead | null;
   onSave: (status: string, note?: string) => void;
   onNext: () => void;
+  className?: string;
 }
 
 const outcomes = [
-  { id: 'sale', icon: DollarSign, label: 'Salg', color: 'bg-success/10 text-success border-success/20' },
-  { id: 'interested', icon: ThumbsUp, label: 'Interesseret', color: 'bg-primary/10 text-primary border-primary/20' },
-  { id: 'callback', icon: RefreshCw, label: 'Genopkald', color: 'bg-info/10 text-info border-info/20' },
-  { id: 'not_interested', icon: ThumbsDown, label: 'Ikke interesseret', color: 'bg-destructive/8 text-destructive/80 border-destructive/15' },
-  { id: 'no_answer', icon: PhoneOff, label: 'Ingen svar', color: 'bg-warning/10 text-warning border-warning/20' },
-  { id: 'voicemail', icon: Voicemail, label: 'Telefonsvarer', color: 'bg-muted text-muted-foreground border-border/50' },
-  { id: 'wrong_number', icon: XCircle, label: 'Forkert nummer', color: 'bg-destructive/8 text-destructive/80 border-destructive/15' },
+  { id: 'sale', icon: DollarSign, label: 'Salg', color: 'bg-success/10 text-success border-success/30' },
+  { id: 'interested', icon: ThumbsUp, label: 'Interesseret', color: 'bg-primary/10 text-primary border-primary/30' },
+  { id: 'callback', icon: RefreshCw, label: 'Genopkald', color: 'bg-info/10 text-info border-info/30' },
+  { id: 'not_interested', icon: ThumbsDown, label: 'Ikke interesseret', color: 'bg-destructive/10 text-destructive border-destructive/30' },
+  { id: 'no_answer', icon: PhoneOff, label: 'Ingen svar', color: 'bg-warning/10 text-warning border-warning/30' },
+  { id: 'voicemail', icon: Voicemail, label: 'Telefonsvarer', color: 'bg-muted text-foreground border-input' },
+  { id: 'wrong_number', icon: XCircle, label: 'Forkert nummer', color: 'bg-destructive/10 text-destructive border-destructive/30' },
 ];
 
-export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }) => {
+export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext, className = '' }) => {
   const [note, setNote] = useState('');
   const [selectedOutcome, setSelectedOutcome] = useState<string | null>(null);
 
@@ -29,9 +30,9 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }
 
   if (!lead) {
     return (
-      <div className="w-[280px] border-l border-border/40 p-5 flex items-center justify-center shrink-0 bg-card">
-        <div className="text-muted-foreground text-[13px]">Ingen emne valgt</div>
-      </div>
+      <aside className={`w-full items-center justify-center bg-card p-5 lg:w-[260px] lg:shrink-0 lg:border-l lg:border-border xl:w-[300px] ${className}`}>
+        <div className="text-sm text-muted-foreground">Vælg et emne i listen for at registrere resultatet.</div>
+      </aside>
     );
   }
 
@@ -43,15 +44,14 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }
   };
 
   return (
-    <div className="w-[280px] border-l border-border/40 p-5 flex flex-col gap-4 shrink-0 overflow-y-auto bg-card">
-      <div className="font-heading font-bold text-[14px] pb-3 border-b border-border/40 tracking-tight">
-        Resultat
-      </div>
+    <aside aria-label="Resultat" className={`w-full flex-col gap-4 overflow-y-auto bg-card p-4 sm:p-5 lg:w-[260px] lg:shrink-0 lg:border-l lg:border-border xl:w-[300px] ${className}`}>
+      <h2 className="section-title border-b border-border pb-3">Resultat</h2>
 
       <div className="flex flex-col gap-1.5">
-        <label className="label-clean">Noter</label>
+        <label htmlFor="lead-note" className="label-clean">Noter</label>
         <textarea
-          className="input-clean resize-none h-24 text-[13px]"
+          id="lead-note"
+          className="input-clean resize-none h-24"
           value={note}
           onChange={e => setNote(e.target.value)}
           placeholder="Skriv noter om samtalen..."
@@ -59,21 +59,24 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label className="label-clean">Udfald</label>
-        <div className="grid grid-cols-1 gap-1">
+        <span id="outcome-label" className="label-clean">Udfald</span>
+        <div role="radiogroup" aria-labelledby="outcome-label" className="grid grid-cols-1 gap-1.5 sm:grid-cols-2 lg:grid-cols-1">
           {outcomes.map(o => {
             const Icon = o.icon;
             return (
               <button
                 key={o.id}
+                type="button"
+                role="radio"
+                aria-checked={selectedOutcome === o.id}
                 onClick={() => setSelectedOutcome(o.id)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-[13px] font-medium cursor-pointer transition-all duration-150
+                className={`flex min-h-11 md:min-h-10 items-center gap-2 px-3 rounded-lg border text-sm font-medium cursor-pointer transition-colors duration-150
                   ${selectedOutcome === o.id
-                    ? `${o.color} border-2 shadow-sm`
-                    : 'bg-transparent border-border/30 text-foreground/65 hover:bg-secondary/40 hover:text-foreground/80'
+                    ? `${o.color} shadow-sm font-semibold`
+                    : 'bg-transparent border-border text-foreground hover:bg-secondary'
                   }`}
               >
-                <Icon size={14} strokeWidth={2} />
+                <Icon size={16} strokeWidth={2} aria-hidden="true" />
                 <span>{o.label}</span>
               </button>
             );
@@ -84,16 +87,18 @@ export const ResultPanel: React.FC<ResultPanelProps> = ({ lead, onSave, onNext }
       <button
         onClick={handleSave}
         disabled={!selectedOutcome}
-        className={`btn-primary-smooth flex items-center justify-center gap-2 text-[13px] ${!selectedOutcome ? 'opacity-40 cursor-not-allowed' : ''}`}
+        className="btn-primary w-full"
       >
-        <Save size={14} strokeWidth={2} />
+        <Save size={16} strokeWidth={2} aria-hidden="true" />
         Gem & næste
       </button>
 
-      <button className="btn-ghost-smooth flex items-center justify-center gap-1.5 text-[13px]" onClick={onNext}>
-        <SkipForward size={14} strokeWidth={2} />
+      {!selectedOutcome && <p className="-mt-2 text-center text-xs text-muted-foreground">Vælg et udfald for at gemme</p>}
+
+      <button type="button" className="btn-secondary w-full" onClick={onNext}>
+        <SkipForward size={16} strokeWidth={2} aria-hidden="true" />
         Spring over
       </button>
-    </div>
+    </aside>
   );
 };

@@ -9,6 +9,7 @@ interface LeadsPanelProps {
   onSearch: (q: string) => void;
   onSelect: (idx: number) => void;
   allLeads: Lead[];
+  className?: string;
 }
 
 const statusConfig: Record<string, { dot: string; label: string }> = {
@@ -23,20 +24,23 @@ const statusConfig: Record<string, { dot: string; label: string }> = {
 };
 
 export const LeadsPanel: React.FC<LeadsPanelProps> = ({
-  leads, currentLeadIdx, searchQuery, onSearch, onSelect, allLeads,
+  leads, currentLeadIdx, searchQuery, onSearch, onSelect, allLeads, className = '',
 }) => {
   return (
-    <div className="w-[320px] border-r border-border/40 flex flex-col shrink-0 bg-card">
-      <div className="px-4 py-3.5 border-b border-border/40 flex items-center justify-between">
-        <span className="font-heading font-bold text-[14px] tracking-tight">Emner</span>
-        <span className="bg-secondary text-muted-foreground rounded-md px-2 py-0.5 text-[11px] font-semibold tabular-nums">{allLeads.length}</span>
+    <section aria-label="Emner" className={`w-full flex-col bg-card lg:w-[280px] lg:shrink-0 lg:border-r lg:border-border xl:w-[320px] ${className}`}>
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <h2 className="section-title">Emner</h2>
+        <span className="rounded-md bg-secondary px-2 py-0.5 text-xs font-semibold tabular-nums text-muted-foreground">{allLeads.length}</span>
       </div>
-      <div className="px-3 py-2.5 border-b border-border/40">
+      <div className="border-b border-border px-3 py-3">
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
+          <label htmlFor="lead-search" className="sr-only">Søg emne</label>
+          <Search size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
-            className="input-clean pl-8 py-2 text-[13px]"
-            placeholder="Søg emne..."
+            id="lead-search"
+            type="search"
+            className="input-clean pl-9"
+            placeholder="Søg firma eller nummer"
             value={searchQuery}
             onChange={e => onSearch(e.target.value)}
           />
@@ -44,42 +48,42 @@ export const LeadsPanel: React.FC<LeadsPanelProps> = ({
       </div>
       <div className="flex-1 overflow-y-auto">
         {leads.length === 0 && (
-          <div className="px-4 py-8 text-center text-muted-foreground text-[13px]">Ingen emner fundet</div>
+          <div className="px-4 py-10 text-center text-sm text-muted-foreground">
+            Ingen emner matcher “{searchQuery}”.
+            <button type="button" onClick={() => onSearch('')} className="btn-ghost btn-sm mx-auto mt-2 flex">Ryd søgning</button>
+          </div>
         )}
         {leads.map((lead) => {
           const realIdx = allLeads.findIndex(l => l.id === lead.id);
           const isActive = realIdx === currentLeadIdx;
           const sc = statusConfig[lead.status] || { dot: 'bg-primary', label: lead.status };
           return (
-            <div
+            <button
+              type="button"
               key={lead.id}
               onClick={() => onSelect(realIdx)}
-              className={`px-3.5 py-3 border-b border-border/20 cursor-pointer flex items-center gap-2.5
-                transition-all duration-150 ease-out
-                ${isActive
-                  ? 'bg-accent/60 border-l-[2.5px] border-l-primary'
-                  : 'hover:bg-secondary/40'
-                }`}
+              aria-current={isActive ? 'true' : undefined}
+              className={`flex min-h-14 w-full items-center gap-3 border-b border-border/60 border-l-2 px-3.5 py-3 text-left transition-colors duration-150
+                ${isActive ? 'border-l-primary bg-accent/60' : 'border-l-transparent hover:bg-secondary/60'}`}
             >
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-semibold text-[11px] shrink-0 tracking-wide
-                transition-all duration-200
+              <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-semibold tracking-wide
                 ${isActive ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'}`}>
                 {lead.company.slice(0, 2).toUpperCase()}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className={`font-medium text-[13px] whitespace-nowrap overflow-hidden text-ellipsis ${isActive ? 'text-foreground' : 'text-foreground/75'}`}>
+              <div className="min-w-0 flex-1">
+                <div className={`truncate text-sm font-medium ${isActive ? 'text-navy' : 'text-foreground'}`}>
                   {lead.company}
                 </div>
-                <div className="text-[11px] text-muted-foreground/70 mt-0.5 tabular-nums">{lead.phone}</div>
+                <div className="mt-0.5 text-xs tabular-nums text-muted-foreground">{lead.phone}</div>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[10px] text-muted-foreground/60">{sc.label}</span>
-                <div className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+              <div className="flex shrink-0 items-center gap-1.5">
+                <span className="text-xs text-muted-foreground">{sc.label}</span>
+                <span className={`h-2 w-2 rounded-full ${sc.dot}`} aria-hidden="true" />
               </div>
-            </div>
+            </button>
           );
         })}
       </div>
-    </div>
+    </section>
   );
 };

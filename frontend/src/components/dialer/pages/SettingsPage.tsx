@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/hooks/useAuth';
-import { User, Lock, Settings as SettingsIcon, Save, Check, Bell, Monitor } from 'lucide-react';
+import { User, Lock, Settings as SettingsIcon, Save } from 'lucide-react';
 
 interface SettingsPageProps {
   tetrisEnabled: boolean;
@@ -34,12 +34,12 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ tetrisEnabled, onTog
     if (!user) return;
     setSaving(true);
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
-    await supabase
+    const { error } = await supabase
       .from('profiles')
       .update({ full_name: fullName, email })
       .eq('user_id', user.id);
     setSaving(false);
-    showNotif('Profil opdateret');
+    showNotif(error ? 'Profilen kunne ikke gemmes — prøv igen' : 'Profil opdateret');
   };
 
   const changePassword = async () => {
@@ -59,103 +59,110 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ tetrisEnabled, onTog
     }
   };
 
-  const Toggle = ({ on, onClick }: { on: boolean; onClick: () => void }) => (
+  const Toggle = ({ on, onClick, label }: { on: boolean; onClick: () => void; label: string }) => (
     <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
       onClick={onClick}
-      className={`w-11 h-[24px] rounded-full border-none cursor-pointer relative transition-all duration-200 ease-out ${
-        on ? 'bg-primary shadow-[0_1px_6px_hsl(217_91%_60%/0.25)]' : 'bg-secondary'
-      }`}
+      className="flex h-11 w-14 shrink-0 cursor-pointer items-center justify-center rounded-full"
     >
-      <span className={`absolute top-[3px] left-[3px] w-[18px] h-[18px] rounded-full bg-card shadow-sm transition-all duration-200 ease-out ${
-        on ? 'translate-x-[20px]' : ''
-      }`} />
+      <span className={`relative h-6 w-11 rounded-full transition-colors duration-150 ${on ? 'bg-primary' : 'bg-input'}`}>
+        <span className={`absolute left-[3px] top-[3px] h-[18px] w-[18px] rounded-full bg-card shadow-sm transition-transform duration-150 ${on ? 'translate-x-5' : ''}`} />
+      </span>
     </button>
   );
 
+  const Row = ({ title, desc, children }: { title: string; desc: string; children: React.ReactNode }) => (
+    <div className="flex items-center justify-between gap-4 border-b border-border py-3 last:border-0">
+      <div>
+        <div className="text-sm font-medium">{title}</div>
+        <p className="mt-0.5 text-sm text-muted-foreground">{desc}</p>
+      </div>
+      {children}
+    </div>
+  );
+
   return (
-    <div className="flex flex-col p-8 gap-5 overflow-y-auto flex-1 max-w-[680px] animate-fade-in">
-      <h1 className="font-heading font-bold text-xl tracking-tight">Indstillinger</h1>
+    <div className="flex-1 overflow-y-auto">
+      <div className="page flex max-w-3xl flex-col gap-6">
+        <header>
+          <h1 className="page-title">Indstillinger</h1>
+          <p className="page-subtitle">Din profil, dialer-præferencer og adgangskode.</p>
+        </header>
 
-      {/* Profile */}
-      <div className="card-surface rounded-xl p-5 flex flex-col gap-4">
-        <div className="font-heading font-bold text-[14px] tracking-tight flex items-center gap-2">
-          <User size={15} className="text-muted-foreground" strokeWidth={1.8} />
-          Profil
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label className="label-clean">Fornavn</label>
-            <input className="input-clean" value={firstName} onChange={e => setFirstName(e.target.value)} />
+        {/* Profile */}
+        <section className="card-surface flex flex-col gap-4 p-5 sm:p-6">
+          <h2 className="section-title flex items-center gap-2">
+            <User size={20} className="text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
+            Profil
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="set-first" className="label-clean">Fornavn</label>
+              <input id="set-first" autoComplete="given-name" className="input-clean" value={firstName} onChange={e => setFirstName(e.target.value)} />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="set-last" className="label-clean">Efternavn</label>
+              <input id="set-last" autoComplete="family-name" className="input-clean" value={lastName} onChange={e => setLastName(e.target.value)} />
+            </div>
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="label-clean">Efternavn</label>
-            <input className="input-clean" value={lastName} onChange={e => setLastName(e.target.value)} />
+            <label htmlFor="set-email" className="label-clean">Email</label>
+            <input id="set-email" type="email" autoComplete="email" className="input-clean" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label className="label-clean">Email</label>
-          <input className="input-clean" value={email} onChange={e => setEmail(e.target.value)} />
-        </div>
-        <button onClick={saveProfile} disabled={saving} className="btn-primary-smooth w-fit text-[13px] py-2 px-4 flex items-center gap-1.5">
-          {saving ? 'Gemmer...' : <><Save size={13} strokeWidth={2} /> Gem profil</>}
-        </button>
-      </div>
+          <button type="button" onClick={saveProfile} disabled={saving} className="btn-primary w-full sm:w-fit">
+            <Save size={16} strokeWidth={2} aria-hidden="true" />
+            {saving ? 'Gemmer…' : 'Gem profil'}
+          </button>
+        </section>
 
-      {/* Dialer settings */}
-      <div className="card-surface rounded-xl p-5 flex flex-col gap-0">
-        <div className="font-heading font-bold text-[14px] tracking-tight mb-3 flex items-center gap-2">
-          <SettingsIcon size={15} className="text-muted-foreground" strokeWidth={1.8} />
-          Dialer
-        </div>
-        <div className="flex items-center justify-between py-3.5 border-b border-border/30">
-          <div>
-            <div className="font-medium text-[13px]">Automatisk opkald</div>
-            <p className="text-[12px] text-muted-foreground/60 mt-0.5">Ring automatisk op ved nyt emne</p>
-          </div>
-          <Toggle on={autoCall} onClick={() => setAutoCall(!autoCall)} />
-        </div>
-        <div className="flex items-center justify-between py-3.5 border-b border-border/30">
-          <div>
-            <div className="font-medium text-[13px]">Tetris under opkald</div>
-            <p className="text-[12px] text-muted-foreground/60 mt-0.5">Spil Tetris mens du venter på svar</p>
-          </div>
-          <Toggle on={tetrisEnabled} onClick={onToggleTetris} />
-        </div>
-        <div className="flex items-center justify-between py-3.5">
-          <div>
-            <div className="font-medium text-[13px]">Notifikationer</div>
-            <p className="text-[12px] text-muted-foreground/60 mt-0.5">Vis popup-notifikationer</p>
-          </div>
-          <Toggle on={notifications} onClick={() => setNotifications(!notifications)} />
-        </div>
-      </div>
+        {/* Dialer settings */}
+        <section className="card-surface flex flex-col p-5 sm:p-6">
+          <h2 className="section-title mb-2 flex items-center gap-2">
+            <SettingsIcon size={20} className="text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
+            Dialer
+          </h2>
+          <Row title="Automatisk opkald" desc="Ring automatisk op ved nyt emne">
+            <Toggle on={autoCall} onClick={() => setAutoCall(!autoCall)} label="Automatisk opkald" />
+          </Row>
+          <Row title="Tetris under opkald" desc="Spil Tetris mens du venter på svar (kræver tastatur)">
+            <Toggle on={tetrisEnabled} onClick={onToggleTetris} label="Tetris under opkald" />
+          </Row>
+          <Row title="Notifikationer" desc="Vis popup-notifikationer">
+            <Toggle on={notifications} onClick={() => setNotifications(!notifications)} label="Notifikationer" />
+          </Row>
+        </section>
 
-      {/* Security */}
-      <div className="card-surface rounded-xl p-5 flex flex-col gap-4">
-        <div className="font-heading font-bold text-[14px] tracking-tight flex items-center gap-2">
-          <Lock size={15} className="text-muted-foreground" strokeWidth={1.8} />
-          Sikkerhed
-        </div>
-        <div className="flex flex-col gap-3">
+        {/* Security */}
+        <section className="card-surface flex flex-col gap-4 p-5 sm:p-6">
+          <h2 className="section-title flex items-center gap-2">
+            <Lock size={20} className="text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
+            Sikkerhed
+          </h2>
           <div className="flex flex-col gap-1.5">
-            <label className="label-clean">Ny adgangskode</label>
+            <label htmlFor="set-pw" className="label-clean">Ny adgangskode</label>
             <input
+              id="set-pw"
               className="input-clean"
               type="password"
+              autoComplete="new-password"
               value={passwordNew}
               onChange={e => setPasswordNew(e.target.value)}
               placeholder="Mindst 6 tegn"
             />
           </div>
           <button
+            type="button"
             onClick={changePassword}
             disabled={changingPassword || !passwordNew}
-            className={`btn-ghost-smooth w-fit text-[12px] py-1.5 px-3 flex items-center gap-1.5 ${!passwordNew ? 'opacity-40' : ''}`}
+            className="btn-secondary w-full sm:w-fit"
           >
-            <Lock size={12} strokeWidth={2} />
-            {changingPassword ? 'Ændrer...' : 'Skift adgangskode'}
+            <Lock size={16} strokeWidth={2} aria-hidden="true" />
+            {changingPassword ? 'Ændrer…' : 'Skift adgangskode'}
           </button>
-        </div>
+        </section>
       </div>
     </div>
   );

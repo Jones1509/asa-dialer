@@ -104,130 +104,136 @@ export const Topbar: React.FC<TopbarProps> = ({
     if (e.key === 'Escape') { setShowManualDial(false); setManualNumber(''); }
   };
 
+  const voipLabel = twilioStatus === 'ready' ? 'VoIP klar' : twilioStatus === 'loading' ? 'Forbinder…' : 'VoIP utilgængelig';
   const statusIcon = () => {
     switch (twilioStatus) {
-      case 'ready': return <Wifi size={12} className="text-success" />;
-      default: return <Loader2 size={12} className="text-muted-foreground animate-spin" />;
+      case 'ready': return <Wifi size={16} className="text-success" aria-hidden="true" />;
+      case 'loading': return <Loader2 size={16} className="text-muted-foreground animate-spin" aria-hidden="true" />;
+      default: return <WifiOff size={16} className="text-destructive" aria-hidden="true" />;
     }
   };
 
+  const isManual = !!activeDialNumber && activeDialNumber !== currentLead?.phone;
+
   return (
-    <div className="h-[56px] bg-card border-b border-border/40 flex items-center px-5 gap-3.5 shrink-0"
-      style={{ boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}>
-      
+    <div className="flex shrink-0 flex-wrap items-center gap-2 border-b border-border bg-card px-3 py-2 sm:gap-3 sm:px-5 md:min-h-14">
+
       {/* Twilio status */}
-      <div className="flex items-center gap-1.5" title={twilioError || `VoIP: ${twilioStatus}`}>
+      <div className="flex items-center gap-1.5" title={twilioError || voipLabel} role="status">
         {statusIcon()}
-        <span className="text-[11px] text-muted-foreground/60">
-          {twilioStatus === 'ready' ? 'VoIP' : 'Forbinder...'}
+        <span className={`hidden text-xs sm:inline ${twilioStatus === 'error' || twilioStatus === 'offline' ? 'text-destructive' : 'text-muted-foreground'}`}>
+          {voipLabel}
         </span>
+        <span className="sr-only sm:hidden">{voipLabel}</span>
       </div>
 
       {/* Call status indicator */}
-      <div className="flex items-center gap-2.5 bg-background border border-border/50 rounded-lg px-3.5 py-2 font-body text-[13px] font-medium min-w-[220px]">
-        <div className={`w-2 h-2 rounded-full shrink-0 transition-all duration-500 ${
-          callActive ? 'bg-success shadow-[0_0_8px_hsl(152_69%_41%/0.5)]' : 'bg-muted-foreground/25'
-        }`} />
-        <span className="text-foreground/80 tabular-nums">{displayNumber}</span>
-        {currentLead?.company && (
-          <span className="text-foreground/60 text-[12px] font-semibold truncate max-w-[160px]">
-            {activeDialNumber && activeDialNumber !== currentLead?.phone ? 'Manuel' : currentLead.company}
+      <div className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg border border-border bg-background px-3 py-2 text-sm font-medium sm:max-w-md md:flex-none md:min-w-[240px]">
+        <span className={`h-2 w-2 shrink-0 rounded-full transition-colors duration-150 ${callActive ? 'bg-success' : 'bg-muted-foreground/30'}`} aria-hidden="true" />
+        <span className="shrink-0 tabular-nums text-foreground">{displayNumber}</span>
+        {(currentLead?.company || isManual) && (
+          <span className="hidden min-w-0 truncate text-xs font-semibold text-muted-foreground sm:inline">
+            {isManual ? 'Manuel' : currentLead?.company}
           </span>
-        )}
-        {activeDialNumber && activeDialNumber !== currentLead?.phone && !currentLead?.company && (
-          <span className="text-muted-foreground/50 text-[12px]">Manuel</span>
         )}
       </div>
 
       {/* Timer */}
-      <div className={`font-heading text-xs font-bold tracking-[0.12em] tabular-nums min-w-[42px] ${
-        callActive ? 'text-success' : 'text-primary/80'
-      }`}>
+      <div className={`min-w-[44px] text-sm font-semibold tabular-nums ${callActive ? 'text-success' : 'text-muted-foreground'}`} aria-label="Samtaletid">
         {formatTime(callSeconds)}
       </div>
 
       {/* === LEAD CALL BUTTON — only visible when manual dial is CLOSED === */}
       {currentLead && !showManualDial && !callActive && (
         <button
+          type="button"
           onClick={handleCallLead}
-          className={`w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-100 ${
-            canMakeVoipCall
-              ? 'bg-success text-success-foreground hover:shadow-[0_0_16px_hsl(152_69%_41%/0.35)]'
-              : 'bg-success/60 text-success-foreground'
+          className={`flex h-11 w-11 items-center justify-center rounded-full text-success-foreground transition-[filter] duration-150 hover:brightness-95 active:scale-[.98] md:h-10 md:w-10 ${
+            canMakeVoipCall ? 'bg-success' : 'bg-success/70'
           }`}
+          aria-label={`Ring til ${currentLead.phone}`}
           title={`Ring til ${currentLead.phone}`}
         >
-          <Phone size={15} strokeWidth={2.2} />
+          <Phone size={20} strokeWidth={2} aria-hidden="true" />
         </button>
       )}
 
       {/* End call button */}
       {callActive && (
         <button
+          type="button"
           onClick={handleEndCall}
-          className="w-9 h-9 rounded-full border-none cursor-pointer flex items-center justify-center bg-destructive text-destructive-foreground transition-all duration-200 ease-out hover:scale-105 hover:shadow-[0_0_16px_hsl(0_72%_51%/0.35)] active:scale-100"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-destructive text-destructive-foreground transition-[filter] duration-150 hover:brightness-95 active:scale-[.98] md:h-10 md:w-10"
+          aria-label="Afslut opkald"
           title="Afslut opkald"
         >
-          <PhoneOff size={15} strokeWidth={2.2} />
+          <PhoneOff size={20} strokeWidth={2} aria-hidden="true" />
         </button>
       )}
 
       {/* === MANUAL DIAL TOGGLE — completely separate from lead call === */}
       {!callActive && (
         <button
+          type="button"
           onClick={() => setShowManualDial(!showManualDial)}
-          className={`w-9 h-9 rounded-full border cursor-pointer flex items-center justify-center transition-all duration-200 ease-out hover:scale-105 active:scale-100 ${
+          aria-expanded={showManualDial}
+          className={`flex h-11 w-11 items-center justify-center rounded-full border transition-colors duration-150 md:h-10 md:w-10 ${
             showManualDial
-              ? 'bg-primary text-primary-foreground border-primary'
-              : 'bg-secondary text-muted-foreground border-border/50 hover:bg-accent'
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-secondary text-muted-foreground hover:bg-accent hover:text-accent-foreground'
           }`}
+          aria-label={showManualDial ? 'Luk manuel indtastning' : 'Indtast nummer manuelt'}
           title="Indtast nummer manuelt"
         >
-          {showManualDial ? <X size={14} strokeWidth={2.2} /> : <Keyboard size={14} strokeWidth={2.2} />}
+          {showManualDial ? <X size={20} strokeWidth={2} aria-hidden="true" /> : <Keyboard size={20} strokeWidth={2} aria-hidden="true" />}
         </button>
       )}
 
       {/* === MANUAL NUMBER INPUT — its own call button === */}
       {showManualDial && !callActive && (
-        <div className="flex items-center gap-2 bg-background border border-border/50 rounded-lg px-3 py-1.5 animate-fade-in">
+        <div className="order-last flex w-full items-center gap-2 rounded-lg border border-border bg-background px-3 py-1 animate-fade-in sm:order-none sm:w-auto">
+          <label htmlFor="manual-number" className="sr-only">Telefonnummer</label>
           <input
+            id="manual-number"
             type="tel"
+            inputMode="tel"
             value={manualNumber}
             onChange={e => setManualNumber(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Indtast nummer..."
-            className="bg-transparent border-none outline-none text-[13px] font-medium w-[160px] text-foreground placeholder:text-muted-foreground/40"
+            placeholder="Indtast nummer"
+            className="min-h-10 min-w-0 flex-1 border-none bg-transparent text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground sm:w-[180px] sm:flex-none"
             autoFocus
           />
           {/* This button ONLY calls handleManualDial — never handleCallLead */}
           <button
+            type="button"
             onClick={handleManualDial}
             disabled={!manualNumber.trim()}
-            className={`w-7 h-7 rounded-full flex items-center justify-center transition-all duration-150 ${
+            className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors duration-150 md:h-9 md:w-9 ${
               manualNumber.trim()
-                ? 'bg-success text-success-foreground cursor-pointer hover:scale-105'
-                : 'bg-muted text-muted-foreground/40 cursor-not-allowed'
+                ? 'cursor-pointer bg-success text-success-foreground hover:brightness-95'
+                : 'cursor-not-allowed bg-muted text-muted-foreground'
             }`}
-            title={`Ring til ${manualNumber.trim() || '...'}`}
+            aria-label={`Ring til ${manualNumber.trim() || 'nummer'}`}
           >
-            <Phone size={12} strokeWidth={2.5} />
+            <Phone size={16} strokeWidth={2.5} aria-hidden="true" />
           </button>
         </div>
       )}
 
-      <div className="flex-1" />
+      <div className="hidden flex-1 md:block" />
 
       {/* Call status badge */}
       {callActive && (
-        <div className="flex items-center gap-2 bg-success/10 border border-success/20 rounded-lg px-3 py-1.5 text-[12px] font-medium text-success">
-          <div className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+        <div className="flex items-center gap-2 rounded-lg border border-success/30 bg-success/10 px-3 py-1.5 text-xs font-medium text-success">
+          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-success" aria-hidden="true" />
           Opkald i gang
         </div>
       )}
 
       {currentLead && !callActive && !showManualDial && (
-        <div className="text-[12px] text-muted-foreground/50 flex items-center gap-1.5">
-          <Phone size={12} strokeWidth={1.8} />
+        <div className="hidden items-center gap-1.5 text-xs text-muted-foreground md:flex">
+          <Phone size={16} strokeWidth={1.75} aria-hidden="true" />
           Klar til opkald
         </div>
       )}

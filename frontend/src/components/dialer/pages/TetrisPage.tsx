@@ -58,10 +58,13 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
   // Auto-scale: fit game inside available space (leave room for header, padding, side panels)
   useEffect(() => {
     const resize = () => {
+      const vw = window.innerWidth;
+      const rail = vw >= 768 ? 72 : 0;
+      const wide = vw >= 1024; // highscores står ved siden af spillet fra 1024px
       const maxH = window.innerHeight - 240; // header + padding
-      const maxW = (window.innerWidth - 68 - 260 - 240) * 0.5; // sidebar + highscore panel + side game panels
+      const maxW = wide ? (vw - rail - 240 - 240) * 0.5 : vw - rail - 48 - 214; // sidepaneler i spillet = ~214px
       const bs = Math.floor(Math.min(maxH / ROWS, maxW / COLS, 22));
-      setBlockSize(Math.max(14, bs));
+      setBlockSize(Math.max(10, bs));
     };
     resize();
     window.addEventListener('resize', resize);
@@ -266,21 +269,28 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
   const medalColors = ['#ffd60a', '#c0c0c0', '#cd7f32'];
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-background">
-      <div className="flex-1 flex flex-col overflow-hidden p-5">
+    <div className="flex flex-1 flex-col overflow-y-auto bg-background lg:flex-row lg:overflow-hidden">
+      <div className="flex flex-col p-4 sm:p-6 lg:flex-1 lg:overflow-hidden">
         {/* Page header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(263 70% 50%))', boxShadow: '0 4px 14px hsl(var(--primary) / 0.3)' }}>
-            <Gamepad2 size={18} className="text-primary-foreground" strokeWidth={1.5} />
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary">
+            <Gamepad2 size={20} className="text-primary-foreground" strokeWidth={1.75} aria-hidden="true" />
           </div>
-          <div>
-            <h1 className="font-heading font-bold text-base text-foreground tracking-tight">Tetris Lounge</h1>
-            <p className="text-[11px] text-muted-foreground">Slå dine kollegaers highscores</p>
+          <div className="min-w-0">
+            <h1 className="page-title">Tetris Lounge</h1>
+            <p className="text-sm text-muted-foreground">Slå dine kollegaers highscores</p>
           </div>
         </div>
 
+        {/* Tetris kræver tastatur — på telefon vises en forklaring i stedet for spillet */}
+        <div className="card-surface flex flex-col items-center gap-2 p-6 text-center md:hidden">
+          <Gamepad2 size={24} className="text-primary" strokeWidth={1.75} aria-hidden="true" />
+          <div className="font-heading text-lg font-semibold text-navy">Spilles med tastatur</div>
+          <p className="max-w-xs text-sm text-muted-foreground">Åbn Dialeren på en computer eller tablet med tastatur for at spille. Highscores kan du se herunder.</p>
+        </div>
+
         {/* Game card */}
-        <div className="flex-1 rounded-2xl overflow-hidden flex items-center justify-center relative"
+        <div className="relative hidden min-h-[480px] flex-1 items-center justify-center overflow-hidden rounded-2xl md:flex"
           style={{ background: 'radial-gradient(ellipse at center, #0c1020, #060810)', border: '1px solid hsl(var(--border) / 0.3)' }}>
           
           {/* Ambient glows */}
@@ -367,32 +377,32 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
       </div>
 
       {/* Highscore sidebar */}
-      <div className="w-[200px] border-l border-border/40 flex flex-col py-5 px-3.5 shrink-0 bg-card">
+      <aside aria-label="Highscores" className="flex w-full shrink-0 flex-col border-t border-border bg-card px-4 py-5 lg:w-[240px] lg:border-l lg:border-t-0">
         <div className="flex items-center gap-2 mb-4">
           <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #ffd60a, #ff9f0a)', boxShadow: '0 2px 10px rgba(255,214,10,0.15)' }}>
             <Crown size={13} className="text-white" strokeWidth={2} />
           </div>
           <div>
-            <div className="font-heading font-bold text-xs text-foreground tracking-tight">Highscores</div>
-            <div className="text-[9px] text-muted-foreground">Top 10</div>
+            <h2 className="section-title">Highscores</h2>
+            <div className="text-xs text-muted-foreground">Top 10</div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-1.5">
           {highScores.length === 0 && (
-            <div className="text-center text-muted-foreground/50 text-[11px] mt-8">Ingen scores endnu</div>
+            <div className="mt-6 text-center text-sm text-muted-foreground">Ingen scores endnu — spil et spil og sæt den første.</div>
           )}
           {highScores.map((hs, i) => (
             <div key={hs.id} className="rounded-lg px-2.5 py-2 flex items-center gap-2 transition-all bg-secondary/50 border border-border/30">
-              <div className="w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0"
+              <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
                 style={{ background: i < 3 ? `rgba(${i === 0 ? '255,214,10' : i === 1 ? '192,192,192' : '205,127,50'},0.15)` : 'hsl(var(--muted))', color: i < 3 ? medalColors[i] : 'hsl(var(--muted-foreground))' }}>
                 {i + 1}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-[10px] font-semibold text-foreground/80 truncate">{hs.player_name}</div>
-                <div className="text-[8px] text-muted-foreground">Lvl {hs.level} · {hs.lines_cleared} linjer</div>
+                <div className="truncate text-sm font-semibold text-foreground">{hs.player_name}</div>
+                <div className="text-xs text-muted-foreground">Lvl {hs.level} · {hs.lines_cleared} linjer</div>
               </div>
-              <div className="text-[10px] font-bold tabular-nums shrink-0" style={{ color: i < 3 ? medalColors[i] : 'hsl(var(--muted-foreground))' }}>
+              <div className="text-sm font-bold tabular-nums shrink-0" style={{ color: i < 3 ? medalColors[i] : 'hsl(var(--muted-foreground))' }}>
                 {hs.score.toLocaleString()}
               </div>
             </div>
@@ -400,11 +410,11 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
         </div>
 
         <div className="mt-3 pt-3 border-t border-border/30">
-          <div className="text-[8px] text-muted-foreground/50 uppercase tracking-[0.15em] text-center">
+          <div className="text-xs text-muted-foreground text-center">
             Spil for at komme på listen
           </div>
         </div>
-      </div>
+      </aside>
     </div>
   );
 };

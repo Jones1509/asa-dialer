@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Package, Plus, CheckCircle2, Lock, Unlock, Trash2, Pencil, X, Save } from 'lucide-react';
+import { Package, Plus, Lock, Unlock, Trash2, Pencil, Save } from 'lucide-react';
+import { EmptyState, SkeletonRows } from '@/components/shell/states';
 
 interface Product {
   id: string;
@@ -87,59 +88,59 @@ export const AdminProductsTab: React.FC<AdminProductsTabProps> = ({ showNotif })
     fetchProducts();
   };
 
-  if (loading) return <div className="p-8 text-muted-foreground/60 text-[13px]">Indlæser produkter...</div>;
+  if (loading) return <div className="card-surface overflow-hidden"><SkeletonRows rows={4} /></div>;
 
   const renderForm = (onSave: () => void, onCancel: () => void, saveLabel: string) => (
-    <div className="card-surface rounded-xl p-5 flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3.5">
+    <div className="card-surface flex flex-col gap-4 p-5 sm:p-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1.5">
-          <label className="label-clean">Produktnavn</label>
-          <input className="input-clean" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Navn" />
+          <label htmlFor="pf-name" className="label-clean">Produktnavn</label>
+          <input id="pf-name" className="input-clean" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Navn" />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="label-clean">Pris</label>
-          <input className="input-clean" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="10.000 kr." />
+          <label htmlFor="pf-price" className="label-clean">Pris</label>
+          <input id="pf-price" className="input-clean" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} placeholder="10.000 kr." />
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="label-clean">Pristype</label>
-          <select className="input-clean" value={form.price_type} onChange={e => setForm({ ...form, price_type: e.target.value })}>
+          <label htmlFor="pf-ptype" className="label-clean">Pristype</label>
+          <select id="pf-ptype" className="input-clean" value={form.price_type} onChange={e => setForm({ ...form, price_type: e.target.value })}>
             <option>Engangsbetaling</option>
             <option>/ måned</option>
             <option>/ år</option>
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <label className="label-clean">Kategori</label>
-          <select className="input-clean" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
+          <label htmlFor="pf-cat" className="label-clean">Kategori</label>
+          <select id="pf-cat" className="input-clean" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>
             <option value="engang">Engangsbetaling</option>
             <option value="abo">Abonnement</option>
           </select>
         </div>
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="label-clean">Beskrivelse</label>
-        <textarea className="input-clean resize-none h-16" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+        <label htmlFor="pf-desc" className="label-clean">Beskrivelse</label>
+        <textarea id="pf-desc" className="input-clean resize-none h-20" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <label className="label-clean">Provision</label>
-        <input className="input-clean" value={form.provision} onChange={e => setForm({ ...form, provision: e.target.value })} placeholder="30% provision" />
+        <label htmlFor="pf-prov" className="label-clean">Provision</label>
+        <input id="pf-prov" className="input-clean" value={form.provision} onChange={e => setForm({ ...form, provision: e.target.value })} placeholder="30% provision" />
       </div>
-      <div className="flex gap-2.5">
-        <button onClick={onSave} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
-          <Save size={14} strokeWidth={2} />
+      <div className="flex flex-col-reverse gap-2 sm:flex-row">
+        <button type="button" onClick={onSave} className="btn-primary">
+          <Save size={16} strokeWidth={2} aria-hidden="true" />
           {saveLabel}
         </button>
-        <button onClick={onCancel} className="btn-ghost-smooth text-[12px]">Annuller</button>
+        <button type="button" onClick={onCancel} className="btn-ghost">Annuller</button>
       </div>
     </div>
   );
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-heading font-bold text-[14px]">Produkter ({products.length})</h3>
-        <button onClick={() => { setShowCreate(!showCreate); setEditingId(null); setForm({ name: '', description: '', icon: '', price: '', price_type: 'Engangsbetaling', provision: '', category: 'engang' }); }} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
-          <Plus size={14} strokeWidth={2} />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="section-title">Produkter <span className="font-body text-sm font-normal text-muted-foreground">({products.length})</span></h2>
+        <button onClick={() => { setShowCreate(!showCreate); setEditingId(null); setForm({ name: '', description: '', icon: '', price: '', price_type: 'Engangsbetaling', provision: '', category: 'engang' }); }} className="btn-primary">
+          <Plus size={16} strokeWidth={2} aria-hidden="true" />
           Nyt produkt
         </button>
       </div>
@@ -148,42 +149,45 @@ export const AdminProductsTab: React.FC<AdminProductsTabProps> = ({ showNotif })
 
       {editingId && !showCreate && renderForm(saveEdit, () => { setEditingId(null); setForm({ name: '', description: '', icon: '', price: '', price_type: 'Engangsbetaling', provision: '', category: 'engang' }); }, 'Gem ændringer')}
 
-      <div className="card-surface rounded-xl overflow-hidden">
+      <div className="card-surface overflow-hidden">
         {products.length === 0 ? (
-          <div className="px-4 py-8 text-center text-muted-foreground/50 text-[13px]">Ingen produkter oprettet endnu</div>
-        ) : products.map(p => (
-          <div key={p.id} className={`flex items-center gap-3.5 px-4 py-3.5 border-b border-border/20 last:border-0 ${editingId === p.id ? 'bg-accent/30' : ''}`}>
-            <div className="w-9 h-9 rounded-lg bg-secondary flex items-center justify-center">
-              <Package size={16} className="text-muted-foreground" strokeWidth={1.8} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-medium text-[13px]">{p.name}</div>
-              <div className="text-[11px] text-muted-foreground/50">{p.price} {p.price_type}</div>
-            </div>
-            {p.provision && <span className="text-[11px] text-success font-medium">{p.provision}</span>}
-            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-md ${p.active ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive/70'}`}>
-              {p.active ? 'Aktiv' : 'Inaktiv'}
-            </span>
-            <div className="flex items-center gap-1">
-              <button onClick={() => startEdit(p)} title="Rediger" className="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent border-none cursor-pointer text-muted-foreground/40 hover:text-primary hover:bg-primary/10 transition-all duration-150">
-                <Pencil size={13} />
-              </button>
-              <button onClick={() => toggleProduct(p.id, p.active)} title={p.active ? 'Deaktiver' : 'Aktiver'} className="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent border-none cursor-pointer text-muted-foreground/40 hover:text-foreground hover:bg-secondary transition-all duration-150">
-                {p.active ? <Lock size={13} /> : <Unlock size={13} />}
-              </button>
-              {deleteConfirm === p.id ? (
-                <div className="flex items-center gap-1">
-                  <button onClick={() => deleteProduct(p.id)} className="text-[10px] bg-destructive text-destructive-foreground border-none rounded-md px-2 py-1 cursor-pointer font-medium">Slet</button>
-                  <button onClick={() => setDeleteConfirm(null)} className="text-[10px] bg-transparent border border-border/50 text-muted-foreground rounded-md px-2 py-1 cursor-pointer">Nej</button>
+          <EmptyState icon={Package} title="Ingen produkter endnu" message="Opret dit første produkt, så sælgerne kan se pris og provision i Produktshoppen." action={{ label: 'Nyt produkt', icon: Plus, onClick: () => { setShowCreate(true); setEditingId(null); } }} />
+        ) : (
+          <ul className="divide-y divide-border">
+            {products.map(p => (
+              <li key={p.id} className={`flex flex-wrap items-center gap-3 px-4 py-3 ${editingId === p.id ? 'bg-accent/40' : ''}`}>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-secondary">
+                  <Package size={16} className="text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
                 </div>
-              ) : (
-                <button onClick={() => setDeleteConfirm(p.id)} title="Slet" className="w-8 h-8 rounded-lg flex items-center justify-center bg-transparent border-none cursor-pointer text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all duration-150">
-                  <Trash2 size={13} />
-                </button>
-              )}
-            </div>
-          </div>
-        ))}
+                <div className="min-w-[140px] flex-1">
+                  <div className="text-sm font-medium">{p.name}</div>
+                  <div className="text-xs text-muted-foreground">{p.price} {p.price_type}{p.provision ? <span className="text-success"> · {p.provision} provision</span> : null}</div>
+                </div>
+                <span className={`rounded-md px-2 py-0.5 text-xs font-medium ${p.active ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'}`}>
+                  {p.active ? 'Aktiv' : 'Inaktiv'}
+                </span>
+                <div className="flex items-center gap-1">
+                  <button type="button" onClick={() => startEdit(p)} aria-label={`Rediger ${p.name}`} title="Rediger" className="icon-btn hover:!bg-primary/10 hover:!text-primary">
+                    <Pencil size={16} aria-hidden="true" />
+                  </button>
+                  <button type="button" onClick={() => toggleProduct(p.id, p.active)} aria-label={p.active ? `Deaktiver ${p.name}` : `Aktiver ${p.name}`} title={p.active ? 'Deaktiver' : 'Aktiver'} className="icon-btn">
+                    {p.active ? <Lock size={16} aria-hidden="true" /> : <Unlock size={16} aria-hidden="true" />}
+                  </button>
+                  {deleteConfirm === p.id ? (
+                    <div className="flex items-center gap-1">
+                      <button type="button" onClick={() => deleteProduct(p.id)} className="btn-danger btn-sm">Slet</button>
+                      <button type="button" onClick={() => setDeleteConfirm(null)} className="btn-ghost btn-sm">Fortryd</button>
+                    </div>
+                  ) : (
+                    <button type="button" onClick={() => setDeleteConfirm(p.id)} aria-label={`Slet ${p.name}`} title="Slet" className="icon-btn hover:!bg-destructive/10 hover:!text-destructive">
+                      <Trash2 size={16} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

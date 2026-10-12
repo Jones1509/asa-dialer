@@ -103,15 +103,15 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 bg-background/70 backdrop-blur-xl z-50 flex items-center justify-center p-4 animate-fade-in" onClick={reset}>
-      <div className="card-surface rounded-xl w-full max-w-[600px] max-h-[78vh] overflow-hidden flex flex-col" onClick={e => e.stopPropagation()}>
-        <div className="px-5 py-4 border-b border-border/40 flex items-center justify-between">
-          <h2 className="font-heading font-bold text-[15px] tracking-tight flex items-center gap-2">
-            <Upload size={16} className="text-muted-foreground" strokeWidth={1.8} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy-ink/50 p-4 backdrop-blur-sm animate-fade-in" onClick={reset}>
+      <div role="dialog" aria-modal="true" aria-labelledby="csv-title" className="flex max-h-[85dvh] w-full max-w-[600px] flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-lg" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+          <h2 id="csv-title" className="section-title flex items-center gap-2">
+            <Upload size={20} className="text-muted-foreground" strokeWidth={1.75} aria-hidden="true" />
             Importer CSV
           </h2>
-          <button onClick={reset} className="text-muted-foreground/40 hover:text-foreground cursor-pointer bg-transparent border-none transition-colors duration-150">
-            <X size={18} />
+          <button type="button" onClick={reset} aria-label="Luk" className="icon-btn">
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -122,7 +122,10 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
               onClick={() => inputRef.current?.click()}
-              className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-200 flex flex-col items-center gap-3
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inputRef.current?.click(); } }}
+              role="button"
+              tabIndex={0}
+              className={`border-2 border-dashed rounded-xl p-6 sm:p-10 text-center cursor-pointer transition-all duration-200 flex flex-col items-center gap-3
                 ${dragOver ? 'border-primary bg-accent/40' : 'border-border/50 hover:border-primary/30 hover:bg-accent/15'}`}
             >
               <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
@@ -146,8 +149,8 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
                   <div className="font-medium text-[13px]">{file.name}</div>
                   <div className="text-[11px] text-muted-foreground/50">{allRows.length} rækker fundet</div>
                 </div>
-                <button onClick={() => { setFile(null); setPreview(null); }} className="text-muted-foreground/40 hover:text-destructive cursor-pointer bg-transparent border-none">
-                  <X size={14} />
+                <button type="button" onClick={() => { setFile(null); setPreview(null); }} aria-label="Fjern fil" className="icon-btn hover:!text-destructive">
+                  <X size={16} aria-hidden="true" />
                 </button>
               </div>
 
@@ -181,11 +184,11 @@ export const CSVUploadModal: React.FC<CSVUploadModalProps> = ({ open, onClose, o
         </div>
 
         {file && (
-          <div className="px-5 py-3.5 border-t border-border/40 flex items-center justify-between">
-            <span className="text-[12px] text-muted-foreground/50">{allRows.length} emner klar</span>
-            <div className="flex gap-2.5">
-              <button onClick={reset} className="btn-ghost-smooth text-[12px]">Annuller</button>
-              <button onClick={handleImport} disabled={importing} className="btn-primary-smooth text-[12px] flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-3">
+            <span className="text-sm text-muted-foreground">{allRows.length} emner klar</span>
+            <div className="flex gap-2">
+              <button type="button" onClick={reset} className="btn-ghost">Annuller</button>
+              <button type="button" onClick={handleImport} disabled={importing} className="btn-primary">
                 {importing ? (
                   <>Importerer...</>
                 ) : (
