@@ -28,7 +28,7 @@
 
 | Hvad | Værdi |
 |---|---|
-| Font | **Manrope** overalt (300/400/500/600/700). Aldrig serif (Fraunces/Georgia/Times), aldrig Inter/Roboto/Arial/system-ui som primær. |
+| Font | **Fraunces** overskrifter + **Geist** brødtekst overalt, også login (Jonas 12. okt 2026). Ingen Manrope/Poppins/Montserrat/Inter/Roboto/Arial/system-ui som primær. |
 | Navy (primær) | `#0E3A5D` — knapper, overskrifter, hero |
 | Navy dyb | `#082843` — hover, mørke flader |
 | Blå (accent) | `#2F80C9` — links, sekundær accent, fokus-glød |

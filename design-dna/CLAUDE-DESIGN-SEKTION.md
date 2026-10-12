@@ -7,7 +7,7 @@ asa-el.dk-familien 1:1 og følge JARVIS-STIL. Boblen/agenter må aldrig lave des
 
 - Kig i `design-dna/eksempler/` (knap, kort, header, formular, liste) og kopiér mønstret — opfind ikke nyt.
 - Tokens skal matche `design-dna/asa-tokens.css` (facit) — brug kun tokens, aldrig rå hex i komponenter.
-- **Fonts:** Manrope overalt. ALDRIG serif (heller ikke Fraunces), ingen Inter/Roboto/Arial/system-ui som primær.
+- **Fonts (Jonas 12. okt 2026):** Fraunces (overskrifter) + Geist (brødtekst) OVERALT, også login. Ingen Manrope/Poppins/Montserrat/Inter/Roboto/Arial/system-ui som primær. Hvert site beholder sit eget logo.
 - **Farver:** Navy `#0E3A5D` · Navy dyb `#082843` · Blå `#2F80C9` (interaktivt/glød) · Lyseblå `#82B3DF` · Lys `#D5E6F4` ·
   Knækket hvid `#F2F4F7`. Lyst tema med dybde (aldrig flad hvid); mørk navy KUN tre steder: boblens svar-kort,
   kommandocentralens status-kort, systemkort-lærredet.
