@@ -1,14 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ASA Økonomi">
-  <defs>
-    <linearGradient id="f" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0E3A5D"/><stop offset="1" stop-color="#061B2E"/></linearGradient>
-    <linearGradient id="s" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#2F80C9"/><stop offset="1" stop-color="#82B3DF"/></linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="14" fill="url(#f)"/>
-  <rect x=".5" y=".5" width="63" height="63" rx="13.5" fill="none" stroke="#82B3DF" stroke-opacity=".28"/>
-  <rect x="14" y="37" width="9" height="14" rx="2.5" fill="url(#s)" opacity=".7"/>
-  <rect x="27.5" y="29" width="9" height="22" rx="2.5" fill="url(#s)" opacity=".85"/>
-  <rect x="41" y="21" width="9" height="30" rx="2.5" fill="url(#s)"/>
-  <path d="M15 30 31 20.5 45.5 13" fill="none" stroke="#D5E6F4" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".85"/>
-  <circle cx="45.5" cy="13" r="3.4" fill="#F2F4F7"/>
-  <circle cx="45.5" cy="13" r="6" fill="#82B3DF" fill-opacity=".25"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="ASA Økonomi"><title>ASA Økonomi</title><defs><linearGradient id="pil" x1="0" y1="98" x2="0" y2="348" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#38B2AC"/><stop offset="1" stop-color="#8FE3DD"/></linearGradient><linearGradient id="flade" x1="0" y1="0" x2="0" y2="512" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#12355A"/><stop offset="1" stop-color="#071A2E"/></linearGradient></defs><rect width="512" height="512" rx="112" fill="url(#flade)"/><g transform="translate(127.9 105.9) scale(0.843)"><polygon points="149,0 155,0 302,300 230,300 152,147 72,300 1,300" fill="#FFFFFF"/><polygon points="106.9,354.2 143.6,287.2 182.7,316.0 241.4,189.1 210.6,174.9 169.3,264.0 132.4,236.8 77.1,337.8" fill="url(#pil)"/><polygon points="256.0,198.1 247.8,134.8 194.3,169.5" fill="url(#pil)"/></g></svg>
