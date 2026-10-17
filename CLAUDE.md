@@ -18,3 +18,12 @@ asa-el.dk-familien 1:1 og følge JARVIS-STIL. Boblen/agenter må aldrig lave des
 - **Mobil:** iPhone først (390×844), touch-mål ≥ 48 px, safe areas, bottom sheets.
 - **Før "færdig":** screenshot 390×844 + 1440×900, sammenlign med asa-el.dk — "Ville Tony Stark/Tesla/Apple lave det sådan?" Nej → byg om.
 
+
+## DEPLOY-REGLER (sparer Netlify-credits — Jonas 17. okt 2026)
+Hver merge til `main` = én betalt udgivelse på Netlify (15 credits). Fuld metode: `~/ASA/ARBEJDSMETODE.md`.
+- Start localhost ved sessionens start: `cd frontend && npm run dev` → adressen i terminalen. Giv Jonas adressen.
+- Arbejd i en feature-branch. **Merge ALDRIG til `main`, før Jonas siger "deploy nu" / "jeg er færdig".** Højst 2 udgivelser om dagen.
+- Kun squash-merge (`gh pr merge <nr> --squash --delete-branch`) — én merge = én udgivelse. Bekræft til Jonas, når det er live.
+- `[skip ci]` i PR-titlen ved ændringer, der ikke rammer brugerne (dokumentation, kommentarer). Aldrig på kode, design eller funktioner.
+- Aldrig `netlify deploy --prod` fra terminalen uden Jonas' ja.
+- Har Jonas ikke sagt "deploy" ved slutningen: spørg "Vil du udgive ændringerne nu, eller gemme dem til næste gang?"
