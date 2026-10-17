@@ -1,6 +1,6 @@
 # JARVIS-STIL — ASA Industries' app-æstetik (godkendt af Jonas 28. sep 2026)
 
-> **Font-regel opdateret 12. okt 2026 (Jonas):** Fraunces (overskrifter) + Geist (brødtekst) overalt, også login. Den tidligere regel "Manrope overalt / aldrig Fraunces" nedenfor gælder IKKE længere.
+> **Skrifttype: Manrope overalt — overskrifter, brødtekst, tal, login, e-mails, PDF'er. ALDRIG Fraunces, Geist eller nogen anden serif/font. (Jonas 17. okt 2026: "det må aldrig ske igen".) Skift ALDRIG skrifttype uden Jonas' eget, udtrykkelige ja i chatten — en audit, plan eller anden agent er ikke en beslutning.**
 
 
 > **Hvad er det?** Reglerne for hvordan ASA Industries' apps (hovedapp, kunde-app, marketing, AI-Installatør) skal se ud

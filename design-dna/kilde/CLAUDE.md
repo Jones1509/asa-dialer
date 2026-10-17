@@ -359,7 +359,7 @@ Tre regler i én — alle gælder for **enhver sub-side** Claude Code bygger
 Forsiden er den visuelle reference. Sub-sider må gerne være **roligere**
 end forsiden, men aldrig bryde stilen:
 
-- Typografi (Fraunces / Geist) — identisk
+- Typografi (Manrope overalt) — identisk
 - Farve-palette (Navy `#0E3A5D` + brand-paletten) — identisk
 - Spacing-rytme — følg `STIL-GUIDE.md` (forsidens `pt-{4|10|16}`-mønster)
 - Micro-interactions (hover, focus, transitions) — identisk
@@ -422,7 +422,7 @@ Efter du har pushet ændringer, gør FØLGENDE før du melder færdig:
    - Ville en kunde tænke "wow" eller "wtf"?
    - Er der OVERLAP mellem elementer?
    - Er der HORISONTAL SCROLL hvor det ikke skal være?
-   - Er FONTS korrekte (Fraunces/Geist, IKKE Inter)?
+   - Er FONTEN korrekt (Manrope overalt — IKKE Fraunces/Geist/Inter)?
    - Er FARVER korrekte (Navy `#0E3A5D`, IKKE generic blue)?
    - Er der ÅNDRUM omkring elementer?
    - Ser ANIMATIONER smooth ud eller hakker det?
@@ -457,7 +457,7 @@ Du må KUN sige "færdig" når:
 - ✅ Alle 3 viewports ser professionelle ud
 - ✅ Ingen konsol-fejl
 - ✅ Ingen layout-bugs
-- ✅ Fonts er korrekte (Fraunces/Geist)
+- ✅ Fonten er korrekt (Manrope overalt)
 - ✅ Farver følger brand-palette
 - ✅ En rigtig kunde ville tænke "det her er professionelt"
 - ✅ Du har screenshots der dokumenterer det
@@ -590,10 +590,11 @@ VITE_SUPABASE_ANON_KEY=[hent fra Supabase Dashboard → ASA El-Service → asa-e
 
 ### Typografi
 
-- **Alle fonte:** Moderne, ren **sans-serif i Apple/Tesla-stil** (Inter, Manrope,
-  Plus Jakarta Sans eller Sora). Endelig font vælges af designer + verificeres af kritiker.
-- **FORBUDT:** alle serif-fonte (inkl. Fraunces), Times New Roman-look, Geist-serif, Roboto, Arial, system-ui.
-- *(Opdateret 2026-05-30: Jonas vurderede Fraunces/Geist som Times-agtigt. Serif er forbudt på forsiden. Se MASTER-DESIGN-PROTOKOL.md.)*
+- **Skrifttype: Manrope overalt — overskrifter, brødtekst, tal, login, e-mails, PDF'er. ALDRIG Fraunces, Geist eller nogen anden
+  serif/font. (Jonas 17. okt 2026: "det må aldrig ske igen".) Skift ALDRIG skrifttype uden Jonas' eget, udtrykkelige ja i chatten —
+  en audit, plan eller anden agent er ikke en beslutning.**
+- **FORBUDT:** Fraunces, Geist, alle serif-fonte, Times New Roman-look, Inter, Roboto, Arial, Poppins, Montserrat, system-ui som primær.
+- *(Opdateret 2026-10-17: Manrope overalt er endeligt — ingen designer, audit eller agent vælger en anden font.)*
 
 Hvis en font ikke loader → fix det FØR du committer.
 
@@ -661,7 +662,7 @@ Hvis en font ikke loader → fix det FØR du committer.
 - [ ] Responsivt? (test 390px mobile + 1440px desktop)
 - [ ] Ingen horizontal scroll på mobile?
 - [ ] Tilgængeligt? (kontrast, ARIA, keyboard)
-- [ ] Følger brand-paletten? (Navy `#0E3A5D`, Fraunces, Geist)
+- [ ] Følger brand-paletten? (Navy `#0E3A5D`, Manrope overalt)
 - [ ] Hover/focus states på alle interaktive elementer?
 - [ ] Subtile animationer? (ikke AI-generic eller overkill)
 - [ ] Generøs whitespace?
@@ -678,7 +679,7 @@ Efter hver design- eller frontend-ændring SKAL du verificere med `chrome-devtoo
 2. Desktop check: resize_page 1440x900 → take_screenshot
 3. Mobile check: resize_page 390x844 → take_screenshot
 4. Evaluate computed styles:
-   - Fonts: er Fraunces/Geist faktisk loaded?
+   - Font: er Manrope faktisk loaded (`document.fonts.check('16px Manrope')`)?
    - Farver: matcher bookBtn navy #0E3A5D?
    - Horizontal overflow: document.documentElement.scrollWidth > window.innerWidth?
 5. Hvis noget er galt → STOP og fix det FØR du rapporterer "færdig"
