@@ -16,7 +16,7 @@ export const EmptyState: React.FC<{ icon: LucideIcon; title: string; message?: s
     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent">
       <Icon size={24} strokeWidth={1.75} className="text-primary" aria-hidden="true" />
     </div>
-    <div className="font-heading text-lg font-semibold text-navy">{title}</div>
+    <div className="font-heading text-lg font-bold text-navy">{title}</div>
     {message && <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{message}</p>}
     {action && (
       <button type="button" onClick={action.onClick} className="btn-primary mt-2">
@@ -38,7 +38,7 @@ export const ErrorState: React.FC<{ title?: string; message?: string; onRetry?: 
     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive/10">
       <AlertTriangle size={24} strokeWidth={1.75} className="text-destructive" aria-hidden="true" />
     </div>
-    <div className="font-heading text-lg font-semibold text-navy">{title}</div>
+    <div className="font-heading text-lg font-bold text-navy">{title}</div>
     <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">{message}</p>
     {onRetry && (
       <button type="button" onClick={onRetry} className="btn-secondary mt-2">

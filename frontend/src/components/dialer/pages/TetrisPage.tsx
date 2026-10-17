@@ -285,7 +285,7 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
         {/* Tetris kræver tastatur — på telefon vises en forklaring i stedet for spillet */}
         <div className="card-surface flex flex-col items-center gap-2 p-6 text-center md:hidden">
           <Gamepad2 size={24} className="text-primary" strokeWidth={1.75} aria-hidden="true" />
-          <div className="font-heading text-lg font-semibold text-navy">Spilles med tastatur</div>
+          <div className="font-heading text-lg font-bold text-navy">Spilles med tastatur</div>
           <p className="max-w-xs text-sm text-muted-foreground">Åbn Dialeren på en computer eller tablet med tastatur for at spille. Highscores kan du se herunder.</p>
         </div>
 

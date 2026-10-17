@@ -111,7 +111,7 @@ export const AppShell: React.FC<AppShellProps> = ({ items, footerItems = [], act
           <Menu size={24} strokeWidth={1.75} aria-hidden="true" />
         </button>
         <img src={asaDialerLogo} alt="" className="h-8 w-8" />
-        <span className="truncate font-heading text-lg font-semibold text-navy">{title}</span>
+        <span className="truncate font-heading text-lg font-bold text-navy">{title}</span>
         {badge && <span className="ml-auto mr-2 rounded-md bg-accent px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground">{badge}</span>}
       </header>
 
@@ -122,7 +122,7 @@ export const AppShell: React.FC<AppShellProps> = ({ items, footerItems = [], act
           <div className="absolute inset-y-0 left-0 flex w-[288px] max-w-[85vw] flex-col bg-card shadow-2xl animate-fade-in" style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}>
             <div className="flex h-14 items-center gap-2 border-b border-border px-4">
               <img src={asaDialerLogo} alt="" className="h-8 w-8" />
-              <span className="font-heading text-lg font-semibold text-navy">ASA Dialer</span>
+              <span className="font-heading text-lg font-bold text-navy">ASA Dialer</span>
               <button ref={closeRef} type="button" aria-label="Luk menu" onClick={() => setOpen(false)} className="icon-btn ml-auto">
                 <X size={20} strokeWidth={1.75} aria-hidden="true" />
               </button>

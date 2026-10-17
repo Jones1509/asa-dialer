@@ -115,7 +115,7 @@ const LoginPage: React.FC = () => {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/20">
               <Mail size={24} className="text-success" aria-hidden="true" />
             </div>
-            <h1 className="font-heading text-2xl font-semibold text-white">Tjek din indbakke</h1>
+            <h1 className="font-heading text-2xl font-bold text-white">Tjek din indbakke</h1>
             <p className="text-sm leading-relaxed text-white/70">
               Vi har sendt et link til <strong className="text-white">{email}</strong>. Klik på linket for at vælge en ny adgangskode.
             </p>

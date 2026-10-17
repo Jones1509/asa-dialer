@@ -6,7 +6,7 @@
  * ASA Dialer — design-tokens.
  * Brand: navy #0E3A5D · navy dyb #082843 · blå #2F80C9 · lyseblå #82B3DF · lys #D5E6F4 · knækket hvid #F2F4F7.
  * Alle farver bruges via disse variabler (hsl-kanaler) — aldrig rå hex i komponenter.
- * Fonte: Fraunces (overskrifter) + Geist (brødtekst). Spacing-grid 4/8/12/16/24/32/48.
+ * Font: Manrope overalt (overskrifter, brødtekst og tal). Spacing-grid 4/8/12/16/24/32/48.
  */
 @layer base {
   :root {
@@ -69,8 +69,8 @@
     --sidebar-border: 212 28% 90%;
     --sidebar-ring: var(--blue);
 
-    --font-heading: 'Fraunces', Georgia, serif;
-    --font-body: 'Geist', ui-sans-serif, sans-serif;
+    --font-heading: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Manrope', ui-sans-serif, system-ui, sans-serif;
 
     --ease: cubic-bezier(0.4, 0, 0.2, 1);
     --dur: 150ms;
@@ -125,7 +125,7 @@
     max-width: 1600px;
   }
   .page-title {
-    @apply text-2xl font-semibold leading-tight;
+    @apply text-2xl font-bold leading-tight;
     font-family: var(--font-heading);
     color: hsl(var(--navy));
   }
@@ -134,7 +134,7 @@
     color: hsl(var(--muted-foreground));
   }
   .section-title {
-    @apply text-base font-semibold;
+    @apply text-base font-bold;
     font-family: var(--font-heading);
     color: hsl(var(--navy));
   }
