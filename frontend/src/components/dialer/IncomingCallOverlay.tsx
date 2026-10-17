@@ -24,7 +24,7 @@ export const IncomingCallOverlay: React.FC<IncomingCallOverlayProps> = ({ from, 
           <div className="mb-1.5 text-xs font-medium uppercase tracking-[0.2em] text-brand-sky">
             Indgående opkald
           </div>
-          <div className="break-all font-heading text-2xl font-semibold text-white">
+          <div className="break-all font-heading text-2xl font-bold text-white">
             {from}
           </div>
         </div>

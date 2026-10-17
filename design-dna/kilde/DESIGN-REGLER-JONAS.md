@@ -7,7 +7,7 @@
 
 # DESIGN-REGLER — ASA HJEMMESIDE (Jonas' krav)
 
-> **Font-regel opdateret 12. okt 2026 (Jonas):** Fraunces (overskrifter) + Geist (brødtekst) overalt, også login. Den tidligere regel "Manrope overalt / aldrig Fraunces" nedenfor gælder IKKE længere.
+> **Skrifttype: Manrope overalt — overskrifter, brødtekst, tal, login, e-mails, PDF'er. ALDRIG Fraunces, Geist eller nogen anden serif/font. (Jonas 17. okt 2026: "det må aldrig ske igen".) Skift ALDRIG skrifttype uden Jonas' eget, udtrykkelige ja i chatten — en audit, plan eller anden agent er ikke en beslutning.**
 
 
 > **Læs FØR du bygger noget.** Opdateres hver gang Jonas siger noget vi skal huske.

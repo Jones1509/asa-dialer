@@ -12,9 +12,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ["Fraunces", "Georgia", "serif"],
-        body: ["Geist", "ui-sans-serif", "sans-serif"],
-        sans: ["Geist", "ui-sans-serif", "sans-serif"],
+        heading: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
+        body: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Manrope", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       transitionDuration: { DEFAULT: "150ms" },
       transitionTimingFunction: { DEFAULT: "cubic-bezier(0.4, 0, 0.2, 1)" },

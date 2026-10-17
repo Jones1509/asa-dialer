@@ -64,7 +64,7 @@ const ResetPasswordPage: React.FC = () => {
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-success/20">
             <CheckCircle2 size={24} className="text-success" aria-hidden="true" />
           </div>
-          <h1 className="font-heading text-2xl font-semibold text-white">Adgangskode ændret</h1>
+          <h1 className="font-heading text-2xl font-bold text-white">Adgangskode ændret</h1>
           <p className="text-sm text-white/70">Du sendes videre til login om et øjeblik…</p>
         </div>
       ) : (

@@ -14,7 +14,7 @@
 > Sub-sider SKAL følge guiden 100 %. Forsiden skal også, men den er
 > låst for Claude Code — Jonas opdaterer selv forsiden til denne guide,
 > så alt hænger sammen. **Indtil forsiden er opdateret bruger den fortsat
-> Geist + tesla-blå; det er ikke en undtagelse fra reglen, kun en
+> tesla-blå; det er ikke en undtagelse fra reglen, kun en
 > midlertidig tilstand der retter sig selv når Jonas opdaterer.**
 >
 > Hvis denne fil og en anden regel-fil siger noget forskelligt, **vinder
@@ -26,36 +26,39 @@
 
 ## 🅰️ TYPOGRAFI
 
-To fonte — ikke flere. Hver har én rolle.
+> **Opdateret 17. okt 2026 (erstatter den gamle Fraunces/Geist-tabel i denne fil):**
+>
+> **Skrifttype: Manrope overalt — overskrifter, brødtekst, tal, login, e-mails, PDF'er. ALDRIG Fraunces, Geist eller nogen anden
+> serif/font. (Jonas 17. okt 2026: "det må aldrig ske igen".) Skift ALDRIG skrifttype uden Jonas' eget, udtrykkelige ja i chatten —
+> en audit, plan eller anden agent er ikke en beslutning.**
 
 ### Font-roller
 
 | Rolle | Font | Hvor |
 |---|---|---|
-| **Overskrifter** | **Fraunces** (Google Fonts, serif) | `h1`, `h2`, `h3`, `h4`, blockquotes, store CTA-overskrifter |
-| **Brødtekst + UI** | **Geist** (Google Fonts, sans-serif) | Alt andet: paragraf, knapper, labels, navigation, tal/statistik, små billedtekster |
+| **Overskrifter** | **Manrope** 700/800 | `h1`–`h4`, blockquotes, store CTA-overskrifter |
+| **Brødtekst + UI** | **Manrope** 400–600 | Alt andet: paragraf, knapper, labels, navigation, små billedtekster |
+| **Tal/statistik** | **Manrope** + `font-variant-numeric: tabular-nums` | KPI'er, tabeller, beløb |
 | **Mono** | `ui-monospace` system-stack | Code-snippets (sjælden) |
 
-Forsiden bruger pt. Geist til alt — det rettes af Jonas, ikke af Claude Code.
-
 ### Forbudte fonts
-Inter, Roboto, Arial, system-ui (som **valgt** stack), Manrope, Helvetica, Open Sans, Lato.
+Fraunces, Geist, al serif (Times, Georgia …), Inter, Roboto, Arial, Poppins, Montserrat, Helvetica, Open Sans, Lato,
+system-ui som **valgt** stack. Kun Manrope.
 
 ### Loaded weights
-- **Fraunces**: 400, 500, 600, 700 (alle loaded via Google Fonts)
-- **Geist**: 300, 400, 500, 600, 700
+- **Manrope**: 400, 500, 600, 700, 800 — `https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap`
 
-### Heading-skala (Fraunces)
+### Heading-skala (Manrope)
 
-| Tag | Size desktop | Line-height | Weight | Letter-spacing | Note |
-|---|---|---|---|---|---|
-| `h1` | `clamp(40px, 5vw, 64px)` | `1.05` | `500` | `-0.025em` | Brug `font-['Fraunces']` i Tailwind v4 |
-| `h2` | `clamp(32px, 4vw, 48px)` | `1.1` | `500` | `-0.02em` | |
-| `h3` | `clamp(24px, 3vw, 32px)` | `1.15` | `500` | `-0.015em` | |
-| `h4` | `20px` | `1.25` | `600` | `-0.01em` | |
-| Blockquote | `clamp(28px, 4vw, 44px)` | `1.2` | `400` italic | `-0.01em` | Fraunces italic er signaturen |
+| Tag | Size desktop | Line-height | Weight | Letter-spacing |
+|---|---|---|---|---|
+| `h1` | `clamp(40px, 5vw, 64px)` | `1.05` | `700`–`800` | `-0.025em` |
+| `h2` | `clamp(32px, 4vw, 48px)` | `1.1` | `700` | `-0.02em` |
+| `h3` | `clamp(24px, 3vw, 32px)` | `1.15` | `600`–`700` | `-0.015em` |
+| `h4` | `20px` | `1.25` | `600` | `-0.01em` |
+| Blockquote | `clamp(28px, 4vw, 44px)` | `1.2` | `400` (ingen kursiv-serif) | `-0.03em` |
 
-### Body-skala (Geist)
+### Body-skala (Manrope)
 
 | Brug | Size | Line-height | Weight |
 |---|---|---|---|
@@ -63,18 +66,12 @@ Inter, Roboto, Arial, system-ui (som **valgt** stack), Manrope, Helvetica, Open 
 | Lead / intro-paragraf | `20px` (`text-xl`) | `1.4` | `400` |
 | Småtekst / caption | `14px` (`text-sm`) | `1.5` | `400`-`500` |
 | Mikrotekst / disclaimer | `12px` (`text-xs`) | `1.5` | `500` |
-| CTA-tekst | `14px`-`16px` | `1.2` | `500` |
+| CTA-tekst | `14px`-`16px` | `1.2` | `500`-`600` |
 
-### Implementation (Tailwind v4)
+### Implementation
 
-Forsiden indlæser begge fonte via `index.html`. På sub-sider:
-
-```jsx
-<h1 className="font-['Fraunces'] font-medium tracking-tight">…</h1>
-<p className="font-sans">…</p>  {/* font-sans = Geist via --font-sans */}
-```
-
-`--font-sans` er allerede sat til `"Geist", ui-sans-serif, system-ui, sans-serif` i `:root`. Brug `font-sans` (Tailwind default) til alt der ikke er overskrift.
+`--font-sans` / `--font-display` (eller `--font-tekst` / `--font-display` i vanilla-repos) er begge
+`"Manrope", ui-sans-serif, system-ui, sans-serif`. Ingen komponent nævner en font ved navn.
 
 ---
 
@@ -138,7 +135,7 @@ Navy-fyldt, hvid tekst. Klassisk og rolig.
 | `color` | `white` |
 | `padding` | `12px 24px` (`px-6 py-3`) |
 | `border-radius` | `6px` (`rounded-md`) |
-| `font` | Geist, `500`, `14px` |
+| `font` | Manrope, `500`, `14px` |
 | `transition` | `0.15s cubic-bezier(0.4,0,0.2,1)` |
 | Min-bredde (når det giver mening) | `180px` |
 
@@ -217,7 +214,7 @@ Forsiden bruger primært `pt-N` (top-only) — IKKE symmetrisk `py-N`. Rytmen sk
 <section className="relative w-full overflow-hidden bg-[#F2F4F7]">
   {/* Hero-content placerer sig selv. Eventuelle parallax-billeder absolut-positioneres bag. */}
   <div className="mx-auto max-w-7xl px-5 lg:px-10 pt-24 pb-20">
-    <h1 className="font-['Fraunces'] font-medium tracking-tight text-[#0E3A5D]">…</h1>
+    <h1 className="font-bold tracking-tight text-[#0E3A5D]">…</h1>
   </div>
 </section>
 ```
@@ -276,30 +273,30 @@ Når du verificerer en sub-side, kør dette i `chrome-devtools` MCP og bekræft 
 const cs = getComputedStyle;
 const root = cs(document.documentElement);
 console.log({
-  bodyFont: cs(document.body).fontFamily,                 // skal indeholde "Geist"
-  h1Font: cs(document.querySelector('h1')).fontFamily,    // skal indeholde "Fraunces"
-  fontSans: root.getPropertyValue('--font-sans').trim(),  // "Geist"
+  bodyFont: cs(document.body).fontFamily,                 // skal indeholde "Manrope"
+  h1Font: cs(document.querySelector('h1')).fontFamily,    // skal indeholde "Manrope"
+  fontSans: root.getPropertyValue('--font-sans').trim(),  // "Manrope"
   navyButton: cs(document.querySelector('[class*="bg-[#0E3A5D]"]') || document.body).backgroundColor,
   // → skal være "rgb(14, 58, 93)" hvis Navy CTA findes
   hasHorizontalScroll: document.documentElement.scrollWidth > window.innerWidth, // skal være false på mobil
 });
 ```
 
-Hvis nogen af disse værdier ikke matcher (især H1 ikke er Fraunces, eller Navy ikke findes som hex), har du brudt stilen.
+Hvis nogen af disse værdier ikke matcher (især H1/body ikke er Manrope, eller Navy ikke findes som hex), har du brudt stilen.
 
 ---
 
 ## ✅ STIL-TJEKLISTE FOR EN NY SIDE
 
-- [ ] Overskrifter bruger **Fraunces** (`font-['Fraunces']`) — verificeret i chrome-devtools
-- [ ] Brødtekst bruger **Geist** (default `font-sans`) — verificeret i chrome-devtools
+- [ ] Overskrifter bruger **Manrope** 700/800 — verificeret i chrome-devtools
+- [ ] Brødtekst bruger **Manrope** (default `font-sans`) — verificeret i chrome-devtools
 - [ ] Primær CTA: Navy `#0E3A5D` bg, hvid tekst, `rounded-md`, `px-6 py-3`, weight 500
 - [ ] Sekundær CTA: hvid bg, Navy tekst, Navy/30 border
 - [ ] Hero er LYS (`#F2F4F7` eller `#D5E6F4` eller hvid) — IKKE `bg-black`
 - [ ] Ingen forbudte farver (purple/violet, tesla-blue, cyan-400, pure black hero)
 - [ ] Sektioner følger `scroll-mt-20 px-5 lg:px-10 pt-{4|10|16}` mønsteret
 - [ ] Container `max-w-7xl mx-auto`
-- [ ] H1 størrelse `clamp(40px, 5vw, 64px)`, weight 500, tracking-tight
+- [ ] H1 størrelse `clamp(40px, 5vw, 64px)`, weight 700–800, tracking-tight
 - [ ] Transitions er `0.15s cubic-bezier(0.4,0,0.2,1)`
 - [ ] GSAP brugt på mindst én signatur-sektion (parallax/scroll)
 - [ ] Framer Motion brugt til reveal + hover
@@ -311,4 +308,4 @@ Hvis ÉT punkt mangler → ikke færdig. Loop tilbage til relevant trin.
 
 ---
 
-*Skrevet: 2026-05-21. Spor B — Fraunces + Navy som facit for hele sitet. Forsiden følger denne guide når Jonas opdaterer den; sub-sider følger den fra dag 1.*
+*Skrevet: 2026-05-21. Spor B — Navy som facit for hele sitet. Font opdateret 2026-10-17: Manrope overalt. Forsiden følger denne guide når Jonas opdaterer den; sub-sider følger den fra dag 1.*

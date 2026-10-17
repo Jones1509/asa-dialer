@@ -4,7 +4,7 @@ import asaDialerLogo from '@/assets/asa-dialer-logo.svg';
 
 /**
  * Fælles ramme for login, opret konto, nulstil adgangskode og afventer godkendelse.
- * Mørk navy-flade, Dialerens eget logo + ordmærke, Fraunces/Geist.
+ * Mørk navy-flade, Dialerens eget logo + ordmærke, Manrope.
  * `kort={false}` (login): intet kort — trekant-layoutet ligger frit under logoet, som ASA-logoets trekant.
  */
 export const AuthLayout: React.FC<{ children: React.ReactNode; subtitle?: string; kort?: boolean }> = ({ children, subtitle = 'Kundekommunikation', kort = true }) => {
@@ -51,7 +51,7 @@ export const AuthLayout: React.FC<{ children: React.ReactNode; subtitle?: string
 
 export const AuthTitle: React.FC<{ title: string; text?: React.ReactNode }> = ({ title, text }) => (
   <div className="mb-6 text-center">
-    <h1 className="font-heading text-2xl font-semibold text-white">{title}</h1>
+    <h1 className="font-heading text-2xl font-bold text-white">{title}</h1>
     {text && <p className="mt-2 text-sm leading-relaxed text-white/70">{text}</p>}
   </div>
 );

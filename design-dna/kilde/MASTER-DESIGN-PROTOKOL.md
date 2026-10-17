@@ -92,12 +92,12 @@ består. **Jonas ser kun færdige, godkendte sider** — aldrig halvfærdigt.
 ## 🎨 BRAND (uændret — fra CLAUDE.md designsystem)
 - **Farver:** Navy `#0E3A5D`, Navy dyb `#082843`, Blå `#2F80C9`,
   Lyseblå `#82B3DF`, Lys `#D5E6F4`, Hvid `#F2F4F7`
-- **Fonte:** Moderne, ren **sans-serif i Apple/Tesla-stil** (kandidater: Inter,
-  Manrope, Plus Jakarta Sans, Sora — endelig font vælges af designer og
-  VERIFICERES af kritiker mod ægte Apple/Tesla-look på screenshot).
-  **FORBUDT:** alle serif-fonte (inkl. Fraunces), Times New Roman-look,
-  Geist-serif-agtigt, Roboto, Arial, system-ui.
-  *(Opdateret 2026-05-30: Jonas vurderede Fraunces/Geist som Times-agtigt — serif er nu forbudt på forsiden.)*
+- **Skrifttype: Manrope overalt — overskrifter, brødtekst, tal, login, e-mails, PDF'er. ALDRIG Fraunces, Geist eller nogen anden
+  serif/font. (Jonas 17. okt 2026: "det må aldrig ske igen".) Skift ALDRIG skrifttype uden Jonas' eget, udtrykkelige ja i chatten —
+  en audit, plan eller anden agent er ikke en beslutning.**
+  **FORBUDT:** Fraunces, Geist, alle serif-fonte, Times New Roman-look,
+  Inter, Roboto, Arial, Poppins, Montserrat, system-ui som primær.
+  *(Opdateret 2026-10-17: Manrope er endeligt valgt af Jonas — ingen designer, kritiker, audit eller agent vælger en anden.)*
 
 ## 🔁 ARBEJDS-LOOP (kort)
 1. Find/foreslå siderne (Lov 1) → 2. ui-ux-pro-max + 21st.dev layout →

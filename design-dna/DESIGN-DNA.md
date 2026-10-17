@@ -28,7 +28,7 @@
 
 | Hvad | Værdi |
 |---|---|
-| Font | **Fraunces** overskrifter + **Geist** brødtekst overalt, også login (Jonas 12. okt 2026). Ingen Manrope/Poppins/Montserrat/Inter/Roboto/Arial/system-ui som primær. |
+| Font | **Skrifttype: Manrope overalt — overskrifter, brødtekst, tal, login, e-mails, PDF'er. ALDRIG Fraunces, Geist eller nogen anden serif/font. (Jonas 17. okt 2026: "det må aldrig ske igen".) Skift ALDRIG skrifttype uden Jonas' eget, udtrykkelige ja i chatten — en audit, plan eller anden agent er ikke en beslutning.** |
 | Navy (primær) | `#0E3A5D` — knapper, overskrifter, hero |
 | Navy dyb | `#082843` — hover, mørke flader |
 | Blå (accent) | `#2F80C9` — links, sekundær accent, fokus-glød |

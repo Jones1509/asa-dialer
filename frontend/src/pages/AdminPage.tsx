@@ -43,7 +43,7 @@ const AdminPage: React.FC = () => {
     <AppShell items={tabs} footerItems={footerItems} active={activeTab} onSelect={setActiveTab} title={activeLabel} badge="Admin">
       <div className="hidden h-14 shrink-0 items-center gap-3 border-b border-border bg-card px-6 md:flex">
         <span className="rounded-md bg-accent px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-accent-foreground">Admin</span>
-        <h1 className="font-heading text-lg font-semibold text-navy">{activeLabel}</h1>
+        <h1 className="font-heading text-lg font-bold text-navy">{activeLabel}</h1>
       </div>
       <div className="flex-1 overflow-y-auto">
         <div key={activeTab} className="page animate-fade-in">
