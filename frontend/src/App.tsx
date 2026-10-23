@@ -18,14 +18,15 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading, isApproved } = useAuth();
+  const { user, loading, isApproved, isAdmin } = useAuth();
 
   if (loading) {
     return <ShellSkeleton />;
   }
 
   if (!user) return <Navigate to="/login" replace />;
-  if (!isApproved) return <Navigate to="/pending" replace />;
+  // Admins skal altid ind (de lander på Indbakken) — ellers ping-pong mellem / og /pending
+  if (!isApproved && !isAdmin) return <Navigate to="/pending" replace />;
 
   return <>{children}</>;
 };

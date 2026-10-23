@@ -10,7 +10,7 @@ const PendingPage: React.FC = () => {
 
   useEffect(() => {
     if (!loading && user) {
-      if (isAdmin) { navigate('/admin', { replace: true }); return; }
+      if (isAdmin) { navigate('/', { replace: true }); return; }
       if (isApproved) { navigate('/', { replace: true }); return; }
     }
     if (!loading && !user) { navigate('/login', { replace: true }); }
