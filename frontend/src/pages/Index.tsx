@@ -5,11 +5,12 @@ import { useDialerState } from '@/hooks/useDialerState';
 import { useTwilioDevice, IncomingCallInfo } from '@/hooks/useTwilioDevice';
 import { useTetrisMusic } from '@/hooks/useTetrisMusic';
 import { AppShell, ShellNavItem } from '@/components/shell/AppShell';
-import { Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2, Check } from 'lucide-react';
+import { Inbox, Phone, PhoneIncoming, LayoutGrid, ShoppingBag, BarChart3, Settings, LogOut, Shield, Gamepad2, Check } from 'lucide-react';
 import { Topbar } from '@/components/dialer/Topbar';
 import { IncomingCallOverlay } from '@/components/dialer/IncomingCallOverlay';
 import { DialerPage } from '@/components/dialer/pages/DialerPage';
 import { IncomingPage } from '@/components/dialer/pages/IncomingPage';
+import { IndbakkePage } from '@/components/dialer/pages/IndbakkePage';
 import { CampaignsPage } from '@/components/dialer/pages/CampaignsPage';
 import { ShopPage } from '@/components/dialer/pages/ShopPage';
 import { ReportsPage } from '@/components/dialer/pages/ReportsPage';
@@ -76,6 +77,7 @@ const Index = () => {
             onGoToCampaigns={() => state.setActivePage('campaigns')}
           />
         );
+      case 'indbakke': return <IndbakkePage />;
       case 'incoming': return <IncomingPage />;
       case 'campaigns':
         return (
@@ -111,6 +113,7 @@ const Index = () => {
   const showTopbar = state.activePage === 'dialer' && state.leads.length > 0;
 
   const navItems: ShellNavItem[] = [
+    { id: 'indbakke', icon: Inbox, label: 'Indbakke' },
     { id: 'dialer', icon: Phone, label: 'Dialer' },
     { id: 'incoming', icon: PhoneIncoming, label: 'Indgående' },
     { id: 'campaigns', icon: LayoutGrid, label: 'Kampagner' },

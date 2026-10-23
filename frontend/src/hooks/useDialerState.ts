@@ -13,7 +13,8 @@ export function useDialerState() {
   const [totalSales, setTotalSales] = useState(0);
   const [totalRecalls, setTotalRecalls] = useState(0);
   const [totalClosed, setTotalClosed] = useState(0);
-  const [activePage, setActivePage] = useState('campaigns');
+  // Indbakken er forsiden (Jonas 23. okt 2026): henvendelser fra asa-el.dk ses først
+  const [activePage, setActivePage] = useState('indbakke');
   const [tetrisEnabled, setTetrisEnabled] = useState(true);
   const [showTetris, setShowTetris] = useState(false);
   const [notification, setNotification] = useState('');
