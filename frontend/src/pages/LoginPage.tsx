@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
   useEffect(() => {
     if (!authLoading && user && !loading) {
       if (isAdmin) {
-        navigate('/admin', { replace: true });
+        navigate('/', { replace: true });
       } else if (isApproved) {
         navigate('/', { replace: true });
       } else {
@@ -74,7 +74,7 @@ const LoginPage: React.FC = () => {
         return;
       }
       setLoading(false);
-      navigate('/admin');
+      navigate('/');
     } else {
       // Bruger-tab: admin/kontor må IKKE logge ind her (streng adskillelse)
       if (adminRole) {
