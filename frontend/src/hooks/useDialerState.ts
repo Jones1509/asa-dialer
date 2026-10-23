@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { Lead } from '@/types/leads';
 
 export function useDialerState() {
@@ -26,7 +27,7 @@ export function useDialerState() {
   const fetchLeads = useCallback(async (campaignId: string) => {
     setLoadingLeads(true);
     const { data } = await supabase
-      .from('leads')
+      .from(tabel('leads'))
       .select('*')
       .eq('campaign_id', campaignId)
       .order('status', { ascending: true })
@@ -113,14 +114,14 @@ export function useDialerState() {
     if (note !== undefined) updates.note = note;
 
     await supabase
-      .from('leads')
+      .from(tabel('leads'))
       .update(updates)
       .eq('id', currentLead.id);
 
     // Also log the call
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      await supabase.from('call_logs').insert({
+      await supabase.from(tabel('call_logs')).insert({
         user_id: user.id,
         lead_id: currentLead.id,
         duration_seconds: callSecondsRef.current,

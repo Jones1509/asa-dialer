@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { erMock } from "../_shared/dialer-twilio.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,7 +9,7 @@ const corsHeaders = {
 
 async function getOrCreateConfig(supabaseAdmin: any) {
   const { data: configs } = await supabaseAdmin
-    .from('twilio_config')
+    .from('dialer_twilio_config')
     .select('key, value');
 
   const configMap: Record<string, string> = {};
@@ -35,7 +36,7 @@ async function getOrCreateConfig(supabaseAdmin: any) {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          FriendlyName: 'Lovable Dialer',
+          FriendlyName: 'ASA Dialer',
           VoiceUrl: voiceUrl,
           VoiceMethod: 'POST',
         }),
@@ -45,7 +46,7 @@ async function getOrCreateConfig(supabaseAdmin: any) {
     if (!app.sid) throw new Error(`Failed to create TwiML App: ${JSON.stringify(app)}`);
     
     configMap['twiml_app_sid'] = app.sid;
-    await supabaseAdmin.from('twilio_config').upsert({ key: 'twiml_app_sid', value: app.sid }, { onConflict: 'key' });
+    await supabaseAdmin.from('dialer_twilio_config').upsert({ key: 'twiml_app_sid', value: app.sid }, { onConflict: 'key' });
   }
 
   if (!configMap['api_key_sid'] || !configMap['api_key_secret']) {
@@ -58,7 +59,7 @@ async function getOrCreateConfig(supabaseAdmin: any) {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
         body: new URLSearchParams({
-          FriendlyName: 'Lovable Dialer Key',
+          FriendlyName: 'ASA Dialer Key',
         }),
       }
     );
@@ -67,8 +68,8 @@ async function getOrCreateConfig(supabaseAdmin: any) {
 
     configMap['api_key_sid'] = key.sid;
     configMap['api_key_secret'] = key.secret;
-    await supabaseAdmin.from('twilio_config').upsert({ key: 'api_key_sid', value: key.sid }, { onConflict: 'key' });
-    await supabaseAdmin.from('twilio_config').upsert({ key: 'api_key_secret', value: key.secret }, { onConflict: 'key' });
+    await supabaseAdmin.from('dialer_twilio_config').upsert({ key: 'api_key_sid', value: key.sid }, { onConflict: 'key' });
+    await supabaseAdmin.from('dialer_twilio_config').upsert({ key: 'api_key_secret', value: key.secret }, { onConflict: 'key' });
   }
 
   return configMap;
@@ -162,6 +163,26 @@ serve(async (req) => {
     console.log('[twilio-token] Authenticated user:', user.id);
 
     const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Multi-tenant: kun godkendte, aktive Dialer-brugere i et firma får en telefon i browseren
+    const { data: profil } = await adminClient
+      .from('dialer_profiles')
+      .select('organisation_id, approved, active')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (!profil || !profil.approved || !profil.active) {
+      return new Response(JSON.stringify({ error: 'Din bruger er ikke godkendt i ASA Dialer endnu' }), {
+        status: 403,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    // Mock (default): ingen kald til Twilio — browseren får ingen rigtig telefon, men login/adgang kan testes
+    if (erMock((n) => Deno.env.get(n))) {
+      return new Response(JSON.stringify({ token: 'mock', identity: user.id, mock: true }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const accountSid = Deno.env.get('TWILIO_ACCOUNT_SID')!;
 
     const config = await getOrCreateConfig(adminClient);

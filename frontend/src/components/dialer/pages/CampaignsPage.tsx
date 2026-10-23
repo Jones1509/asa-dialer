@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { LayoutGrid, RefreshCw, ChevronRight } from 'lucide-react';
 import { EmptyState, ErrorState, SkeletonCards } from '@/components/shell/states';
 
@@ -30,7 +31,7 @@ export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onSelectCampaign, 
     if (!user) { setLoading(false); return; }
 
     const { data: assignments, error: assignError } = await supabase
-      .from('campaign_users')
+      .from(tabel('campaign_users'))
       .select('campaign_id')
       .eq('user_id', user.id);
     if (assignError) throw assignError;
@@ -43,7 +44,7 @@ export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onSelectCampaign, 
 
     const campaignIds = assignments.map(a => a.campaign_id);
     const { data, error } = await supabase
-      .from('campaigns')
+      .from(tabel('campaigns'))
       .select('*')
       .in('id', campaignIds)
       .eq('archived', false)
@@ -53,8 +54,8 @@ export const CampaignsPage: React.FC<CampaignsPageProps> = ({ onSelectCampaign, 
     if (data) {
       const withCounts = await Promise.all(data.map(async c => {
         const [{ count }, { count: newCount }] = await Promise.all([
-          supabase.from('leads').select('*', { count: 'exact', head: true }).eq('campaign_id', c.id),
-          supabase.from('leads').select('*', { count: 'exact', head: true }).eq('campaign_id', c.id).in('status', ['new', 'no_answer', 'callback']),
+          supabase.from(tabel('leads')).select('*', { count: 'exact', head: true }).eq('campaign_id', c.id),
+          supabase.from(tabel('leads')).select('*', { count: 'exact', head: true }).eq('campaign_id', c.id).in('status', ['new', 'no_answer', 'callback']),
         ]);
         return { ...c, leadCount: count ?? 0, newCount: newCount ?? 0 };
       }));

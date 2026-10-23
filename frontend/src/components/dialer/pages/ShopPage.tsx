@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { ShoppingBag, Package, Tag, Zap, CreditCard, Search } from 'lucide-react';
 import { EmptyState, ErrorState, SkeletonCards } from '@/components/shell/states';
 
@@ -31,7 +32,7 @@ export const ShopPage: React.FC = () => {
     setLoading(true);
     setFailed(false);
     const { data, error } = await supabase
-      .from('products')
+      .from(tabel('products'))
       .select('*')
       .eq('active', true)
       .order('created_at');

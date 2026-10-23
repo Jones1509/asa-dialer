@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Lock, Settings as SettingsIcon, Save } from 'lucide-react';
 
@@ -35,7 +36,7 @@ export const SettingsPage: React.FC<SettingsPageProps> = ({ tetrisEnabled, onTog
     setSaving(true);
     const fullName = `${firstName.trim()} ${lastName.trim()}`.trim();
     const { error } = await supabase
-      .from('profiles')
+      .from(tabel('profiles'))
       .update({ full_name: fullName, email })
       .eq('user_id', user.id);
     setSaving(false);

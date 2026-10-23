@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { CSVUploadModal } from '@/components/dialer/CSVUploadModal';
 import { LayoutGrid, Plus, FileUp, UserPlus, Archive, X, ChevronDown, Users, Hash, Calendar } from 'lucide-react';
 import { EmptyState, SkeletonRows } from '@/components/shell/states';
@@ -41,14 +42,14 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
 
   const fetchAll = async () => {
     const [{ data: campaignsData }, { data: profilesData }] = await Promise.all([
-      supabase.from('campaigns').select('*').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('user_id, full_name, email').eq('approved', true),
+      supabase.from(tabel('campaigns')).select('*').order('created_at', { ascending: false }),
+      supabase.from(tabel('profiles')).select('user_id, full_name, email').eq('approved', true),
     ]);
 
     const enriched = await Promise.all((campaignsData ?? []).map(async c => {
       const [{ count }, { data: cuData }] = await Promise.all([
-        supabase.from('leads').select('*', { count: 'exact', head: true }).eq('campaign_id', c.id),
-        supabase.from('campaign_users').select('user_id').eq('campaign_id', c.id),
+        supabase.from(tabel('leads')).select('*', { count: 'exact', head: true }).eq('campaign_id', c.id),
+        supabase.from(tabel('campaign_users')).select('user_id').eq('campaign_id', c.id),
       ]);
       const assignedUserIds = (cuData ?? []).map(cu => cu.user_id);
       const assignedUsers = (profilesData ?? []).filter(p => assignedUserIds.includes(p.user_id));
@@ -64,7 +65,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
 
   const createCampaign = async () => {
     if (!newName.trim()) return;
-    const { data, error } = await supabase.from('campaigns').insert({ name: newName, description: newDesc }).select().single();
+    const { data, error } = await supabase.from(tabel('campaigns')).insert({ name: newName, description: newDesc }).select().single();
     if (error || !data) { showNotif('Kunne ikke oprette kampagne'); return; }
     showNotif('Kampagne oprettet — tilføj nu leads via CSV');
     setNewCampaignId(data.id);
@@ -73,7 +74,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   };
 
   const archiveCampaign = async (id: string) => {
-    await supabase.from('campaigns').update({ archived: true }).eq('id', id);
+    await supabase.from(tabel('campaigns')).update({ archived: true }).eq('id', id);
     showNotif('Kampagne arkiveret');
     fetchAll();
   };
@@ -94,7 +95,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
       website: l.website,
       contact_person: l.contact_person,
     }));
-    const { error } = await supabase.from('leads').insert(rows);
+    const { error } = await supabase.from(tabel('leads')).insert(rows);
     if (error) { showNotif('Fejl ved import'); return; }
     showNotif(`${leads.length} emner importeret`);
     setShowCSV(false);
@@ -110,7 +111,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   };
 
   const assignUser = async (campaignId: string, userId: string) => {
-    const { error } = await supabase.from('campaign_users').insert({ campaign_id: campaignId, user_id: userId });
+    const { error } = await supabase.from(tabel('campaign_users')).insert({ campaign_id: campaignId, user_id: userId });
     if (error) {
       if (error.code === '23505') showNotif('Bruger er allerede tildelt');
       else showNotif('Fejl ved tildeling');
@@ -122,7 +123,7 @@ export const AdminCampaignsTab: React.FC<AdminCampaignsTabProps> = ({ showNotif 
   };
 
   const removeUser = async (campaignId: string, userId: string) => {
-    await supabase.from('campaign_users').delete().eq('campaign_id', campaignId).eq('user_id', userId);
+    await supabase.from(tabel('campaign_users')).delete().eq('campaign_id', campaignId).eq('user_id', userId);
     showNotif('Bruger fjernet fra kampagne');
     fetchAll();
   };
