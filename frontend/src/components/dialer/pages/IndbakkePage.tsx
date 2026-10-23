@@ -85,11 +85,12 @@ export const IndbakkePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
   const [filter, setFilter] = useState<string>('Alle');
-  const [visKladder, setVisKladder] = useState(false);
+  const [fejl, setFejl] = useState<string | null>(null);
 
   const hent = useCallback(async (stille = false) => {
     if (!stille) setLoading(true);
     setFailed(false);
+    setFejl(null);
     const [henv, book] = await Promise.all([
       supabase
         .schema('business')
@@ -104,7 +105,11 @@ export const IndbakkePage: React.FC = () => {
         .order('created_at', { ascending: false })
         .limit(100),
     ]);
-    if (henv.error) setFailed(true);
+    if (henv.error) {
+      console.error('[indbakke]', henv.error);
+      setFejl(henv.error.message);
+      setFailed(true);
+    }
     else {
       // Bookinger kræver admin-adgang — uden den vises bare henvendelserne
       const bookinger = book.error ? [] : ((book.data ?? []) as Booking[]).map(fraBooking);
@@ -124,10 +129,9 @@ export const IndbakkePage: React.FC = () => {
     return () => { supabase.removeChannel(kanal); };
   }, [hent]);
 
-  const synlige = useMemo(() => rows.filter(h => visKladder || !erKladde(h)), [rows, visKladder]);
+  const synlige = rows;
   const formularer = useMemo(() => ['Alle', ...Array.from(new Set(synlige.map(overskrift)))], [synlige]);
   const viste = filter === 'Alle' ? synlige : synlige.filter(h => overskrift(h) === filter);
-  const antalKladder = rows.filter(erKladde).length;
   const antalNye = synlige.filter(h => h.status === 'ny').length;
 
   return (
@@ -156,19 +160,13 @@ export const IndbakkePage: React.FC = () => {
               {f}{f === 'Alle' && antalNye > 0 ? ` · ${antalNye} nye` : ''}
             </button>
           ))}
-          {antalKladder > 0 && (
-            <label className="ml-auto flex items-center gap-2 text-[13px] text-muted-foreground">
-              <input type="checkbox" checked={visKladder} onChange={e => setVisKladder(e.target.checked)} />
-              Vis {antalKladder} chat{antalKladder === 1 ? '' : 's'} uden kontaktoplysninger
-            </label>
-          )}
         </div>
 
         <section className="card-surface overflow-hidden">
           {loading ? (
             <SkeletonRows rows={5} />
           ) : failed ? (
-            <ErrorState message="Indbakken kunne ikke hentes. Har din konto adgang til henvendelser? Prøv igen, eller kontakt Jonas." onRetry={() => hent()} />
+            <ErrorState message={`Indbakken kunne ikke hentes${fejl ? ` (${fejl})` : ''}. Prøv igen — fortsætter det, så send skærmbilledet til Jonas.`} onRetry={() => hent()} />
           ) : viste.length === 0 ? (
             <EmptyState icon={Inbox} title="Ingen henvendelser endnu" message="Når en kunde skriver i en formular eller i Elio-chatten på asa-el.dk, dukker det op her med det samme." />
           ) : (
