@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { useAuth } from '@/hooks/useAuth';
 import { Clock, CheckCircle2, UserCheck, Lock, Unlock, Users } from 'lucide-react';
 import { EmptyState, ErrorState, SkeletonRows } from '@/components/shell/states';
@@ -25,7 +26,7 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showNotif }) => {
   const fetchUsers = async () => {
     setFailed(false);
     const { data, error } = await supabase
-      .from('profiles')
+      .from(tabel('profiles'))
       .select('user_id, full_name, email, approved, active, created_at')
       .order('created_at', { ascending: false });
     if (error) setFailed(true);
@@ -36,13 +37,13 @@ export const AdminUsersTab: React.FC<AdminUsersTabProps> = ({ showNotif }) => {
   useEffect(() => { fetchUsers(); }, []);
 
   const toggleApproval = async (userId: string, approved: boolean) => {
-    const { error } = await supabase.from('profiles').update({ approved: !approved }).eq('user_id', userId);
+    const { error } = await supabase.from(tabel('profiles')).update({ approved: !approved }).eq('user_id', userId);
     showNotif(error ? 'Handlingen mislykkedes — prøv igen' : approved ? 'Bruger deaktiveret' : 'Bruger godkendt');
     fetchUsers();
   };
 
   const toggleActive = async (userId: string, active: boolean) => {
-    const { error } = await supabase.from('profiles').update({ active: !active }).eq('user_id', userId);
+    const { error } = await supabase.from(tabel('profiles')).update({ active: !active }).eq('user_id', userId);
     showNotif(error ? 'Handlingen mislykkedes — prøv igen' : active ? 'Bruger deaktiveret' : 'Bruger aktiveret');
     fetchUsers();
   };

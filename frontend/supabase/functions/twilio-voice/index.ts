@@ -1,88 +1,51 @@
+/**
+ * Edge twilio-voice — TwiML for Dialerens opkald, multi-tenant (23. okt 2026).
+ *
+ *  - Udgående (From = "client:<bruger-uuid>"): firmaets eget primære nummer bruges som caller-id.
+ *  - Indgående (To = et firmanummer): KUN det firmas godkendte, aktive brugere ringes op (højst 10 samtidig).
+ *  - Ukendt nummer / ingen brugere / intet firmanummer: venlig besked og læg på.
+ * Firmaet slås op i dialer.telefonnumre (public.dialer_*-funktionerne, kun service_role).
+ * X-Twilio-Signature kontrolleres, når TWILIO_MOCK=0 (rigtig drift) og TWILIO_AUTH_TOKEN er sat.
+ */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { erMock, gyldigTwilioSignatur, routOpkald, routingTilTwiml, twimlSig } from "../_shared/dialer-twilio.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const xml = (twiml: string, status = 200) => new Response(twiml, { status, headers: { 'Content-Type': 'text/xml' } });
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
   try {
-    const formData = await req.formData().catch(() => null);
-    const url = new URL(req.url);
+    const env = (n: string) => Deno.env.get(n);
+    const form = await req.formData().catch(() => null);
+    const params: Record<string, string> = {};
+    form?.forEach((v, k) => { params[k] = String(v); });
 
-    const toNumber = formData?.get('To') as string || url.searchParams.get('To') || '';
-    const fromNumber = formData?.get('From') as string || url.searchParams.get('From') || '';
-    const direction = formData?.get('Direction') as string || '';
-    const callerId = Deno.env.get('TWILIO_PHONE_NUMBER') || '';
-
-    console.log(`[twilio-voice] Request - To: ${toNumber}, From: ${fromNumber}, Direction: ${direction}`);
-
-    // Determine if this is an incoming call (To = our Twilio number) or outgoing (To = some other number)
-    const isIncoming = toNumber === callerId || toNumber.startsWith('client:') === false && fromNumber !== callerId && toNumber === callerId;
-    
-    // OUTGOING CALL: Browser client is calling a phone number
-    if (toNumber && toNumber !== callerId && !toNumber.startsWith('client:')) {
-      console.log(`[twilio-voice] Outgoing call to ${toNumber}`);
-      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Dial callerId="${callerId}">
-    <Number>${toNumber}</Number>
-  </Dial>
-</Response>`;
-      return new Response(twiml, { headers: { 'Content-Type': 'text/xml' } });
+    const authToken = erMock(env) ? undefined : env('TWILIO_AUTH_TOKEN');
+    const offentligUrl = env('DIALER_VOICE_URL') ?? `${env('SUPABASE_URL')}/functions/v1/twilio-voice`;
+    if (!(await gyldigTwilioSignatur(authToken, offentligUrl, params, req.headers.get('X-Twilio-Signature')))) {
+      console.warn('[twilio-voice] Afvist: ugyldig Twilio-signatur');
+      return xml(twimlSig('Afvist.'), 403);
     }
 
-    // INCOMING CALL: Someone is calling our Twilio number
-    // Ring all online browser clients simultaneously
-    console.log('[twilio-voice] Incoming call detected, ringing all online clients...');
+    const admin = createClient(env('SUPABASE_URL')!, env('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const routing = await routOpkald({ To: params.To, From: params.From }, {
+      klienterForNummer: async (nummer) => {
+        const { data, error } = await admin.rpc('dialer_klienter_for_nummer', { p_nummer: nummer });
+        if (error) throw new Error(error.message);
+        return (data ?? []).map((r: { user_id: string }) => r.user_id);
+      },
+      callerIdForBruger: async (userId) => {
+        const { data, error } = await admin.rpc('dialer_callerid_for_bruger', { p_user_id: userId });
+        if (error) throw new Error(error.message);
+        return data?.[0]?.nummer ?? null;
+      },
+    });
 
-    // Get all approved and active users to ring
-    const { data: profiles } = await adminClient
-      .from('profiles')
-      .select('user_id')
-      .eq('approved', true)
-      .eq('active', true);
-
-    if (!profiles || profiles.length === 0) {
-      console.log('[twilio-voice] No active users found');
-      const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say language="da-DK">Der er ingen tilgængelige sælgere lige nu. Prøv igen senere.</Say>
-</Response>`;
-      return new Response(twiml, { headers: { 'Content-Type': 'text/xml' } });
-    }
-
-    // Build Client entries for all active users — they'll all ring simultaneously
-    const clientEntries = profiles
-      .map(p => `    <Client>${p.user_id}</Client>`)
-      .join('\n');
-
-    console.log(`[twilio-voice] Ringing ${profiles.length} clients`);
-
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Dial callerId="${fromNumber}" timeout="30" action="">
-${clientEntries}
-  </Dial>
-  <Say language="da-DK">Ingen svarede. Prøv igen senere.</Say>
-</Response>`;
-
-    return new Response(twiml, { headers: { 'Content-Type': 'text/xml' } });
+    console.log(`[twilio-voice] ${routing.type}${routing.type === 'afvis' ? ` (${routing.grund})` : ''} To=${params.To ?? ''}`);
+    return xml(routingTilTwiml(routing));
   } catch (error) {
-    console.error('[twilio-voice] Error:', error.message);
-    const twiml = `<?xml version="1.0" encoding="UTF-8"?>
-<Response>
-  <Say language="da-DK">Der opstod en fejl. Prøv igen senere.</Say>
-</Response>`;
-    return new Response(twiml, { headers: { 'Content-Type': 'text/xml' } });
+    console.error('[twilio-voice] Fejl:', (error as Error).message);
+    return xml(twimlSig('Der opstod en fejl. Prøv igen senere.'));
   }
 });

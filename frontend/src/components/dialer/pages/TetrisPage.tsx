@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Gamepad2, Pause, Play, Trophy, Zap, Star, Crown, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 
 interface TetrisMusic {
   musicMuted: boolean;
@@ -76,7 +77,7 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
 
   // Fetch high scores
   const fetchScores = useCallback(async () => {
-    const { data } = await supabase.from('tetris_scores').select('*').order('score', { ascending: false }).limit(10);
+    const { data } = await supabase.from(tabel('tetris_scores')).select('*').order('score', { ascending: false }).limit(10);
     if (data) setHighScores(data as HighScore[]);
   }, []);
 
@@ -86,8 +87,8 @@ export const TetrisPage: React.FC<TetrisPageProps> = ({ music }) => {
     if (finalScore === 0 || scoreSaved) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    const { data: profile } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
-    await supabase.from('tetris_scores').insert({ user_id: user.id, player_name: profile?.full_name || 'Ukendt', score: finalScore, lines_cleared: finalLines, level: finalLevel });
+    const { data: profile } = await supabase.from(tabel('profiles')).select('full_name').eq('user_id', user.id).single();
+    await supabase.from(tabel('tetris_scores')).insert({ user_id: user.id, player_name: profile?.full_name || 'Ukendt', score: finalScore, lines_cleared: finalLines, level: finalLevel });
     setScoreSaved(true);
     fetchScores();
   }, [scoreSaved, fetchScores]);

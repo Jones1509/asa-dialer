@@ -55,9 +55,10 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
         return;
       }
 
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
+        || `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co`;
       const response = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/twilio-token`,
+        `${supabaseUrl.replace(/\/$/, '')}/functions/v1/twilio-token`,
         {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
@@ -71,7 +72,13 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
         throw new Error(data.error || `Token fejl (${response.status})`);
       }
 
-      const { token } = await response.json();
+      const { token, mock } = await response.json();
+      if (mock) {
+        // Test-tilstand (TWILIO_MOCK): ingen rigtig telefon i browseren
+        setStatus('offline');
+        setError('Telefonen kører i test-tilstand (intet Twilio-nummer er købt)');
+        return;
+      }
 
       if (deviceRef.current) {
         deviceRef.current.destroy();
@@ -135,7 +142,7 @@ export function useTwilioDevice(options?: UseTwilioDeviceOptions) {
           const { data: { session: newSession } } = await supabase.auth.getSession();
           if (!newSession) return;
           const res = await fetch(
-            `https://${projectId}.supabase.co/functions/v1/twilio-token`,
+            `${supabaseUrl.replace(/\/$/, '')}/functions/v1/twilio-token`,
             {
               headers: {
                 'Authorization': `Bearer ${newSession.access_token}`,

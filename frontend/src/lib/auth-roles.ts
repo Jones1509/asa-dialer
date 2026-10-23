@@ -11,6 +11,7 @@
  * være eksponeret i Supabase Dashboard → Project Settings → API → Exposed schemas.
  */
 import { supabase } from '@/lib/supabase';
+import { tabel, DIALER_FAELLES_DB } from '@/lib/dialer-db';
 
 export type UserRole = 'admin' | 'kontor' | string;
 
@@ -45,10 +46,11 @@ export function isAdminRole(role: string | null | undefined): boolean {
  * tilbage og kan håndteres af kaldende kode.
  */
 export async function resolveUserData(userId: string): Promise<ResolvedUserData> {
+  if (DIALER_FAELLES_DB) return resolveFaellesUserData(userId);
 
   // ---------- PRIMARY: public.user_roles ----------
   const userRolesRes = await supabase
-    .from('user_roles')
+    .from(tabel('user_roles'))
     .select('role')
     .eq('user_id', userId);
 
@@ -95,5 +97,33 @@ export async function resolveUserData(userId: string): Promise<ResolvedUserData>
     navn: (medarb?.navn as string) ?? '',
     email: (medarb?.email as string) ?? '',
     aktiv: (medarb?.aktiv as boolean) ?? true,
+  };
+}
+
+/**
+ * Fælles database (VITE_DIALER_DB=faelles): rolle og status fra dialer_user_roles + dialer_profiles i brugerens eget firma
+ * (RLS sørger for firmaet). Første login opretter en profil, der afventer godkendelse fra firmaets admin.
+ */
+async function resolveFaellesUserData(userId: string): Promise<ResolvedUserData> {
+  const [{ data: roller }, { data: profil }] = await Promise.all([
+    supabase.from(tabel('user_roles')).select('role').eq('user_id', userId),
+    supabase.from(tabel('profiles')).select('full_name, email, approved, active').eq('user_id', userId).maybeSingle(),
+  ]);
+
+  let p = profil as { full_name: string; email: string; approved: boolean; active: boolean } | null;
+  if (!p) {
+    const { data: { user } } = await supabase.auth.getUser();
+    const ny = { user_id: userId, full_name: (user?.user_metadata?.full_name as string) ?? '', email: user?.email ?? '' };
+    const { error } = await supabase.from(tabel('profiles')).insert(ny);
+    if (error) console.warn('[auth-roles] Kunne ikke oprette Dialer-profil:', error.message);
+    p = { ...ny, approved: false, active: true };
+  }
+
+  const erAdmin = (roller ?? []).some((r: { role: string }) => r.role === 'admin');
+  return {
+    role: erAdmin ? 'admin' : 'user',
+    navn: p.full_name,
+    email: p.email,
+    aktiv: p.approved && p.active,
   };
 }

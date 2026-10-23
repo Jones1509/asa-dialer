@@ -8,3 +8,8 @@ verify_jwt = false
 
 [functions.spotify-auth]
 verify_jwt = false
+[functions.twilio-sms]
+verify_jwt = false
+
+[functions.dialer-nummer-opret]
+verify_jwt = false

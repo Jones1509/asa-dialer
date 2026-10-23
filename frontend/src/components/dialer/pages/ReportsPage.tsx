@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { useAuth } from '@/hooks/useAuth';
 import { Phone, ShoppingCart, RefreshCw, Clock, BarChart3, Target, PhoneOff, Calendar } from 'lucide-react';
 import { EmptyState, ErrorState, SkeletonRows } from '@/components/shell/states';
@@ -41,7 +42,7 @@ export const ReportsPage: React.FC<ReportsPageProps> = ({
       today.setHours(0, 0, 0, 0);
 
       const { data: callLogs, error } = await supabase
-        .from('call_logs')
+        .from(tabel('call_logs'))
         .select('*, leads(company, phone)')
         .eq('user_id', user.id)
         .gte('created_at', today.toISOString())

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { tabel } from '@/lib/dialer-db';
 import { Package, Plus, Lock, Unlock, Trash2, Pencil, Save } from 'lucide-react';
 import { EmptyState, SkeletonRows } from '@/components/shell/states';
 
@@ -28,7 +29,7 @@ export const AdminProductsTab: React.FC<AdminProductsTabProps> = ({ showNotif })
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   const fetchProducts = async () => {
-    const { data } = await supabase.from('products').select('*').order('created_at', { ascending: false });
+    const { data } = await supabase.from(tabel('products')).select('*').order('created_at', { ascending: false });
     setProducts(data ?? []);
     setLoading(false);
   };
@@ -37,7 +38,7 @@ export const AdminProductsTab: React.FC<AdminProductsTabProps> = ({ showNotif })
 
   const createProduct = async () => {
     if (!form.name.trim() || !form.price.trim()) return;
-    const { error } = await supabase.from('products').insert(form);
+    const { error } = await supabase.from(tabel('products')).insert(form);
     if (error) { showNotif('Kunne ikke oprette produkt'); return; }
     showNotif('Produkt oprettet');
     setForm({ name: '', description: '', icon: '', price: '', price_type: 'Engangsbetaling', provision: '', category: 'engang' });
@@ -60,7 +61,7 @@ export const AdminProductsTab: React.FC<AdminProductsTabProps> = ({ showNotif })
 
   const saveEdit = async () => {
     if (!editingId || !form.name.trim() || !form.price.trim()) return;
-    const { error } = await supabase.from('products').update({
+    const { error } = await supabase.from(tabel('products')).update({
       name: form.name,
       description: form.description,
       price: form.price,
@@ -76,14 +77,14 @@ export const AdminProductsTab: React.FC<AdminProductsTabProps> = ({ showNotif })
   };
 
   const deleteProduct = async (id: string) => {
-    await supabase.from('products').delete().eq('id', id);
+    await supabase.from(tabel('products')).delete().eq('id', id);
     showNotif('Produkt slettet');
     setDeleteConfirm(null);
     fetchProducts();
   };
 
   const toggleProduct = async (id: string, active: boolean) => {
-    await supabase.from('products').update({ active: !active }).eq('id', id);
+    await supabase.from(tabel('products')).update({ active: !active }).eq('id', id);
     showNotif(active ? 'Produkt deaktiveret' : 'Produkt aktiveret');
     fetchProducts();
   };
